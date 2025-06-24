@@ -243,12 +243,48 @@ public class ReportWasteActivity extends AppCompatActivity {
                 binding.tvPhotoStatus.setTextColor(getResources().getColor(R.color.medium_gray));
                 return;
             }
+            
+            // Check file size (limit to 5MB)
+            long fileSizeInMB = photoFile.length() / (1024 * 1024);
+            if (fileSizeInMB > 5) {
+                Toast.makeText(this, "Photo file is too large. Please use a smaller image (max 5MB).", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        // Validate gallery image size
+        if (currentPhotoPath == null && photoUri != null) {
+            try {
+                android.database.Cursor cursor = getContentResolver().query(photoUri, null, null, null, null);
+                if (cursor != null) {
+                    cursor.moveToFirst();
+                    int sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
+                    if (sizeIndex != -1) {
+                        long fileSize = cursor.getLong(sizeIndex);
+                        long fileSizeInMB = fileSize / (1024 * 1024);
+                        if (fileSizeInMB > 5) {
+                            Toast.makeText(this, "Selected image is too large. Please choose a smaller image (max 5MB).", Toast.LENGTH_SHORT).show();
+                            cursor.close();
+                            return;
+                        }
+                    }
+                    cursor.close();
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Could not check file size: " + e.getMessage());
+            }
         }
 
         // Validate spinner selections
         if (binding.spinnerWasteType.getSelectedItem() == null || 
             binding.spinnerWasteSize.getSelectedItem() == null) {
             Toast.makeText(this, "Please select waste type and size", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check network connectivity
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, "No internet connection. Please check your network and try again.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -269,8 +305,12 @@ public class ReportWasteActivity extends AppCompatActivity {
         Log.d(TAG, "Starting image upload to: " + imagePath);
         Log.d(TAG, "Photo URI: " + photoUri.toString());
 
+        // Compress image before upload
+        Uri uploadUri = compressImage(photoUri);
+        Log.d(TAG, "Using compressed image URI: " + uploadUri.toString());
+
         StorageReference imageRef = storageRef.child(imagePath);
-        imageRef.putFile(photoUri)
+        imageRef.putFile(uploadUri)
                 .addOnSuccessListener(taskSnapshot -> {
                     Log.d(TAG, "Image uploaded successfully");
                     // Get the download URL
@@ -451,9 +491,50 @@ public class ReportWasteActivity extends AppCompatActivity {
         }
     }
 
+    private boolean isNetworkAvailable() {
+        android.net.ConnectivityManager connectivityManager = 
+            (android.net.ConnectivityManager) getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+        android.net.NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    private Uri compressImage(Uri imageUri) {
+        try {
+            android.graphics.Bitmap bitmap = android.provider.MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+            
+            // Calculate scaled dimensions (max 1024x1024)
+            int maxSize = 1024;
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            
+            if (width > maxSize || height > maxSize) {
+                float ratio = Math.min((float) maxSize / width, (float) maxSize / height);
+                width = Math.round(ratio * width);
+                height = Math.round(ratio * height);
+                bitmap = android.graphics.Bitmap.createScaledBitmap(bitmap, width, height, true);
+            }
+            
+            // Save compressed image
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+            String imageFileName = "COMPRESSED_" + timeStamp + ".jpg";
+            File compressedFile = new File(getExternalFilesDir(null), "WastePhotos/" + imageFileName);
+            
+            java.io.FileOutputStream out = new java.io.FileOutputStream(compressedFile);
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, out);
+            out.flush();
+            out.close();
+            bitmap.recycle();
+            
+            return Uri.fromFile(compressedFile);
+        } catch (Exception e) {
+            Log.e(TAG, "Error compressing image", e);
+            return imageUri; // Return original if compression fails
+        }
     }
 }

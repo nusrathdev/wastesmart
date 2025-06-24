@@ -73,9 +73,11 @@
             android:exported="false" />
         <activity android:name=".admin.AdminDashboardActivity"
             android:exported="false" />
-        <activity android:name=".admin.AnalyticsDashboardActivity"
+        <activity android:name=".admin.ManageReportsActivity"
             android:exported="false" />
         <activity android:name=".admin.ManageCollectorsActivity"
+            android:exported="false" />
+        <activity android:name=".admin.AnalyticsActivity"
             android:exported="false" />
 
         <!-- FileProvider for camera functionality -->

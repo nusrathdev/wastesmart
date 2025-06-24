@@ -1,0 +1,22 @@
+// Firebase Storage Security Rules
+// Add these rules in Firebase Console -> Storage -> Rules
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow authenticated users to read and write their own waste report images
+    match /waste_reports/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow public read access to waste report images for admin/collector viewing
+    match /waste_reports/{userId}/{allPaths=**} {
+      allow read: if request.auth != null;
+    }
+    
+    // Allow admins and collectors to read all waste reports
+    match /waste_reports/{allPaths=**} {
+      allow read: if request.auth != null;
+    }
+  }
+}

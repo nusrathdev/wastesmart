@@ -14,27 +14,53 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <TextView
+        android:id="@+id/tvMapPlaceholder"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="120dp"
+        android:background="@color/light_gray"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="🗺️ Map will be integrated here\n(Google Maps requires API key setup)"
+        android:textAlignment="center"
+        android:textColor="@color/dark_gray"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        tools:context=".collector.RouteMapActivity" />
+        app:layout_constraintTop_toBottomOf="@+id/tvMapPlaceholder" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabOptimizeRoute"
+    <TextView
+        android:id="@+id/tvNoRoutes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/accent"
-        android:contentDescription="Optimize Route"
-        android:src="@android:drawable/ic_menu_directions"
+        android:text="No routes assigned for today"
+        android:textColor="@color/dark_gray"
+        android:textSize="18sp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvMapPlaceholder" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewRoutes"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvMapPlaceholder"
+        tools:listitem="@layout/item_route_point" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

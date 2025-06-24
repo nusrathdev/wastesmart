@@ -13,6 +13,7 @@ public class WasteReport {
     private String photoUrl;
     private String status; // PENDING, ASSIGNED, COLLECTED, CANCELED
     private Date reportDate;
+    private Long timestamp; // Added for compatibility with adapters
 
     // Required empty constructor for Firestore
     public WasteReport() {
@@ -31,6 +32,7 @@ public class WasteReport {
         this.photoUrl = photoUrl;
         this.status = status;
         this.reportDate = reportDate;
+        this.timestamp = reportDate != null ? reportDate.getTime() : System.currentTimeMillis();
     }
 
     // Getters and setters
@@ -112,5 +114,37 @@ public class WasteReport {
 
     public void setReportDate(Date reportDate) {
         this.reportDate = reportDate;
+        this.timestamp = reportDate != null ? reportDate.getTime() : System.currentTimeMillis();
+    }
+
+    // Additional getter methods for adapter compatibility
+    public String getSize() {
+        return wasteSize;
+    }
+
+    public void setSize(String size) {
+        this.wasteSize = size;
+    }
+
+    public String getImageUrl() {
+        return photoUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.photoUrl = imageUrl;
+    }
+
+    public Long getTimestamp() {
+        if (timestamp == null && reportDate != null) {
+            timestamp = reportDate.getTime();
+        }
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+        if (timestamp != null) {
+            this.reportDate = new Date(timestamp);
+        }
     }
 }
