@@ -1,0 +1,98 @@
+<resources>
+    <string name="app_name">SmartWaste AI</string>
+    <string name="app_tagline">Smart Collection for a Cleaner Tomorrow</string>
+    <string name="app_logo">App Logo</string>
+    <string name="welcome_message">Welcome to SmartWaste AI. Please select your role to continue:</string>
+    <string name="user_login">User Login</string>
+    <string name="user_register">New User? Register Here</string>
+    <string name="collector_login">Waste Collector Login</string>
+    <string name="admin_login">Municipal Admin Login</string>
+
+    <!-- User Registration/Login -->
+    <string name="email">Email Address</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="name">Full Name</string>
+    <string name="address">Address</string>
+    <string name="phone">Phone Number</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="forgot_password">Forgot Password?</string>
+
+    <!-- Citizen/User Dashboard -->
+    <string name="report_waste">Report Waste</string>
+    <string name="view_schedule">Collection Schedule</string>
+    <string name="waste_history">My Reports</string>
+    <string name="my_profile">My Profile</string>
+
+    <!-- Report Waste -->
+    <string name="waste_type">Waste Type</string>
+    <string name="organic_waste">Organic</string>
+    <string name="plastic_waste">Plastic</string>
+    <string name="paper_waste">Paper</string>
+    <string name="glass_waste">Glass</string>
+    <string name="metal_waste">Metal</string>
+    <string name="electronic_waste">E-waste</string>
+    <string name="hazardous_waste">Hazardous</string>
+    <string name="waste_size">Approximate Size</string>
+    <string name="small">Small (Fits in a bag)</string>
+    <string name="medium">Medium (Fits in a bin)</string>
+    <string name="large">Large (Multiple bins)</string>
+    <string name="waste_location">Location</string>
+    <string name="use_current_location">Use My Current Location</string>
+    <string name="select_on_map">Select on Map</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="add_description">Additional Description</string>
+    <string name="submit_report">Submit Report</string>
+    <string name="location_obtained">Location: %1$.6f, %2$.6f</string>
+    <string name="unable_to_get_location">Unable to get location. Please try again.</string>
+    <string name="error_location">Error getting location: %s</string>
+    <string name="photo_added">Photo added successfully</string>
+
+    <!-- Collector Features -->
+    <string name="todays_routes">Today\'s Collection Routes</string>
+    <string name="route_optimization">Optimize Route</string>
+    <string name="waste_reports">Open Reports</string>
+    <string name="completed_collections">Completed Collections</string>
+    <string name="mark_collected">Mark as Collected</string>
+    <string name="navigation">Navigate to Location</string>
+
+    <!-- Admin Features -->
+    <string name="analytics_dashboard">Analytics Dashboard</string>
+    <string name="manage_collectors">Manage Collectors</string>
+    <string name="waste_patterns">Waste Generation Patterns</string>
+    <string name="create_schedule">Create Collection Schedule</string>
+    <string name="system_settings">System Settings</string>
+    <string name="generate_report">Generate Analytics Report</string>
+
+    <!-- Common -->
+    <string name="logout">Logout</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+    <string name="help">Help</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="success">Success</string>
+    <string name="error">Error</string>
+    <string name="loading">Loading…</string>
+
+    <!-- String arrays for spinners -->
+    <string-array name="waste_types">
+        <item>@string/organic_waste</item>
+        <item>@string/plastic_waste</item>
+        <item>@string/paper_waste</item>
+        <item>@string/glass_waste</item>
+        <item>@string/metal_waste</item>
+        <item>@string/electronic_waste</item>
+        <item>@string/hazardous_waste</item>
+    </string-array>
+
+    <string-array name="waste_sizes">
+        <item>@string/small</item>
+        <item>@string/medium</item>
+        <item>@string/large</item>
+    </string-array>
+</resources>

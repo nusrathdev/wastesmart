@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- SmartWaste AI Theme Colors -->
+    <color name="primary">#2E7D32</color> <!-- Dark Green -->
+    <color name="primary_light">#4CAF50</color> <!-- Medium Green -->
+    <color name="primary_dark">#1B5E20</color> <!-- Very Dark Green -->
+    <color name="secondary">#00796B</color> <!-- Teal -->
+    <color name="secondary_light">#26A69A</color> <!-- Light Teal -->
+    <color name="secondary_dark">#004D40</color> <!-- Dark Teal -->
+    <color name="accent">#FFD600</color> <!-- Yellow Accent -->
+    <color name="light_gray">#EEEEEE</color>
+    <color name="medium_gray">#9E9E9E</color>
+    <color name="dark_gray">#616161</color>
+    <color name="error">#D32F2F</color> <!-- Red for errors -->
+    <color name="success">#388E3C</color> <!-- Green for success -->
+    <color name="warning">#FFA000</color> <!-- Amber for warnings -->
+</resources>

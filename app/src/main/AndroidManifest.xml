@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Wastesmart"
+        tools:targetApi="31">
+
+        <!-- Main Entry Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Wastesmart">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- User Authentication Activities -->
+        <activity android:name=".user.UserLoginActivity"
+            android:exported="false" />
+        <activity android:name=".user.UserRegisterActivity"
+            android:exported="false" />
+        <activity android:name=".user.UserForgotPasswordActivity"
+            android:exported="false" />
+
+        <!-- Citizen/User Features -->
+        <activity android:name=".user.UserDashboardActivity"
+            android:exported="false" />
+        <activity android:name=".user.ReportWasteActivity"
+            android:exported="false" />
+        <activity android:name=".user.UserProfileActivity"
+            android:exported="false" />
+        <activity android:name=".user.WasteHistoryActivity"
+            android:exported="false" />
+        <activity android:name=".user.CollectionScheduleActivity"
+            android:exported="false" />
+        <activity android:name=".user.SelectLocationMapActivity"
+            android:exported="false" />
+
+        <!-- Collector Features -->
+        <activity android:name=".collector.CollectorLoginActivity"
+            android:exported="false" />
+        <activity android:name=".collector.CollectorDashboardActivity"
+            android:exported="false" />
+        <activity android:name=".collector.RouteMapActivity"
+            android:exported="false" />
+        <activity android:name=".collector.CollectionTasksActivity"
+            android:exported="false" />
+
+        <!-- Admin Features -->
+        <activity android:name=".admin.AdminLoginActivity"
+            android:exported="false" />
+        <activity android:name=".admin.AdminDashboardActivity"
+            android:exported="false" />
+        <activity android:name=".admin.AnalyticsDashboardActivity"
+            android:exported="false" />
+        <activity android:name=".admin.ManageCollectorsActivity"
+            android:exported="false" />
+
+        <!-- FileProvider for camera functionality -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.wastesmart.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${GOOGLE_MAPS_API_KEY}" />
+    </application>
+
+</manifest>
