@@ -85,29 +85,37 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:weightSum="2">
 
                 <Button
                     android:id="@+id/btnCurrentLocation"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
                     android:background="@color/secondary"
                     android:text="@string/use_current_location"
                     android:textColor="@color/white"
-                    android:textSize="12sp" />
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:drawableLeft="@android:drawable/ic_menu_mylocation"
+                    android:drawablePadding="8dp" />
 
                 <Button
                     android:id="@+id/btnSelectOnMap"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
+                    android:layout_marginStart="8dp"
                     android:layout_weight="1"
                     android:background="@color/secondary_light"
                     android:text="@string/select_on_map"
                     android:textColor="@color/white"
-                    android:textSize="12sp" />
+                    android:textSize="14sp"
+                    android:padding="12dp"
+                    android:drawableLeft="@android:drawable/ic_dialog_map"
+                    android:drawablePadding="8dp" />
             </LinearLayout>
 
             <TextView

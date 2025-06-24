@@ -39,8 +39,8 @@
     <string name="medium">Medium (Fits in a bin)</string>
     <string name="large">Large (Multiple bins)</string>
     <string name="waste_location">Location</string>
-    <string name="use_current_location">Use My Current Location</string>
-    <string name="select_on_map">Select on Map</string>
+    <string name="use_current_location">Current Location</string>
+    <string name="select_on_map">Choose on Map</string>
     <string name="add_photo">Add Photo</string>
     <string name="add_description">Additional Description</string>
     <string name="submit_report">Submit Report</string>
