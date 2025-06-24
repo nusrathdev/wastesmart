@@ -22,7 +22,11 @@ import com.wastesmart.R;
 import com.wastesmart.databinding.ActivityReportWasteBinding;
 import com.wastesmart.models.WasteReport;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -50,6 +54,7 @@ public class ReportWasteActivity extends AppCompatActivity {
     private FirebaseStorage storage;
     private StorageReference storageRef;
     private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
 
     private Uri photoUri;
     private String currentPhotoPath;
@@ -80,6 +85,31 @@ public class ReportWasteActivity extends AppCompatActivity {
 
         // Initialize location services
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        
+        // Initialize location callback for accurate location updates
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                binding.progressBar.setVisibility(View.GONE);
+                
+                if (locationResult.getLastLocation() != null) {
+                    latitude = locationResult.getLastLocation().getLatitude();
+                    longitude = locationResult.getLastLocation().getLongitude();
+                    hasLocation = true;
+                    binding.tvLocationStatus.setText(getString(R.string.location_obtained,
+                            latitude, longitude));
+                    binding.tvLocationStatus.setTextColor(getResources().getColor(R.color.success));
+                    
+                    // Stop location updates once we get a good location
+                    fusedLocationClient.removeLocationUpdates(locationCallback);
+                    Log.d(TAG, "Accurate location obtained: " + latitude + ", " + longitude);
+                } else {
+                    binding.tvLocationStatus.setText(R.string.unable_to_get_location);
+                    binding.tvLocationStatus.setTextColor(getResources().getColor(R.color.error));
+                }
+            }
+        };
 
         // Setup toolbar
         setSupportActionBar(binding.toolbar);
@@ -104,8 +134,14 @@ public class ReportWasteActivity extends AppCompatActivity {
         binding.btnCurrentLocation.setOnClickListener(v -> getCurrentLocation());
 
         binding.btnSelectOnMap.setOnClickListener(v -> {
-            Intent intent = new Intent(ReportWasteActivity.this, SelectLocationMapActivity.class);
-            startActivityForResult(intent, REQUEST_MAP_LOCATION);
+            // First get current location if not already available, then open map
+            if (!hasLocation) {
+                // Show brief message and get location first
+                Toast.makeText(this, "Getting your location...", Toast.LENGTH_SHORT).show();
+                getCurrentLocationThenOpenMap();
+            } else {
+                openMapActivity();
+            }
         });
 
         binding.btnAddPhoto.setOnClickListener(v -> showPhotoOptionsDialog());
@@ -123,28 +159,66 @@ public class ReportWasteActivity extends AppCompatActivity {
         }
 
         binding.progressBar.setVisibility(View.VISIBLE);
-        binding.tvLocationStatus.setText(R.string.loading);
+        binding.tvLocationStatus.setText("Getting your current location...");
+        binding.tvLocationStatus.setTextColor(getResources().getColor(R.color.primary));
 
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, location -> {
-                    binding.progressBar.setVisibility(View.GONE);
-                    if (location != null) {
-                        latitude = location.getLatitude();
-                        longitude = location.getLongitude();
-                        hasLocation = true;
-                        binding.tvLocationStatus.setText(getString(R.string.location_obtained,
-                                latitude, longitude));
-                        binding.tvLocationStatus.setTextColor(getResources().getColor(R.color.success));
-                    } else {
-                        binding.tvLocationStatus.setText(R.string.unable_to_get_location);
-                        binding.tvLocationStatus.setTextColor(getResources().getColor(R.color.error));
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    binding.progressBar.setVisibility(View.GONE);
-                    binding.tvLocationStatus.setText(getString(R.string.error_location, e.getMessage()));
-                    binding.tvLocationStatus.setTextColor(getResources().getColor(R.color.error));
-                });
+        // Create location request for high accuracy
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000)
+                .setWaitForAccurateLocation(true)
+                .setMinUpdateIntervalMillis(2000)
+                .setMaxUpdateDelayMillis(10000)
+                .setMaxUpdates(3) // Try up to 3 updates to get accurate location
+                .build();
+
+        try {
+            // First try to get last known location for quick response
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, location -> {
+                        if (location != null) {
+                            // Check if last known location is recent (within 2 minutes)
+                            long locationAge = System.currentTimeMillis() - location.getTime();
+                            if (locationAge < 2 * 60 * 1000 && location.getAccuracy() < 100) {
+                                // Use recent, accurate last known location
+                                latitude = location.getLatitude();
+                                longitude = location.getLongitude();
+                                hasLocation = true;
+                                binding.progressBar.setVisibility(View.GONE);
+                                binding.tvLocationStatus.setText(getString(R.string.location_obtained,
+                                        latitude, longitude));
+                                binding.tvLocationStatus.setTextColor(getResources().getColor(R.color.success));
+                                Log.d(TAG, "Using recent last known location: " + latitude + ", " + longitude + 
+                                        ", accuracy: " + location.getAccuracy() + "m");
+                                return;
+                            }
+                        }
+                        
+                        // Last known location is old or inaccurate, request fresh location
+                        Log.d(TAG, "Requesting fresh location updates...");
+                        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, getMainLooper());
+                        
+                        // Set timeout to stop location updates if no good location is found
+                        binding.getRoot().postDelayed(() -> {
+                            fusedLocationClient.removeLocationUpdates(locationCallback);
+                            if (!hasLocation) {
+                                binding.progressBar.setVisibility(View.GONE);
+                                binding.tvLocationStatus.setText("Unable to get precise location. Please try again or select location on map.");
+                                binding.tvLocationStatus.setTextColor(getResources().getColor(R.color.error));
+                                Log.w(TAG, "Location request timed out");
+                            }
+                        }, 15000); // 15 second timeout
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to get last known location, requesting fresh location", e);
+                        // Request fresh location if last known location fails
+                        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, getMainLooper());
+                    });
+
+        } catch (SecurityException e) {
+            binding.progressBar.setVisibility(View.GONE);
+            binding.tvLocationStatus.setText("Location permission denied");
+            binding.tvLocationStatus.setTextColor(getResources().getColor(R.color.error));
+            Log.e(TAG, "Location permission denied", e);
+        }
     }
 
     private void dispatchTakePictureIntent() {
@@ -536,5 +610,57 @@ public class ReportWasteActivity extends AppCompatActivity {
             Log.e(TAG, "Error compressing image", e);
             return imageUri; // Return original if compression fails
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Stop location updates to prevent memory leaks
+        if (fusedLocationClient != null && locationCallback != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
+    }
+
+    private void getCurrentLocationThenOpenMap() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION_PERMISSION);
+            return;
+        }
+
+        try {
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, location -> {
+                        if (location != null) {
+                            latitude = location.getLatitude();
+                            longitude = location.getLongitude();
+                            hasLocation = true;
+                            Log.d(TAG, "Got location for map: " + latitude + ", " + longitude);
+                        }
+                        // Open map regardless of whether we got location or not
+                        openMapActivity();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to get location for map", e);
+                        // Open map anyway - it will use default location
+                        openMapActivity();
+                    });
+        } catch (SecurityException e) {
+            Log.e(TAG, "Location permission denied for map", e);
+            openMapActivity();
+        }
+    }
+
+    private void openMapActivity() {
+        Intent intent = new Intent(ReportWasteActivity.this, SelectLocationMapActivity.class);
+        // Pass current location if available
+        if (hasLocation) {
+            intent.putExtra("current_latitude", latitude);
+            intent.putExtra("current_longitude", longitude);
+            Log.d(TAG, "Passing location to map: " + latitude + ", " + longitude);
+        }
+        startActivityForResult(intent, REQUEST_MAP_LOCATION);
     }
 }
