@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "684253552293",
-    "project_id": "wastesmart-b3ee3",
-    "storage_bucket": "wastesmart-b3ee3.firebasestorage.app"
+    "project_number": "942189622961",
+    "project_id": "smartwaste-b7ca9",
+    "storage_bucket": "smartwaste-b7ca9.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:684253552293:android:0e031731669e22658db74c",
+        "mobilesdk_app_id": "1:942189622961:android:1f5099339d30db37a01490",
         "android_client_info": {
           "package_name": "com.wastesmart"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyClwBDFTinW7vQsQWLku5dJzrbolFGWxig"
+          "current_key": "AIzaSyBCwPVAJuCwhU-6f7FQcrKDxZDN4-LuYQo"
         }
       ],
       "services": {
