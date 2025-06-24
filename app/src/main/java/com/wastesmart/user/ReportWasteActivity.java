@@ -70,6 +70,14 @@ public class ReportWasteActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
 
+        // Validate Firebase initialization
+        if (mAuth == null || db == null || storage == null || storageRef == null) {
+            Log.e(TAG, "Firebase components not properly initialized");
+            Toast.makeText(this, "Firebase initialization error", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
         // Initialize location services
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -206,15 +214,41 @@ public class ReportWasteActivity extends AppCompatActivity {
     }
 
     private void validateAndSubmitReport() {
+        // Check if user is authenticated
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "Please log in to submit a report", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // Check if a location has been set
         if (!hasLocation) {
             Toast.makeText(this, "Please select a location for the waste report", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Check if a photo has been taken
+        // Check if a photo has been taken or selected
         if (photoUri == null) {
-            Toast.makeText(this, "Please take a photo of the waste", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please add a photo of the waste", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Additional validation for camera photos
+        if (currentPhotoPath != null) {
+            File photoFile = new File(currentPhotoPath);
+            if (!photoFile.exists() || photoFile.length() == 0) {
+                Toast.makeText(this, "Photo file is invalid. Please take another photo.", Toast.LENGTH_SHORT).show();
+                photoUri = null;
+                binding.imgPreview.setVisibility(View.GONE);
+                binding.tvPhotoStatus.setText("No photo added");
+                binding.tvPhotoStatus.setTextColor(getResources().getColor(R.color.medium_gray));
+                return;
+            }
+        }
+
+        // Validate spinner selections
+        if (binding.spinnerWasteType.getSelectedItem() == null || 
+            binding.spinnerWasteSize.getSelectedItem() == null) {
+            Toast.makeText(this, "Please select waste type and size", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -225,17 +259,23 @@ public class ReportWasteActivity extends AppCompatActivity {
 
         // Show progress
         binding.progressBar.setVisibility(View.VISIBLE);
+        binding.btnSubmitReport.setEnabled(false); // Prevent multiple submissions
 
         // First upload the image to Firebase Storage
         String userId = mAuth.getCurrentUser().getUid();
         String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imagePath = "waste_reports/" + userId + "/" + timestamp + ".jpg";
 
+        Log.d(TAG, "Starting image upload to: " + imagePath);
+        Log.d(TAG, "Photo URI: " + photoUri.toString());
+
         StorageReference imageRef = storageRef.child(imagePath);
         imageRef.putFile(photoUri)
                 .addOnSuccessListener(taskSnapshot -> {
+                    Log.d(TAG, "Image uploaded successfully");
                     // Get the download URL
                     imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        Log.d(TAG, "Download URL obtained: " + uri.toString());
                         // Create the waste report object with the image URL
                         WasteReport report = new WasteReport(
                                 null, // ID will be set by Firestore
@@ -249,23 +289,36 @@ public class ReportWasteActivity extends AppCompatActivity {
                                 "PENDING",
                                 new Date());
 
+                        Log.d(TAG, "Saving report to Firestore");
                         // Save to Firestore
                         db.collection("waste_reports").add(report)
                                 .addOnSuccessListener(documentReference -> {
+                                    Log.d(TAG, "Report saved successfully with ID: " + documentReference.getId());
                                     binding.progressBar.setVisibility(View.GONE);
+                                    binding.btnSubmitReport.setEnabled(true);
                                     Toast.makeText(ReportWasteActivity.this,
                                             "Report submitted successfully", Toast.LENGTH_SHORT).show();
                                     finish();
                                 })
                                 .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Error saving report to Firestore", e);
                                     binding.progressBar.setVisibility(View.GONE);
+                                    binding.btnSubmitReport.setEnabled(true);
                                     Toast.makeText(ReportWasteActivity.this,
                                             "Error submitting report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 });
+                    }).addOnFailureListener(e -> {
+                        Log.e(TAG, "Error getting download URL", e);
+                        binding.progressBar.setVisibility(View.GONE);
+                        binding.btnSubmitReport.setEnabled(true);
+                        Toast.makeText(ReportWasteActivity.this,
+                                "Error getting image URL: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
                 })
                 .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error uploading image to Storage", e);
                     binding.progressBar.setVisibility(View.GONE);
+                    binding.btnSubmitReport.setEnabled(true);
                     Toast.makeText(ReportWasteActivity.this,
                             "Error uploading image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
@@ -277,8 +330,8 @@ public class ReportWasteActivity extends AppCompatActivity {
         Log.d(TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
         
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            // Check if the photo file exists
-            if (photoUri != null) {
+            // Handle camera capture result
+            if (photoUri != null && currentPhotoPath != null) {
                 File photoFile = new File(currentPhotoPath);
                 Log.d(TAG, "Photo file path: " + currentPhotoPath);
                 Log.d(TAG, "Photo file exists: " + photoFile.exists());
@@ -293,9 +346,10 @@ public class ReportWasteActivity extends AppCompatActivity {
                 } else {
                     Log.e(TAG, "Photo file not found or empty");
                     Toast.makeText(this, "Photo file not found or empty", Toast.LENGTH_SHORT).show();
+                    photoUri = null; // Reset if failed
                 }
             } else {
-                Log.e(TAG, "Photo URI is null");
+                Log.e(TAG, "Photo URI or path is null");
                 Toast.makeText(this, "Failed to capture photo", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_CANCELED) {
@@ -310,23 +364,24 @@ public class ReportWasteActivity extends AppCompatActivity {
         } else if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
             Uri selectedImageUri = data.getData();
             if (selectedImageUri != null) {
-                photoUri = selectedImageUri;
-                binding.imgPreview.setVisibility(View.VISIBLE);
-                binding.imgPreview.setImageURI(photoUri);
-                binding.tvPhotoStatus.setText(R.string.photo_added);
-                binding.tvPhotoStatus.setTextColor(getResources().getColor(R.color.success));
-                Log.d(TAG, "Photo selected from gallery: " + photoUri.toString());
+                try {
+                    // Validate that we can access the URI
+                    getContentResolver().openInputStream(selectedImageUri).close();
+                    photoUri = selectedImageUri;
+                    currentPhotoPath = null; // Clear camera path since we're using gallery image
+                    binding.imgPreview.setVisibility(View.VISIBLE);
+                    binding.imgPreview.setImageURI(photoUri);
+                    binding.tvPhotoStatus.setText(R.string.photo_added);
+                    binding.tvPhotoStatus.setTextColor(getResources().getColor(R.color.success));
+                    Log.d(TAG, "Photo selected from gallery: " + photoUri.toString());
+                } catch (Exception e) {
+                    Log.e(TAG, "Error accessing selected image", e);
+                    Toast.makeText(this, "Cannot access selected image. Please try another image.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Log.e(TAG, "Failed to get image from gallery");
+                Toast.makeText(this, "Failed to select image from gallery", Toast.LENGTH_SHORT).show();
             }
-        } else if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
-            // Get the selected image URI
-            photoUri = data.getData();
-            Log.d(TAG, "Selected image URI: " + photoUri.toString());
-
-            // Display the selected image
-            binding.imgPreview.setVisibility(View.VISIBLE);
-            binding.imgPreview.setImageURI(photoUri);
-            binding.tvPhotoStatus.setText(R.string.photo_added);
-            binding.tvPhotoStatus.setTextColor(getResources().getColor(R.color.success));
         }
     }
 
@@ -341,11 +396,24 @@ public class ReportWasteActivity extends AppCompatActivity {
     }
 
     private void chooseFromGallery() {
+        // Check if we need READ_MEDIA_IMAGES permission (Android 13+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_MEDIA_IMAGES},
+                        REQUEST_GALLERY_PERMISSION);
+                return;
+            }
+        }
+        
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         if (intent.resolveActivity(getPackageManager()) != null) {
+            Log.d(TAG, "Opening gallery for image selection");
             startActivityForResult(intent, REQUEST_PICK_IMAGE);
         } else {
+            Log.e(TAG, "No gallery app available");
             Toast.makeText(this, "No gallery app available", Toast.LENGTH_SHORT).show();
         }
     }
@@ -371,6 +439,14 @@ public class ReportWasteActivity extends AppCompatActivity {
             } else {
                 Log.d(TAG, "Camera permission denied");
                 Toast.makeText(this, "Camera permission is required to take photos", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == REQUEST_GALLERY_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Gallery permission granted");
+                chooseFromGallery();
+            } else {
+                Log.d(TAG, "Gallery permission denied");
+                Toast.makeText(this, "Gallery permission is required to select photos", Toast.LENGTH_SHORT).show();
             }
         }
     }
