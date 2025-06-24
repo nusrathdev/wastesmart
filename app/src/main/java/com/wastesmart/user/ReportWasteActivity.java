@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -35,9 +36,13 @@ import java.util.Locale;
 
 public class ReportWasteActivity extends AppCompatActivity {
 
+    private static final String TAG = "ReportWasteActivity";
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_LOCATION_PERMISSION = 2;
     private static final int REQUEST_MAP_LOCATION = 3;
+    private static final int REQUEST_CAMERA_PERMISSION = 4;
+    private static final int REQUEST_GALLERY_PERMISSION = 5;
+    private static final int REQUEST_PICK_IMAGE = 6;
 
     private ActivityReportWasteBinding binding;
     private FirebaseAuth mAuth;
@@ -95,7 +100,7 @@ public class ReportWasteActivity extends AppCompatActivity {
             startActivityForResult(intent, REQUEST_MAP_LOCATION);
         });
 
-        binding.btnAddPhoto.setOnClickListener(v -> dispatchTakePictureIntent());
+        binding.btnAddPhoto.setOnClickListener(v -> showPhotoOptionsDialog());
 
         binding.btnSubmitReport.setOnClickListener(v -> validateAndSubmitReport());
     }
@@ -135,14 +140,30 @@ public class ReportWasteActivity extends AppCompatActivity {
     }
 
     private void dispatchTakePictureIntent() {
+        Log.d(TAG, "dispatchTakePictureIntent called");
+        
+        // Check camera permission first
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Camera permission not granted, requesting permission");
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    REQUEST_CAMERA_PERMISSION);
+            return;
+        }
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            Log.d(TAG, "Camera app available, creating image file");
             // Create the file where the photo should go
             File photoFile = null;
             try {
                 photoFile = createImageFile();
+                Log.d(TAG, "Image file created: " + photoFile.getAbsolutePath());
             } catch (IOException ex) {
-                Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error creating image file", ex);
+                Toast.makeText(this, "Error creating image file: " + ex.getMessage(), Toast.LENGTH_LONG).show();
+                return;
             }
 
             // Continue only if the file was successfully created
@@ -150,9 +171,13 @@ public class ReportWasteActivity extends AppCompatActivity {
                 photoUri = FileProvider.getUriForFile(this,
                         "com.wastesmart.fileprovider",
                         photoFile);
+                Log.d(TAG, "Photo URI: " + photoUri.toString());
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
+        } else {
+            Log.e(TAG, "No camera app available");
+            Toast.makeText(this, "No camera app available", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -160,7 +185,14 @@ public class ReportWasteActivity extends AppCompatActivity {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir("WastePhotos");
+        
+        // Use app-specific directory which doesn't require permissions
+        File storageDir = new File(getExternalFilesDir(null), "WastePhotos");
+        if (!storageDir.exists()) {
+            boolean created = storageDir.mkdirs();
+            Log.d(TAG, "Storage directory created: " + created + " at " + storageDir.getAbsolutePath());
+        }
+        
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -169,6 +201,7 @@ public class ReportWasteActivity extends AppCompatActivity {
 
         // Save a file path for use with ACTION_VIEW intents
         currentPhotoPath = image.getAbsolutePath();
+        Log.d(TAG, "Created image file: " + currentPhotoPath);
         return image;
     }
 
@@ -241,17 +274,79 @@ public class ReportWasteActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
+        
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            binding.imgPreview.setVisibility(View.VISIBLE);
-            binding.imgPreview.setImageURI(photoUri);
-            binding.tvPhotoStatus.setText(R.string.photo_added);
-            binding.tvPhotoStatus.setTextColor(getResources().getColor(R.color.success));
+            // Check if the photo file exists
+            if (photoUri != null) {
+                File photoFile = new File(currentPhotoPath);
+                Log.d(TAG, "Photo file path: " + currentPhotoPath);
+                Log.d(TAG, "Photo file exists: " + photoFile.exists());
+                Log.d(TAG, "Photo file size: " + photoFile.length());
+                
+                if (photoFile.exists() && photoFile.length() > 0) {
+                    binding.imgPreview.setVisibility(View.VISIBLE);
+                    binding.imgPreview.setImageURI(photoUri);
+                    binding.tvPhotoStatus.setText(R.string.photo_added);
+                    binding.tvPhotoStatus.setTextColor(getResources().getColor(R.color.success));
+                    Log.d(TAG, "Photo successfully captured and displayed");
+                } else {
+                    Log.e(TAG, "Photo file not found or empty");
+                    Toast.makeText(this, "Photo file not found or empty", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Log.e(TAG, "Photo URI is null");
+                Toast.makeText(this, "Failed to capture photo", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_CANCELED) {
+            Log.d(TAG, "Camera capture was cancelled");
+            Toast.makeText(this, "Photo capture cancelled", Toast.LENGTH_SHORT).show();
         } else if (requestCode == REQUEST_MAP_LOCATION && resultCode == RESULT_OK && data != null) {
             latitude = data.getDoubleExtra("latitude", 0);
             longitude = data.getDoubleExtra("longitude", 0);
             hasLocation = true;
             binding.tvLocationStatus.setText(getString(R.string.location_obtained, latitude, longitude));
             binding.tvLocationStatus.setTextColor(getResources().getColor(R.color.success));
+        } else if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
+            Uri selectedImageUri = data.getData();
+            if (selectedImageUri != null) {
+                photoUri = selectedImageUri;
+                binding.imgPreview.setVisibility(View.VISIBLE);
+                binding.imgPreview.setImageURI(photoUri);
+                binding.tvPhotoStatus.setText(R.string.photo_added);
+                binding.tvPhotoStatus.setTextColor(getResources().getColor(R.color.success));
+                Log.d(TAG, "Photo selected from gallery: " + photoUri.toString());
+            }
+        } else if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
+            // Get the selected image URI
+            photoUri = data.getData();
+            Log.d(TAG, "Selected image URI: " + photoUri.toString());
+
+            // Display the selected image
+            binding.imgPreview.setVisibility(View.VISIBLE);
+            binding.imgPreview.setImageURI(photoUri);
+            binding.tvPhotoStatus.setText(R.string.photo_added);
+            binding.tvPhotoStatus.setTextColor(getResources().getColor(R.color.success));
+        }
+    }
+
+    private void showPhotoOptionsDialog() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Add Photo")
+                .setMessage("Choose an option to add a photo")
+                .setPositiveButton("Take Photo", (dialog, which) -> dispatchTakePictureIntent())
+                .setNegativeButton("Choose from Gallery", (dialog, which) -> chooseFromGallery())
+                .setNeutralButton("Cancel", null)
+                .show();
+    }
+
+    private void chooseFromGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, REQUEST_PICK_IMAGE);
+        } else {
+            Toast.makeText(this, "No gallery app available", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -259,11 +354,23 @@ public class ReportWasteActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Log.d(TAG, "onRequestPermissionsResult: requestCode=" + requestCode);
+        
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Location permission granted");
                 getCurrentLocation();
             } else {
+                Log.d(TAG, "Location permission denied");
                 Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Camera permission granted");
+                dispatchTakePictureIntent();
+            } else {
+                Log.d(TAG, "Camera permission denied");
+                Toast.makeText(this, "Camera permission is required to take photos", Toast.LENGTH_SHORT).show();
             }
         }
     }
