@@ -61,10 +61,9 @@ public class RouteMapActivity extends AppCompatActivity {
     private void loadTodaysRoutes() {
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        // Load assigned and in-progress tasks for today
+        // Simple approach: Load all reports and filter client-side
+        // This avoids any Firestore index requirements
         db.collection("waste_reports")
-                .whereIn("status", java.util.Arrays.asList("assigned", "in_progress"))
-                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     binding.progressBar.setVisibility(View.GONE);
@@ -74,11 +73,26 @@ public class RouteMapActivity extends AppCompatActivity {
                         try {
                             WasteReport route = document.toObject(WasteReport.class);
                             route.setId(document.getId());
-                            routePoints.add(route);
+                            
+                            // Filter for assigned and in_progress tasks only
+                            String status = route.getStatus();
+                            if ("assigned".equals(status) || "in_progress".equals(status)) {
+                                routePoints.add(route);
+                            }
                         } catch (Exception e) {
                             Log.e(TAG, "Error parsing route: " + document.getId(), e);
                         }
                     }
+
+                    // Sort by timestamp (oldest first for route planning)
+                    routePoints.sort((r1, r2) -> {
+                        Long ts1 = r1.getTimestamp();
+                        Long ts2 = r2.getTimestamp();
+                        if (ts1 == null && ts2 == null) return 0;
+                        if (ts1 == null) return 1;
+                        if (ts2 == null) return -1;
+                        return ts1.compareTo(ts2); // Ascending order (oldest first)
+                    });
 
                     adapter.notifyDataSetChanged();
 

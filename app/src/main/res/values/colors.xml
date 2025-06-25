@@ -19,7 +19,11 @@
     <color name="light_gray">#EEEEEE</color>
     <color name="medium_gray">#9E9E9E</color>
     <color name="dark_gray">#616161</color>
+    <color name="text_secondary">#757575</color> <!-- Secondary text color -->
     <color name="error">#D32F2F</color> <!-- Red for errors -->
     <color name="success">#388E3C</color> <!-- Green for success -->
+    <color name="success_light">#E8F5E8</color> <!-- Light green background -->
+    <color name="success_dark">#2E7D32</color> <!-- Dark green text -->
     <color name="warning">#FFA000</color> <!-- Amber for warnings -->
+    <color name="light_blue">#E3F2FD</color> <!-- Light blue background -->
 </resources>

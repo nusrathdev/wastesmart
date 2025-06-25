@@ -53,9 +53,17 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
             holder.tvTimestamp.setText(dateFormat.format(new Date(report.getTimestamp())));
         }
 
-        // Set status
-        String status = report.getStatus() != null ? report.getStatus() : "Pending";
-        holder.tvStatus.setText(status);
+        // Set status and assigned collector info
+        String status = report.getStatus() != null ? report.getStatus() : "pending";
+        holder.tvStatus.setText(status.toUpperCase());
+        
+        // Show assigned collector if available
+        if (report.getAssignedCollectorName() != null && !report.getAssignedCollectorName().isEmpty()) {
+            holder.tvAssignedTo.setVisibility(View.VISIBLE);
+            holder.tvAssignedTo.setText("Assigned to: " + report.getAssignedCollectorName());
+        } else {
+            holder.tvAssignedTo.setVisibility(View.GONE);
+        }
         
         // Set status color
         int statusColor;
@@ -84,23 +92,35 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
 
         // Setup button listeners
         holder.btnAssign.setOnClickListener(v -> {
-            context.updateReportStatus(report.getId(), "assigned");
+            context.assignReportToCollector(report.getId(), report);
         });
 
         holder.btnComplete.setOnClickListener(v -> {
             context.updateReportStatus(report.getId(), "completed");
         });
 
-        // Hide buttons based on current status
-        if ("completed".equals(status.toLowerCase())) {
-            holder.btnAssign.setVisibility(View.GONE);
-            holder.btnComplete.setVisibility(View.GONE);
-        } else if ("assigned".equals(status.toLowerCase()) || "in_progress".equals(status.toLowerCase())) {
-            holder.btnAssign.setVisibility(View.GONE);
-            holder.btnComplete.setVisibility(View.VISIBLE);
-        } else {
-            holder.btnAssign.setVisibility(View.VISIBLE);
-            holder.btnComplete.setVisibility(View.VISIBLE);
+        // Show/hide buttons based on current status
+        switch (status.toLowerCase()) {
+            case "completed":
+                holder.btnAssign.setVisibility(View.GONE);
+                holder.btnComplete.setVisibility(View.GONE);
+                holder.btnAssign.setText("COMPLETED");
+                break;
+            case "assigned":
+                holder.btnAssign.setVisibility(View.GONE);
+                holder.btnComplete.setVisibility(View.VISIBLE);
+                holder.btnComplete.setText("MARK COMPLETED");
+                break;
+            case "in_progress":
+                holder.btnAssign.setVisibility(View.GONE);
+                holder.btnComplete.setVisibility(View.VISIBLE);
+                holder.btnComplete.setText("MARK COMPLETED");
+                break;
+            default: // pending
+                holder.btnAssign.setVisibility(View.VISIBLE);
+                holder.btnComplete.setVisibility(View.GONE);
+                holder.btnAssign.setText("ASSIGN TO COLLECTOR");
+                break;
         }
     }
 
@@ -110,7 +130,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
     }
 
     static class ReportViewHolder extends RecyclerView.ViewHolder {
-        TextView tvWasteType, tvSize, tvLocation, tvDescription, tvTimestamp, tvStatus;
+        TextView tvWasteType, tvSize, tvLocation, tvDescription, tvTimestamp, tvStatus, tvAssignedTo;
         ImageView ivPhoto;
         Button btnAssign, btnComplete;
 
@@ -122,6 +142,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
             tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvAssignedTo = itemView.findViewById(R.id.tvAssignedTo);
             ivPhoto = itemView.findViewById(R.id.ivPhoto);
             btnAssign = itemView.findViewById(R.id.btnAssign);
             btnComplete = itemView.findViewById(R.id.btnComplete);

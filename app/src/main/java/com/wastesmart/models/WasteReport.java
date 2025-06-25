@@ -15,6 +15,10 @@ public class WasteReport {
     private Date reportDate;
     private Long timestamp; // Added for compatibility with adapters
 
+    private String assignedCollectorId;
+    private String assignedCollectorName;
+    private Long assignedTimestamp;
+
     // Required empty constructor for Firestore
     public WasteReport() {
     }
@@ -146,5 +150,29 @@ public class WasteReport {
         if (timestamp != null) {
             this.reportDate = new Date(timestamp);
         }
+    }
+
+    public String getAssignedCollectorId() {
+        return assignedCollectorId;
+    }
+
+    public void setAssignedCollectorId(String assignedCollectorId) {
+        this.assignedCollectorId = assignedCollectorId;
+    }
+
+    public String getAssignedCollectorName() {
+        return assignedCollectorName;
+    }
+
+    public void setAssignedCollectorName(String assignedCollectorName) {
+        this.assignedCollectorName = assignedCollectorName;
+    }
+
+    public Long getAssignedTimestamp() {
+        return assignedTimestamp;
+    }
+
+    public void setAssignedTimestamp(Long assignedTimestamp) {
+        this.assignedTimestamp = assignedTimestamp;
     }
 }

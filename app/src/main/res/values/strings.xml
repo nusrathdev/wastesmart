@@ -56,6 +56,9 @@
     <string name="completed_collections">Completed Collections</string>
     <string name="mark_collected">Mark as Collected</string>
     <string name="navigation">Navigate to Location</string>
+    <string name="navigate">Navigate</string>
+    <string name="start_collection">Start Collection</string>
+    <string name="complete">Complete</string>
 
     <!-- Admin Features -->
     <string name="analytics_dashboard">Analytics Dashboard</string>

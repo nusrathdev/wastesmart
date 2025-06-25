@@ -4,22 +4,21 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.wastesmart.R;
 import com.wastesmart.databinding.ActivityCollectionTasksBinding;
 import com.wastesmart.models.WasteReport;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CollectionTasksActivity extends AppCompatActivity {
 
@@ -58,10 +57,9 @@ public class CollectionTasksActivity extends AppCompatActivity {
     private void loadAssignedTasks() {
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        // Load tasks that are assigned but not completed
+        // Simple approach: Load all reports and filter client-side
+        // This avoids any Firestore index requirements
         db.collection("waste_reports")
-                .whereIn("status", java.util.Arrays.asList("assigned", "in_progress"))
-                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     binding.progressBar.setVisibility(View.GONE);
@@ -71,17 +69,33 @@ public class CollectionTasksActivity extends AppCompatActivity {
                         try {
                             WasteReport task = document.toObject(WasteReport.class);
                             task.setId(document.getId());
-                            tasksList.add(task);
+                            
+                            // Filter for assigned and in_progress tasks only
+                            String status = task.getStatus();
+                            if ("assigned".equals(status) || "in_progress".equals(status)) {
+                                tasksList.add(task);
+                            }
                         } catch (Exception e) {
                             Log.e(TAG, "Error parsing task: " + document.getId(), e);
                         }
                     }
+
+                    // Sort by assigned timestamp (newest first)
+                    tasksList.sort((t1, t2) -> {
+                        Long ts1 = t1.getAssignedTimestamp();
+                        Long ts2 = t2.getAssignedTimestamp();
+                        if (ts1 == null && ts2 == null) return 0;
+                        if (ts1 == null) return 1;
+                        if (ts2 == null) return -1;
+                        return ts2.compareTo(ts1); // Descending order (newest first)
+                    });
 
                     adapter.notifyDataSetChanged();
 
                     if (tasksList.isEmpty()) {
                         binding.tvNoTasks.setVisibility(View.VISIBLE);
                         binding.recyclerView.setVisibility(View.GONE);
+                        binding.tvNoTasks.setText("No collection tasks assigned yet");
                     } else {
                         binding.tvNoTasks.setVisibility(View.GONE);
                         binding.recyclerView.setVisibility(View.VISIBLE);
@@ -94,20 +108,17 @@ public class CollectionTasksActivity extends AppCompatActivity {
                 });
     }
 
-    public void markTaskInProgress(String taskId) {
-        updateTaskStatus(taskId, "in_progress");
-    }
+    public void updateTaskStatus(String taskId, String status) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", status);
+        if ("completed".equals(status)) {
+            updates.put("completedTimestamp", System.currentTimeMillis());
+        }
 
-    public void markTaskCompleted(String taskId) {
-        updateTaskStatus(taskId, "completed");
-    }
-
-    private void updateTaskStatus(String taskId, String status) {
         db.collection("waste_reports").document(taskId)
-                .update("status", status)
+                .update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    String message = "completed".equals(status) ? "Task completed!" : "Task started!";
-                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Task status updated to " + status, Toast.LENGTH_SHORT).show();
                     loadAssignedTasks(); // Refresh the list
                 })
                 .addOnFailureListener(e -> {

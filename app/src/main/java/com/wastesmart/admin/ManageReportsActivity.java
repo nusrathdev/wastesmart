@@ -1,10 +1,13 @@
 package com.wastesmart.admin;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,15 +21,20 @@ import com.wastesmart.R;
 import com.wastesmart.models.WasteReport;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ManageReportsActivity extends AppCompatActivity {
 
     private static final String TAG = "ManageReports";
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
-    private FirebaseFirestore db;    private ReportsAdapter adapter;
+    private FirebaseFirestore db;
+    private ReportsAdapter adapter;
     private List<WasteReport> reportsList;
+    private List<String> collectorsList;
+    private Map<String, String> collectorsMap; // ID -> Name mapping
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +50,16 @@ public class ManageReportsActivity extends AppCompatActivity {
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
 
+        // Initialize collectors list
+        collectorsList = new ArrayList<>();
+        collectorsMap = new HashMap<>();
+        loadCollectors();
+
         // Initialize views
         recyclerView = findViewById(R.id.recyclerViewReports);
-        progressBar = findViewById(R.id.progressBar);        // Setup RecyclerView
+        progressBar = findViewById(R.id.progressBar);
+
+        // Setup RecyclerView
         reportsList = new ArrayList<>();
         adapter = new ReportsAdapter(reportsList, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -52,6 +67,18 @@ public class ManageReportsActivity extends AppCompatActivity {
 
         // Load reports
         loadWasteReports();
+    }
+
+    private void loadCollectors() {
+        // Use a single hardcoded collector for simplicity
+        collectorsList.clear();
+        collectorsMap.clear();
+        
+        // Add single default collector
+        collectorsList.add("Waste Collector (All Areas)");
+        collectorsMap.put("Waste Collector (All Areas)", "default_collector");
+        
+        Log.d(TAG, "Loaded 1 default collector");
     }
 
     private void loadWasteReports() {
@@ -97,6 +124,52 @@ public class ManageReportsActivity extends AppCompatActivity {
                     Log.e(TAG, "Error updating report status", e);
                     Toast.makeText(this, "Error updating status: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    public void assignReportToCollector(String reportId, WasteReport report) {
+        if (collectorsList.isEmpty()) {
+            Toast.makeText(this, "No collectors available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Create collector selection dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Assign to Collector");
+        
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_assign_collector, null);
+        Spinner spinnerCollectors = dialogView.findViewById(R.id.spinnerCollectors);
+        
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, 
+                android.R.layout.simple_spinner_item, collectorsList);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCollectors.setAdapter(adapter);
+        
+        builder.setView(dialogView);
+        builder.setPositiveButton("Assign", (dialog, which) -> {
+            String selectedCollector = (String) spinnerCollectors.getSelectedItem();
+            String collectorId = collectorsMap.get(selectedCollector);
+            
+            // Update report with assigned collector
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", "assigned");
+            updates.put("assignedCollectorId", collectorId);
+            updates.put("assignedCollectorName", selectedCollector);
+            updates.put("assignedTimestamp", System.currentTimeMillis());
+            
+            db.collection("waste_reports").document(reportId)
+                    .update(updates)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Report assigned to " + selectedCollector, Toast.LENGTH_SHORT).show();
+                        loadWasteReports(); // Refresh the list
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error assigning report", e);
+                        Toast.makeText(this, "Error assigning report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        });
+        
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
     }
 
     @Override
