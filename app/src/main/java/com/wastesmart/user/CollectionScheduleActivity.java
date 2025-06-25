@@ -1,8 +1,8 @@
 package com.wastesmart.user;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,12 +24,24 @@ public class CollectionScheduleActivity extends AppCompatActivity {
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Collection Schedule");
+            getSupportActionBar().setTitle("About");
         }
 
-        // TODO: Implement collection schedule functionality
-        // This is a placeholder implementation
-        Toast.makeText(this, "Collection Schedule feature is under development", Toast.LENGTH_LONG).show();
+        setupClickListeners();
+    }
+
+    private void setupClickListeners() {
+        // Submit Waste Report button
+        binding.btnSubmitReport.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ReportWasteActivity.class);
+            startActivity(intent);
+        });
+
+        // View My Reports button
+        binding.btnViewReports.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MyReportsActivity.class);
+            startActivity(intent);
+        });
     }
 
     @Override

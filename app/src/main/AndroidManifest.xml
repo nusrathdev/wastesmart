@@ -57,6 +57,8 @@
             android:exported="false" />
         <activity android:name=".user.SelectLocationMapActivity"
             android:exported="false" />
+        <activity android:name=".user.MyReportsActivity"
+            android:exported="false" />
 
         <!-- Collector Features -->
         <activity android:name=".collector.CollectorLoginActivity"

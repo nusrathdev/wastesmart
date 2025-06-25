@@ -48,7 +48,7 @@ public class UserDashboardActivity extends AppCompatActivity {
         });
 
         binding.cardWasteHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(UserDashboardActivity.this, WasteHistoryActivity.class);
+            Intent intent = new Intent(UserDashboardActivity.this, MyReportsActivity.class);
             startActivity(intent);
         });
 

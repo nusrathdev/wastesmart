@@ -63,7 +63,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
         } else {
             holder.tvTimestamp.setText("🕒 Time not available");
         }
-
+        
         // Set description if available
         if (task.getDescription() != null && !task.getDescription().trim().isEmpty()) {
             holder.tvDescription.setVisibility(View.VISIBLE);
@@ -72,9 +72,29 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
             holder.tvDescription.setVisibility(View.GONE);
         }
 
-        // Set status
+        // Set status with emoji and color
         String status = task.getStatus() != null ? task.getStatus() : "assigned";
-        holder.tvStatus.setText(status.replace("_", " ").toUpperCase());
+        int statusBackground;
+        int statusColor;
+        
+        // Update status badge with emoji and background color
+        switch (status.toLowerCase()) {
+            case "completed":
+                holder.tvStatus.setText("COMPLETED");
+                statusBackground = R.drawable.status_completed_circle_bg;
+                statusColor = context.getResources().getColor(R.color.status_completed, null);
+                break;
+            case "in_progress":
+                holder.tvStatus.setText("IN PROGRESS");
+                statusBackground = R.drawable.status_in_progress_circle_bg;
+                statusColor = context.getResources().getColor(R.color.status_in_progress, null);
+                break;
+            default: // assigned
+                holder.tvStatus.setText("ASSIGNED");
+                statusBackground = R.drawable.status_assigned_circle_bg;
+                statusColor = context.getResources().getColor(R.color.status_assigned, null);
+                break;
+        }
         
         // Always show assigned collector info with better formatting
         holder.tvAssignedInfo.setVisibility(View.VISIBLE);
@@ -92,22 +112,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
             holder.tvAssignedTime.setVisibility(View.GONE);
         }
         
-        // Set status color and background
-        int statusColor;
-        int statusBackground;
-        if ("in_progress".equals(status)) {
-            statusColor = context.getResources().getColor(R.color.warning, null);
-            statusBackground = R.drawable.status_in_progress_bg;
-        } else if ("assigned".equals(status)) {
-            statusColor = context.getResources().getColor(R.color.primary, null);
-            statusBackground = R.drawable.status_assigned_bg;
-        } else if ("completed".equals(status)) {
-            statusColor = context.getResources().getColor(R.color.success, null);
-            statusBackground = R.drawable.status_completed_bg;
-        } else {
-            statusColor = context.getResources().getColor(R.color.primary, null);
-            statusBackground = R.drawable.status_assigned_bg;
-        }
+        // Apply status styling
         holder.tvStatus.setTextColor(statusColor);
         holder.tvStatus.setBackgroundResource(statusBackground);
 
