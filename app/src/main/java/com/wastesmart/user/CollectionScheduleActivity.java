@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.wastesmart.R;
 import com.wastesmart.databinding.ActivityCollectionScheduleBinding;
 
-public class CollectionScheduleActivity extends AppCompatActivity {
+public class CollectionScheduleActivity extends BaseUserActivity {
 
     private ActivityCollectionScheduleBinding binding;
 
@@ -26,6 +26,9 @@ public class CollectionScheduleActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("About");
         }
+
+        // Setup bottom navigation
+        setupBottomNavigation();
 
         setupClickListeners();
     }
@@ -51,5 +54,10 @@ public class CollectionScheduleActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected String getActiveNavItem() {
+        return "about";
     }
 }

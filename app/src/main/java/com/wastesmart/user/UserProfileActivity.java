@@ -14,7 +14,7 @@ import com.wastesmart.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class UserProfileActivity extends AppCompatActivity {
+public class UserProfileActivity extends BaseUserActivity {
 
     private ActivityUserProfileBinding binding;
     private FirebaseAuth mAuth;
@@ -33,6 +33,9 @@ public class UserProfileActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("My Profile");
         }
+
+        // Setup bottom navigation
+        setupBottomNavigation();
 
         // Initialize Firebase components
         mAuth = FirebaseAuth.getInstance();
@@ -124,5 +127,10 @@ public class UserProfileActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected String getActiveNavItem() {
+        return "profile";
     }
 }

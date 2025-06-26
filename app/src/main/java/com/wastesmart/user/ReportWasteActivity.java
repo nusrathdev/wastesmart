@@ -38,7 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class ReportWasteActivity extends AppCompatActivity {
+public class ReportWasteActivity extends BaseUserActivity {
 
     private static final String TAG = "ReportWasteActivity";
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -117,6 +117,9 @@ public class ReportWasteActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle(R.string.report_waste);
         }
+
+        // Setup bottom navigation
+        setupBottomNavigation();
 
         // Setup waste type dropdown
         ArrayAdapter<CharSequence> wasteTypeAdapter = ArrayAdapter.createFromResource(
@@ -660,5 +663,10 @@ public class ReportWasteActivity extends AppCompatActivity {
             Log.d(TAG, "Passing location to map: " + latitude + ", " + longitude);
         }
         startActivityForResult(intent, REQUEST_MAP_LOCATION);
+    }
+
+    @Override
+    protected String getActiveNavItem() {
+        return "submit";
     }
 }

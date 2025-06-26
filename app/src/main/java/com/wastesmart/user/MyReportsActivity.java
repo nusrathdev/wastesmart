@@ -24,7 +24,7 @@ import com.wastesmart.models.WasteReport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyReportsActivity extends AppCompatActivity {
+public class MyReportsActivity extends BaseUserActivity {
 
     private static final String TAG = "MyReports";
     private RecyclerView recyclerViewReports;
@@ -47,6 +47,9 @@ public class MyReportsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("My Reports");
         }
+
+        // Setup bottom navigation
+        setupBottomNavigation();
 
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
@@ -158,5 +161,10 @@ public class MyReportsActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected String getActiveNavItem() {
+        return "reports";
     }
 }

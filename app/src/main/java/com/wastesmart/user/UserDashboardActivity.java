@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.wastesmart.MainActivity;
 import com.wastesmart.R;
@@ -17,7 +16,7 @@ import com.wastesmart.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class UserDashboardActivity extends AppCompatActivity {
+public class UserDashboardActivity extends BaseUserActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -38,27 +37,16 @@ public class UserDashboardActivity extends AppCompatActivity {
         // Set up toolbar
         setSupportActionBar(binding.toolbar);
 
-        // Set up button click listeners
-        binding.cardReportWaste.setOnClickListener(v -> {
-            Intent intent = new Intent(UserDashboardActivity.this, ReportWasteActivity.class);
-            startActivity(intent);
-        });        binding.cardViewSchedule.setOnClickListener(v -> {
-            Intent intent = new Intent(UserDashboardActivity.this, CollectionScheduleActivity.class);
-            startActivity(intent);
-        });
-
-        binding.cardWasteHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(UserDashboardActivity.this, MyReportsActivity.class);
-            startActivity(intent);
-        });
-
-        binding.cardMyProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(UserDashboardActivity.this, UserProfileActivity.class);
-            startActivity(intent);
-        });
+        // Setup bottom navigation
+        setupBottomNavigation();
 
         // Load user data
         loadUserData();
+    }
+
+    @Override
+    protected String getActiveNavItem() {
+        return "home";
     }
 
     private void loadUserData() {
@@ -86,8 +74,22 @@ public class UserDashboardActivity extends AppCompatActivity {
     private void updateUI() {
         if (currentUser != null) {
             binding.tvUserName.setText(currentUser.getName());
-            // User email is not displayed in this layout, so we'll remove this line
-            // binding.tvUserEmail.setText(currentUser.getEmail());
+            
+            // Set dynamic welcome message
+            String[] welcomeMessages = {
+                "Ready to make a difference today?",
+                "Your community thanks you!",
+                "Every report counts!",
+                "Together we keep our city clean!",
+                "Thank you for being a responsible citizen!"
+            };
+            int randomIndex = (int) (Math.random() * welcomeMessages.length);
+            binding.tvWelcomeMessage.setText(welcomeMessages[randomIndex]);
+            
+            // TODO: Load actual user stats from database
+            // For now, using placeholder values
+            binding.tvReportsCount.setText("12");
+            binding.tvPointsEarned.setText("240");
         }
     }
 
