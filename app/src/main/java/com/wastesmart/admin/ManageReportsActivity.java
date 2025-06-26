@@ -127,49 +127,23 @@ public class ManageReportsActivity extends AppCompatActivity {
     }
 
     public void assignReportToCollector(String reportId, WasteReport report) {
-        if (collectorsList.isEmpty()) {
-            Toast.makeText(this, "No collectors available", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Create collector selection dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Assign to Collector");
+        // Directly assign to default collector without dialog
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", "assigned");
+        updates.put("assignedCollectorId", "default_collector");
+        updates.put("assignedCollectorName", "Waste Collector");
+        updates.put("assignedTimestamp", System.currentTimeMillis());
         
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_assign_collector, null);
-        Spinner spinnerCollectors = dialogView.findViewById(R.id.spinnerCollectors);
-        
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, 
-                android.R.layout.simple_spinner_item, collectorsList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCollectors.setAdapter(adapter);
-        
-        builder.setView(dialogView);
-        builder.setPositiveButton("Assign", (dialog, which) -> {
-            String selectedCollector = (String) spinnerCollectors.getSelectedItem();
-            String collectorId = collectorsMap.get(selectedCollector);
-            
-            // Update report with assigned collector
-            Map<String, Object> updates = new HashMap<>();
-            updates.put("status", "assigned");
-            updates.put("assignedCollectorId", collectorId);
-            updates.put("assignedCollectorName", selectedCollector);
-            updates.put("assignedTimestamp", System.currentTimeMillis());
-            
-            db.collection("waste_reports").document(reportId)
-                    .update(updates)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Report assigned to " + selectedCollector, Toast.LENGTH_SHORT).show();
-                        loadWasteReports(); // Refresh the list
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Error assigning report", e);
-                        Toast.makeText(this, "Error assigning report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-        });
-        
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
+        db.collection("waste_reports").document(reportId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Report assigned to collector", Toast.LENGTH_SHORT).show();
+                    loadWasteReports(); // Refresh the list
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error assigning report", e);
+                    Toast.makeText(this, "Error assigning report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override

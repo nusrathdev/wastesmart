@@ -96,13 +96,8 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
                 break;
         }
         
-        // Always show assigned collector info with better formatting
-        holder.tvAssignedInfo.setVisibility(View.VISIBLE);
-        if (task.getAssignedCollectorName() != null && !task.getAssignedCollectorName().isEmpty()) {
-            holder.tvAssignedInfo.setText("👤 Assigned to: " + task.getAssignedCollectorName());
-        } else {
-            holder.tvAssignedInfo.setText("👤 Assigned to: Waste Collector");
-        }
+        // Hide assigned collector info (no need to show collector name)
+        holder.tvAssignedInfo.setVisibility(View.GONE);
         
         // Show assigned time if available with better formatting
         if (task.getAssignedTimestamp() != null) {

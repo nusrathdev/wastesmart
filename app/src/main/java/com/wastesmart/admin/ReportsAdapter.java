@@ -57,13 +57,8 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
         String status = report.getStatus() != null ? report.getStatus() : "pending";
         holder.tvStatus.setText(status.toUpperCase());
         
-        // Show assigned collector if available
-        if (report.getAssignedCollectorName() != null && !report.getAssignedCollectorName().isEmpty()) {
-            holder.tvAssignedTo.setVisibility(View.VISIBLE);
-            holder.tvAssignedTo.setText("Assigned to: " + report.getAssignedCollectorName());
-        } else {
-            holder.tvAssignedTo.setVisibility(View.GONE);
-        }
+        // Hide assigned collector info (no need to show collector name)
+        holder.tvAssignedTo.setVisibility(View.GONE);
         
         // Set status color
         int statusColor;

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.wastesmart.R;
 import com.wastesmart.models.WasteReport;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -59,51 +61,50 @@ public class UserReportsAdapter extends RecyclerView.Adapter<UserReportsAdapter.
         // Set status and update UI based on status
         String status = report.getStatus() != null ? report.getStatus().toLowerCase() : "pending";
         
+        // Check if photo should be displayed (show for all statuses when available)
+        boolean hasPhoto = report.getImageUrl() != null && !report.getImageUrl().isEmpty();
+        
         // Update status badge with emoji and background color
         switch (status) {
             case "completed":
                 holder.tvStatus.setText("COMPLETED");
                 holder.tvStatus.setBackgroundResource(R.drawable.status_completed_circle_bg);
                 holder.tvStatus.setTextColor(context.getResources().getColor(R.color.status_completed, null));
-                holder.layoutCollectorInfo.setVisibility(View.VISIBLE);
-                holder.layoutProgress.setVisibility(View.GONE);
-                holder.layoutCompletionInfo.setVisibility(View.VISIBLE);
                 break;
             case "in_progress":
                 holder.tvStatus.setText("IN PROGRESS");
                 holder.tvStatus.setBackgroundResource(R.drawable.status_in_progress_circle_bg);
                 holder.tvStatus.setTextColor(context.getResources().getColor(R.color.status_in_progress, null));
-                holder.layoutCollectorInfo.setVisibility(View.VISIBLE);
-                holder.layoutProgress.setVisibility(View.VISIBLE);
-                holder.layoutCompletionInfo.setVisibility(View.GONE);
                 break;
             case "assigned":
                 holder.tvStatus.setText("ASSIGNED");
                 holder.tvStatus.setBackgroundResource(R.drawable.status_assigned_circle_bg);
                 holder.tvStatus.setTextColor(context.getResources().getColor(R.color.status_assigned, null));
-                holder.layoutCollectorInfo.setVisibility(View.VISIBLE);
-                holder.layoutProgress.setVisibility(View.GONE);
-                holder.layoutCompletionInfo.setVisibility(View.GONE);
                 break;
             default: // pending
                 holder.tvStatus.setText("PENDING");
                 holder.tvStatus.setBackgroundResource(R.drawable.status_pending_circle_bg);
                 holder.tvStatus.setTextColor(context.getResources().getColor(R.color.status_pending, null));
-                holder.layoutCollectorInfo.setVisibility(View.GONE);
-                holder.layoutProgress.setVisibility(View.GONE);
-                holder.layoutCompletionInfo.setVisibility(View.GONE);
                 break;
         }
 
-        // Show assigned collector info if available
-        if (report.getAssignedCollectorName() != null && !report.getAssignedCollectorName().isEmpty()) {
-            holder.tvAssignedCollector.setText(report.getAssignedCollectorName());
+        // Show photo thumbnail in corner when photo is available
+        if (hasPhoto) {
+            holder.ivPhotoCorner.setVisibility(View.VISIBLE);
+            
+            // Load actual image from URL using Picasso
+            Picasso.get()
+                    .load(report.getImageUrl())
+                    .placeholder(R.drawable.ic_photo_placeholder)
+                    .error(R.drawable.ic_photo_placeholder)
+                    .fit()
+                    .centerCrop()
+                    .into(holder.ivPhotoCorner);
         } else {
-            holder.layoutCollectorInfo.setVisibility(View.GONE);
+            holder.ivPhotoCorner.setVisibility(View.GONE);
         }
 
-        // Photo indicator (always visible since photo is required)
-        holder.tvPhotoIndicator.setVisibility(View.VISIBLE);
+        holder.layoutCollectorInfo.setVisibility(View.GONE);
     }
 
     @Override
@@ -113,8 +114,9 @@ public class UserReportsAdapter extends RecyclerView.Adapter<UserReportsAdapter.
 
     static class UserReportViewHolder extends RecyclerView.ViewHolder {
         TextView tvWasteType, tvSize, tvDescription, tvLocation, tvTimestamp, tvStatus;
-        TextView tvPhotoIndicator, tvAssignedCollector;
-        LinearLayout layoutCollectorInfo, layoutProgress, layoutCompletionInfo;
+        TextView tvAssignedCollector;
+        ImageView ivPhoto, ivPhotoCorner;
+        LinearLayout layoutCollectorInfo;
 
         public UserReportViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -124,11 +126,10 @@ public class UserReportsAdapter extends RecyclerView.Adapter<UserReportsAdapter.
             tvLocation = itemView.findViewById(R.id.tvLocation);
             tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
             tvStatus = itemView.findViewById(R.id.tvStatus);
-            tvPhotoIndicator = itemView.findViewById(R.id.tvPhotoIndicator);
             tvAssignedCollector = itemView.findViewById(R.id.tvAssignedCollector);
+            ivPhoto = itemView.findViewById(R.id.ivPhoto);
+            ivPhotoCorner = itemView.findViewById(R.id.ivPhotoCorner);
             layoutCollectorInfo = itemView.findViewById(R.id.layoutCollectorInfo);
-            layoutProgress = itemView.findViewById(R.id.layoutProgress);
-            layoutCompletionInfo = itemView.findViewById(R.id.layoutCompletionInfo);
         }
     }
 }

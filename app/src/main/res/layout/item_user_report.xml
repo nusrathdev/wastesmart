@@ -186,24 +186,10 @@
 
             </LinearLayout>
 
-            <!-- Photo Indicator -->
-            <LinearLayout
+            <!-- Empty space for better layout balance -->
+            <View
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <TextView
-                    android:id="@+id/tvPhotoIndicator"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="📷 Photo"
-                    android:textColor="@color/success"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:visibility="visible" />
-
-            </LinearLayout>
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
@@ -237,50 +223,24 @@
 
         </LinearLayout>
 
-        <!-- Progress Indicator for In Progress Reports -->
-        <LinearLayout
-            android:id="@+id/layoutProgress"
+        <!-- Photo Display (Bottom Right Corner) -->
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="12dp"
-            android:visibility="gone">
+            android:layout_marginTop="8dp">
 
-            <ProgressBar
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="8dp" />
+            <ImageView
+                android:id="@+id/ivPhotoCorner"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_alignParentEnd="true"
+                android:scaleType="centerCrop"
+                android:background="@drawable/photo_corner_bg"
+                android:visibility="gone"
+                android:elevation="2dp"
+                android:contentDescription="Waste photo thumbnail" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🚚 Collection in progress..."
-                android:textColor="@color/warning"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <!-- Completion Info -->
-        <LinearLayout
-            android:id="@+id/layoutCompletionInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="12dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="✅ Collection completed!"
-                android:textColor="@color/success"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
+        </RelativeLayout>
 
     </LinearLayout>
 
