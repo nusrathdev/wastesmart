@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/closeArea"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#CC000000"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Full-screen image with zoom capability -->
+    <ImageView
+        android:id="@+id/ivFullScreenImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:contentDescription="Full screen waste photo"
+        android:background="@android:color/transparent" />
+
+    <!-- Close indicator (optional - shows user can tap to close) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp"
+        android:background="#80000000"
+        android:padding="8dp"
+        android:text="✕"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:minWidth="40dp"
+        android:minHeight="40dp"
+        android:clickable="false"
+        android:focusable="false" />
+
+    <!-- Instruction text -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="32dp"
+        android:background="#80000000"
+        android:padding="12dp"
+        android:text="Tap anywhere to close"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:clickable="false"
+        android:focusable="false" />
+
+</FrameLayout>

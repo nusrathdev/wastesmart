@@ -118,16 +118,14 @@ public class ReportWasteActivity extends AppCompatActivity {
             getSupportActionBar().setTitle(R.string.report_waste);
         }
 
-        // Setup waste type spinner
+        // Setup waste type dropdown
         ArrayAdapter<CharSequence> wasteTypeAdapter = ArrayAdapter.createFromResource(
-                this, R.array.waste_types, android.R.layout.simple_spinner_item);
-        wasteTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                this, R.array.waste_types, android.R.layout.simple_dropdown_item_1line);
         binding.spinnerWasteType.setAdapter(wasteTypeAdapter);
 
-        // Setup waste size spinner
+        // Setup waste size dropdown
         ArrayAdapter<CharSequence> wasteSizeAdapter = ArrayAdapter.createFromResource(
-                this, R.array.waste_sizes, android.R.layout.simple_spinner_item);
-        wasteSizeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                this, R.array.waste_sizes, android.R.layout.simple_dropdown_item_1line);
         binding.spinnerWasteSize.setAdapter(wasteSizeAdapter);
 
         // Button listeners
@@ -349,9 +347,9 @@ public class ReportWasteActivity extends AppCompatActivity {
             }
         }
 
-        // Validate spinner selections
-        if (binding.spinnerWasteType.getSelectedItem() == null || 
-            binding.spinnerWasteSize.getSelectedItem() == null) {
+        // Validate dropdown selections
+        if (binding.spinnerWasteType.getText().toString().trim().isEmpty() || 
+            binding.spinnerWasteSize.getText().toString().trim().isEmpty()) {
             Toast.makeText(this, "Please select waste type and size", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -363,8 +361,8 @@ public class ReportWasteActivity extends AppCompatActivity {
         }
 
         // Get other report details
-        String wasteType = binding.spinnerWasteType.getSelectedItem().toString();
-        String wasteSize = binding.spinnerWasteSize.getSelectedItem().toString();
+        String wasteType = binding.spinnerWasteType.getText().toString().trim();
+        String wasteSize = binding.spinnerWasteSize.getText().toString().trim();
         String description = binding.etDescription.getText().toString().trim();
 
         // Show progress

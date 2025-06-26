@@ -7,6 +7,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.app.Dialog;
+import android.view.Window;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AlphaAnimation;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -95,16 +102,16 @@ public class UserReportsAdapter extends RecyclerView.Adapter<UserReportsAdapter.
             // Load actual image from URL using Picasso
             Picasso.get()
                     .load(report.getImageUrl())
-                    .placeholder(R.drawable.ic_photo_placeholder)
-                    .error(R.drawable.ic_photo_placeholder)
                     .fit()
                     .centerCrop()
                     .into(holder.ivPhotoCorner);
+
+            // Set click listener for full-screen image view
+            holder.ivPhotoCorner.setOnClickListener(v -> showFullScreenImage(report.getImageUrl()));
         } else {
             holder.ivPhotoCorner.setVisibility(View.GONE);
+            holder.ivPhotoCorner.setOnClickListener(null);
         }
-
-        holder.layoutCollectorInfo.setVisibility(View.GONE);
     }
 
     @Override
@@ -112,11 +119,87 @@ public class UserReportsAdapter extends RecyclerView.Adapter<UserReportsAdapter.
         return reports.size();
     }
 
+    /**
+     * Show full-screen image viewer with modern slide-in animation
+     */
+    private void showFullScreenImage(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) return;
+
+        // Create dialog for full-screen image
+        Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_fullscreen_image);
+        
+        // Make dialog full-screen and transparent
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, 
+                           WindowManager.LayoutParams.MATCH_PARENT);
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                          WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
+
+        // Get views from dialog
+        ImageView fullScreenImage = dialog.findViewById(R.id.ivFullScreenImage);
+        View closeArea = dialog.findViewById(R.id.closeArea);
+
+        // Load the full-resolution image
+        Picasso.get()
+                .load(imageUrl)
+                .into(fullScreenImage);
+
+        // Close dialog when clicking outside the image
+        closeArea.setOnClickListener(v -> {
+            // Add fade-out animation
+            Animation fadeOut = new AlphaAnimation(1.0f, 0.0f);
+            fadeOut.setDuration(200);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {}
+                
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    dialog.dismiss();
+                }
+                
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+            closeArea.startAnimation(fadeOut);
+        });
+        
+        // Close dialog when clicking the image itself (alternative)
+        fullScreenImage.setOnClickListener(v -> {
+            Animation fadeOut = new AlphaAnimation(1.0f, 0.0f);
+            fadeOut.setDuration(200);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {}
+                
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    dialog.dismiss();
+                }
+                
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+            closeArea.startAnimation(fadeOut);
+        });
+
+        // Show dialog with fade-in animation
+        dialog.show();
+        
+        // Add fade-in animation
+        Animation fadeIn = new AlphaAnimation(0.0f, 1.0f);
+        fadeIn.setDuration(250);
+        closeArea.startAnimation(fadeIn);
+    }
+
     static class UserReportViewHolder extends RecyclerView.ViewHolder {
         TextView tvWasteType, tvSize, tvDescription, tvLocation, tvTimestamp, tvStatus;
-        TextView tvAssignedCollector;
-        ImageView ivPhoto, ivPhotoCorner;
-        LinearLayout layoutCollectorInfo;
+        ImageView ivPhotoCorner;
 
         public UserReportViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -126,10 +209,7 @@ public class UserReportsAdapter extends RecyclerView.Adapter<UserReportsAdapter.
             tvLocation = itemView.findViewById(R.id.tvLocation);
             tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
             tvStatus = itemView.findViewById(R.id.tvStatus);
-            tvAssignedCollector = itemView.findViewById(R.id.tvAssignedCollector);
-            ivPhoto = itemView.findViewById(R.id.ivPhoto);
             ivPhotoCorner = itemView.findViewById(R.id.ivPhotoCorner);
-            layoutCollectorInfo = itemView.findViewById(R.id.layoutCollectorInfo);
         }
     }
 }

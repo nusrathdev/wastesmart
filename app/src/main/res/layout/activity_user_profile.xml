@@ -102,13 +102,16 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Update Button -->
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnUpdateProfile"
+                style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/primary"
+                android:paddingVertical="16dp"
                 android:text="Update Profile"
-                android:textColor="@color/white" />
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="@color/primary" />
 
             <!-- Progress Bar -->
             <ProgressBar

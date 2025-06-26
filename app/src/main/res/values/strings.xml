@@ -105,13 +105,13 @@
     <string name="no_reports_message">You haven\'t submitted any waste reports yet.\nStart by reporting waste in your area!</string>
     <string name="submit_first_report">SUBMIT YOUR FIRST REPORT</string>
     <string name="report_details">Report Details</string>
-    <string name="waste_type_label">♻️ Waste Type:</string>
-    <string name="size_label">📏 Size:</string>
-    <string name="description_label">📝 Description:</string>
-    <string name="location_label">📍 Location:</string>
-    <string name="submitted_label">🕒 Submitted:</string>
-    <string name="photo_indicator">📷 Photo</string>
-    <string name="assigned_collector_label">👷 Assigned Collector:</string>
-    <string name="collection_in_progress">🚚 Collection in progress...</string>
-    <string name="collection_completed">✅ Collection completed!</string>
+    <string name="waste_type_label">Waste Type:</string>
+    <string name="size_label">Size:</string>
+    <string name="description_label">Description:</string>
+    <string name="location_label">Location:</string>
+    <string name="submitted_label">Submitted:</string>
+    <string name="photo_indicator">Photo</string>
+    <string name="assigned_collector_label">Assigned Collector:</string>
+    <string name="collection_in_progress">Collection in progress...</string>
+    <string name="collection_completed">Collection completed!</string>
 </resources>

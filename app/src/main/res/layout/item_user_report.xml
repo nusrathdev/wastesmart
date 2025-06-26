@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    android:layout_margin="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="24dp">
 
         <!-- Header with Status Badge -->
         <LinearLayout
@@ -19,29 +19,32 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="20dp">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="📋 Report Details"
+                android:text="Report Details"
                 android:textColor="@color/primary"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:gravity="start|center_vertical"
+                android:letterSpacing="0.02" />
 
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/status_circle_bg"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
-                android:text="🔵 ASSIGNED"
+                android:paddingHorizontal="18dp"
+                android:paddingVertical="10dp"
+                android:text="ASSIGNED"
                 android:textColor="@color/white"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:textStyle="bold"
-                android:gravity="center" />
+                android:gravity="center"
+                android:letterSpacing="0.1" />
 
         </LinearLayout>
 
@@ -50,21 +53,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="20dp"
+            android:gravity="top">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginEnd="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="♻️ Waste Type:"
+                    android:text="Waste Type:"
                     android:textColor="@color/dark_gray"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:id="@+id/tvWasteType"
@@ -72,8 +79,9 @@
                     android:layout_height="wrap_content"
                     android:text="Plastic"
                     android:textColor="@color/primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.02" />
 
             </LinearLayout>
 
@@ -81,15 +89,18 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginStart="8dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📏 Size:"
+                    android:text="Size:"
                     android:textColor="@color/dark_gray"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:id="@+id/tvSize"
@@ -97,7 +108,11 @@
                     android:layout_height="wrap_content"
                     android:text="Medium"
                     android:textColor="@color/dark_gray"
-                    android:textSize="16sp" />
+                    android:textSize="14sp"
+                    android:textStyle="normal"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
 
             </LinearLayout>
 
@@ -108,15 +123,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="20dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📝 Description:"
+                android:text="Description:"
                 android:textColor="@color/dark_gray"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="6dp" />
 
             <TextView
                 android:id="@+id/tvDescription"
@@ -124,8 +141,9 @@
                 android:layout_height="wrap_content"
                 android:text="Description of the waste report..."
                 android:textColor="@color/dark_gray"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp" />
+                android:textSize="13sp"
+                android:lineSpacingExtra="4dp"
+                android:lineSpacingMultiplier="1.2" />
 
         </LinearLayout>
 
@@ -134,15 +152,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="24dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📍 Location:"
+                android:text="Location:"
                 android:textColor="@color/dark_gray"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="6dp" />
 
             <TextView
                 android:id="@+id/tvLocation"
@@ -150,31 +170,35 @@
                 android:layout_height="wrap_content"
                 android:text="12.345678, 98.765432"
                 android:textColor="@color/dark_gray"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp" />
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.02" />
 
         </LinearLayout>
 
-        <!-- Report Date and Time -->
+        <!-- Report Date and Photo -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:gravity="center_vertical">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginEnd="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🕒 Submitted:"
+                    android:text="Submitted:"
                     android:textColor="@color/dark_gray"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:id="@+id/tvTimestamp"
@@ -182,65 +206,23 @@
                     android:layout_height="wrap_content"
                     android:text="Dec 15, 2024 14:30"
                     android:textColor="@color/dark_gray"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.02" />
 
             </LinearLayout>
 
-            <!-- Empty space for better layout balance -->
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-        <!-- Collector Information (if assigned) -->
-        <LinearLayout
-            android:id="@+id/layoutCollectorInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/status_badge_bg"
-            android:padding="12dp"
-            android:layout_marginTop="8dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="👷 Assigned Collector:"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvAssignedCollector"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="John Smith"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp" />
-
-        </LinearLayout>
-
-        <!-- Photo Display (Bottom Right Corner) -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
-
+            <!-- Photo Display (Right Side) -->
             <ImageView
                 android:id="@+id/ivPhotoCorner"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_alignParentEnd="true"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:scaleType="centerCrop"
                 android:background="@drawable/photo_corner_bg"
                 android:visibility="gone"
-                android:elevation="2dp"
                 android:contentDescription="Waste photo thumbnail" />
 
-        </RelativeLayout>
+        </LinearLayout>
 
     </LinearLayout>
 

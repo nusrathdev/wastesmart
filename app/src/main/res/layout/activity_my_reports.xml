@@ -39,7 +39,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="📊 My Waste Reports"
+                android:text="My Waste Reports"
                 android:textColor="@color/primary"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -78,12 +78,12 @@
             android:padding="32dp"
             android:visibility="gone">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📋"
-                android:textSize="64sp"
-                android:layout_marginBottom="16dp" />
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_assignment"
+                android:layout_marginBottom="16dp"
+                android:contentDescription="No reports icon" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -108,7 +108,7 @@
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📝 SUBMIT YOUR FIRST REPORT"
+                android:text="SUBMIT YOUR FIRST REPORT"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:backgroundTint="@color/primary" />
