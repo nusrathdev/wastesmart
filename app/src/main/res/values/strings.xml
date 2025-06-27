@@ -21,7 +21,7 @@
 
     <!-- Citizen/User Dashboard -->
     <string name="report_waste">Report Waste</string>
-    <string name="view_schedule">Collection Schedule</string>
+    <string name="view_schedule">About</string>
     <string name="waste_history">My Reports</string>
     <string name="my_profile">My Profile</string>
 
@@ -56,6 +56,9 @@
     <string name="completed_collections">Completed Collections</string>
     <string name="mark_collected">Mark as Collected</string>
     <string name="navigation">Navigate to Location</string>
+    <string name="navigate">Navigate</string>
+    <string name="start_collection">Start Collection</string>
+    <string name="complete">Complete</string>
 
     <!-- Admin Features -->
     <string name="analytics_dashboard">Analytics Dashboard</string>
@@ -95,4 +98,20 @@
         <item>@string/medium</item>
         <item>@string/large</item>
     </string-array>
+
+    <!-- My Reports Feature -->
+    <string name="my_reports_title">My Waste Reports</string>
+    <string name="no_reports_yet">No Reports Yet</string>
+    <string name="no_reports_message">You haven\'t submitted any waste reports yet.\nStart by reporting waste in your area!</string>
+    <string name="submit_first_report">SUBMIT YOUR FIRST REPORT</string>
+    <string name="report_details">Report Details</string>
+    <string name="waste_type_label">Waste Type:</string>
+    <string name="size_label">Size:</string>
+    <string name="description_label">Description:</string>
+    <string name="location_label">Location:</string>
+    <string name="submitted_label">Submitted:</string>
+    <string name="photo_indicator">Photo</string>
+    <string name="assigned_collector_label">Assigned Collector:</string>
+    <string name="collection_in_progress">Collection in progress...</string>
+    <string name="collection_completed">Collection completed!</string>
 </resources>

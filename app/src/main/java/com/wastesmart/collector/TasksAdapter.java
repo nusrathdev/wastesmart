@@ -1,6 +1,7 @@
 package com.wastesmart.collector;
 
 import android.content.Intent;
+import android.content.Context;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,12 +24,12 @@ import java.util.Locale;
 
 public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHolder> {
 
-    private List<WasteReport> tasks;
-    private CollectionTasksActivity context;
+    private List<WasteReport> tasksList;
+    private Context context;
     private SimpleDateFormat dateFormat;
 
-    public TasksAdapter(List<WasteReport> tasks, CollectionTasksActivity context) {
-        this.tasks = tasks;
+    public TasksAdapter(List<WasteReport> tasksList, Context context) {
+        this.tasksList = tasksList;
         this.context = context;
         this.dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
     }
@@ -35,87 +37,149 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
     @NonNull
     @Override
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_collection_task, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_collection_task, parent, false);
         return new TaskViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        WasteReport task = tasks.get(position);
+        WasteReport task = tasksList.get(position);
 
-        holder.tvWasteType.setText(task.getWasteType());
-        holder.tvSize.setText(task.getSize());
-        holder.tvLocation.setText(String.format(Locale.getDefault(), "%.6f, %.6f", 
-                task.getLatitude(), task.getLongitude()));
-        holder.tvDescription.setText(task.getDescription());
+        // Set basic task information
+        holder.tvWasteType.setText(task.getWasteType() != null ? task.getWasteType() : "Unknown");
+        holder.tvSize.setText(task.getSize() != null ? task.getSize() : "Not specified");
         
-        // Format timestamp
-        if (task.getTimestamp() != null) {
-            holder.tvTimestamp.setText(dateFormat.format(new Date(task.getTimestamp())));
-        }
-
-        // Set status
-        String status = task.getStatus() != null ? task.getStatus() : "assigned";
-        holder.tvStatus.setText(status.replace("_", " ").toUpperCase());
-        
-        // Set status color
-        int statusColor;
-        if ("in_progress".equals(status)) {
-            statusColor = context.getResources().getColor(R.color.warning, null);
+        // Format location with emoji
+        if (task.getLatitude() != 0.0 && task.getLongitude() != 0.0) {
+            holder.tvLocation.setText("📍 " + task.getLatitude() + ", " + task.getLongitude());
         } else {
-            statusColor = context.getResources().getColor(R.color.primary, null);
+            holder.tvLocation.setText("📍 Location not available");
         }
-        holder.tvStatus.setTextColor(statusColor);        // Show image indicator if available
+
+        // Format timestamp with emoji
+        if (task.getTimestamp() != null) {
+            holder.tvTimestamp.setText("🕒 " + dateFormat.format(new Date(task.getTimestamp())));
+        } else {
+            holder.tvTimestamp.setText("🕒 Time not available");
+        }
+        
+        // Set description if available
+        if (task.getDescription() != null && !task.getDescription().trim().isEmpty()) {
+            holder.tvDescription.setVisibility(View.VISIBLE);
+            holder.tvDescription.setText(task.getDescription());
+        } else {
+            holder.tvDescription.setVisibility(View.GONE);
+        }
+
+        // Set status with emoji and color
+        String status = task.getStatus() != null ? task.getStatus() : "assigned";
+        int statusBackground;
+        int statusColor;
+        
+        // Update status badge with emoji and background color
+        switch (status.toLowerCase()) {
+            case "completed":
+                holder.tvStatus.setText("COMPLETED");
+                statusBackground = R.drawable.status_completed_circle_bg;
+                statusColor = context.getResources().getColor(R.color.status_completed, null);
+                break;
+            case "in_progress":
+                holder.tvStatus.setText("IN PROGRESS");
+                statusBackground = R.drawable.status_in_progress_circle_bg;
+                statusColor = context.getResources().getColor(R.color.status_in_progress, null);
+                break;
+            default: // assigned
+                holder.tvStatus.setText("ASSIGNED");
+                statusBackground = R.drawable.status_assigned_circle_bg;
+                statusColor = context.getResources().getColor(R.color.status_assigned, null);
+                break;
+        }
+        
+        // Hide assigned collector info (no need to show collector name)
+        holder.tvAssignedInfo.setVisibility(View.GONE);
+        
+        // Show assigned time if available with better formatting
+        if (task.getAssignedTimestamp() != null) {
+            holder.tvAssignedTime.setVisibility(View.VISIBLE);
+            holder.tvAssignedTime.setText("📅 Assigned: " + dateFormat.format(new Date(task.getAssignedTimestamp())));
+        } else {
+            holder.tvAssignedTime.setVisibility(View.GONE);
+        }
+        
+        // Apply status styling
+        holder.tvStatus.setTextColor(statusColor);
+        holder.tvStatus.setBackgroundResource(statusBackground);
+
+        // Show image indicator if available
         if (task.getImageUrl() != null && !task.getImageUrl().isEmpty()) {
             holder.ivPhoto.setVisibility(View.VISIBLE);
             // Simple placeholder - actual image loading can be implemented later
             holder.ivPhoto.setImageResource(R.drawable.ic_photo_placeholder);
         } else {
-            holder.ivPhoto.setVisibility(View.GONE);
+            holder.ivPhoto.setVisibility(View.VISIBLE);
+            holder.ivPhoto.setImageResource(R.drawable.ic_photo_placeholder);
         }
 
         // Setup button listeners
         holder.btnNavigate.setOnClickListener(v -> {
             // Open Google Maps for navigation
-            String uri = String.format(Locale.getDefault(), 
-                    "geo:%f,%f?q=%f,%f(Waste Collection Point)", 
-                    task.getLatitude(), task.getLongitude(),
-                    task.getLatitude(), task.getLongitude());
-            Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
-            mapIntent.setPackage("com.google.android.apps.maps");
-            
-            if (mapIntent.resolveActivity(context.getPackageManager()) != null) {
-                context.startActivity(mapIntent);
+            if (task.getLatitude() != 0.0 && task.getLongitude() != 0.0) {
+                String uri = "geo:" + task.getLatitude() + "," + task.getLongitude() + "?q=" + 
+                           task.getLatitude() + "," + task.getLongitude() + "(Waste Collection Point)";
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                mapIntent.setPackage("com.google.android.apps.maps");
+                
+                if (mapIntent.resolveActivity(context.getPackageManager()) != null) {
+                    context.startActivity(mapIntent);
+                } else {
+                    // Fallback to web browser
+                    String webUri = "https://www.google.com/maps?q=" + task.getLatitude() + "," + task.getLongitude();
+                    Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUri));
+                    context.startActivity(webIntent);
+                }
             } else {
-                // Fallback to browser
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, 
-                        Uri.parse("https://maps.google.com/maps?q=" + task.getLatitude() + "," + task.getLongitude()));
-                context.startActivity(browserIntent);
+                Toast.makeText(context, "Location not available for navigation", Toast.LENGTH_SHORT).show();
             }
         });
 
-        if ("assigned".equals(status)) {
-            holder.btnStart.setVisibility(View.VISIBLE);
-            holder.btnComplete.setVisibility(View.GONE);
-            holder.btnStart.setOnClickListener(v -> {
-                context.markTaskInProgress(task.getId());
-            });
-        } else if ("in_progress".equals(status)) {
-            holder.btnStart.setVisibility(View.GONE);
+        holder.btnStart.setOnClickListener(v -> {
+            // Update task status to in_progress
+            if (context instanceof CollectionTasksActivity) {
+                ((CollectionTasksActivity) context).updateTaskStatus(task.getId(), "in_progress");
+            }
+        });
+
+        holder.btnComplete.setOnClickListener(v -> {
+            // Update task status to completed
+            if (context instanceof CollectionTasksActivity) {
+                ((CollectionTasksActivity) context).updateTaskStatus(task.getId(), "completed");
+            }
+        });
+
+        // Show/hide complete button based on status
+        if ("in_progress".equals(status)) {
             holder.btnComplete.setVisibility(View.VISIBLE);
-            holder.btnComplete.setOnClickListener(v -> {
-                context.markTaskCompleted(task.getId());
-            });
+            holder.btnStart.setVisibility(View.GONE);
+        } else {
+            holder.btnComplete.setVisibility(View.GONE);
+            holder.btnStart.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public int getItemCount() {
-        return tasks.size();
+        return tasksList.size();
+    }
+
+    public void updateTasks(List<WasteReport> newTasks) {
+        this.tasksList = newTasks;
+        notifyDataSetChanged();
     }
 
     static class TaskViewHolder extends RecyclerView.ViewHolder {
-        TextView tvWasteType, tvSize, tvLocation, tvDescription, tvTimestamp, tvStatus;
+        TextView tvWasteType, tvSize, tvLocation, tvTimestamp, tvDescription;
+        TextView tvStatus, tvAssignedInfo, tvAssignedTime;
         ImageView ivPhoto;
         Button btnNavigate, btnStart, btnComplete;
 
@@ -124,9 +188,11 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
             tvWasteType = itemView.findViewById(R.id.tvWasteType);
             tvSize = itemView.findViewById(R.id.tvSize);
             tvLocation = itemView.findViewById(R.id.tvLocation);
-            tvDescription = itemView.findViewById(R.id.tvDescription);
             tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
+            tvDescription = itemView.findViewById(R.id.tvDescription);
             tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvAssignedInfo = itemView.findViewById(R.id.tvAssignedInfo);
+            tvAssignedTime = itemView.findViewById(R.id.tvAssignedTime);
             ivPhoto = itemView.findViewById(R.id.ivPhoto);
             btnNavigate = itemView.findViewById(R.id.btnNavigate);
             btnStart = itemView.findViewById(R.id.btnStart);
