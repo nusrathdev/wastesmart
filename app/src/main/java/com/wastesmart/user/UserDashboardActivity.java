@@ -40,6 +40,16 @@ public class UserDashboardActivity extends BaseUserActivity {
         // Setup bottom navigation
         setupBottomNavigation();
 
+        // Set up quick submit button click
+        binding.btnQuickSubmit.setOnClickListener(v -> {
+            if (!getActiveNavItem().equals("submit")) {
+                Intent intent = new Intent(UserDashboardActivity.this, ReportWasteActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+            }
+        });
+
         // Load user data
         loadUserData();
     }
@@ -89,7 +99,7 @@ public class UserDashboardActivity extends BaseUserActivity {
             // TODO: Load actual user stats from database
             // For now, using placeholder values
             binding.tvReportsCount.setText("12");
-            binding.tvPointsEarned.setText("240");
+            // binding.tvPointsEarned.setText("240"); // Removed: view no longer exists in layout
         }
     }
 
