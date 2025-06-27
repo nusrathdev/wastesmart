@@ -106,4 +106,8 @@
     <!-- Include Bottom Navigation -->
     <include layout="@layout/bottom_navigation_bar" />
 
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </RelativeLayout>

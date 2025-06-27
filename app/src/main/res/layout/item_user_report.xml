@@ -90,7 +90,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:layout_marginStart="8dp">
+                android:layout_marginStart="-25dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -106,7 +106,7 @@
                     android:id="@+id/tvSize"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Medium"
+                    android:text="Medium(Fits in a box)"
                     android:textColor="@color/dark_gray"
                     android:textSize="14sp"
                     android:textStyle="normal"

@@ -29,7 +29,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:paddingBottom="80dp"> <!-- Added bottom padding -->
 
             <!-- Header Section -->
             <LinearLayout
@@ -253,11 +254,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
+                android:backgroundTint="@color/primary"
                 android:paddingVertical="16dp"
                 android:text="SUBMIT WASTE REPORT"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                android:backgroundTint="@color/primary" />
+                android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnViewReports"
@@ -278,29 +279,32 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp"
-                app:cardBackgroundColor="#F5F5F5">
+                app:cardBackgroundColor="#F5F5F5"
+                android:layout_marginBottom="100dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    >
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="Need Help?"
                         android:textColor="@color/primary"
                         android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Contact: +94-XXX-XXXXXX\nEmail: support@wastesmart.com"
+                        android:textColor="@color/dark_gray"
                         android:textSize="14sp"
-                        android:textColor="@color/dark_gray" />
+                        />
 
                 </LinearLayout>
 
