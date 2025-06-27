@@ -105,7 +105,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Your Impact"
+                    android:text="Total Reports"
                     android:textColor="@android:color/white"
                     android:textSize="20sp"
                     android:textStyle="bold"
@@ -130,7 +130,7 @@
                             android:id="@+id/btnQuickSubmit"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
-                            android:layout_marginTop="5dp"
+                            android:layout_marginTop="10dp"
                             android:src="@drawable/baseline_assignment_add_24"
                             android:contentDescription="Submit report"
                             android:layout_gravity="center"
