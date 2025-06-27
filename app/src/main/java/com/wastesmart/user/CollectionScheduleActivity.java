@@ -23,7 +23,8 @@ public class CollectionScheduleActivity extends BaseUserActivity {
         // Setup toolbar
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            // Remove back arrow
+            // getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("About");
         }
 
