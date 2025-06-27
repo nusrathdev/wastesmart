@@ -34,7 +34,7 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_add"
+                android:src="@drawable/baseline_assignment_add_24"
                 app:tint="@color/dark_gray"
                 android:contentDescription="Submit report"
                 android:layout_marginBottom="4dp" />
@@ -65,7 +65,7 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_recent_history"
+                android:src="@drawable/baseline_assignment_24"
                 app:tint="@color/dark_gray"
                 android:contentDescription="View reports"
                 android:layout_marginBottom="4dp" />
@@ -128,7 +128,7 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_info_details"
+                android:src="@drawable/baseline_info_24"
                 app:tint="@color/dark_gray"
                 android:contentDescription="About app"
                 android:layout_marginBottom="4dp" />
