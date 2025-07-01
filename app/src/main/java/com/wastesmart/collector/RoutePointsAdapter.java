@@ -45,29 +45,49 @@ public class RoutePointsAdapter extends RecyclerView.Adapter<RoutePointsAdapter.
         holder.tvRouteNumber.setText(String.valueOf(position + 1));
         holder.tvWasteType.setText(routePoint.getWasteType());
         holder.tvSize.setText(routePoint.getSize());
-        holder.tvLocation.setText(String.format(Locale.getDefault(), "%.6f, %.6f", 
+        holder.tvLocation.setText(String.format(Locale.getDefault(), "📍 %.6f, %.6f", 
                 routePoint.getLatitude(), routePoint.getLongitude()));
         
         // Format timestamp
         if (routePoint.getTimestamp() != null) {
-            holder.tvTime.setText(dateFormat.format(new Date(routePoint.getTimestamp())));
+            holder.tvTime.setText(String.format("🕒 %s", dateFormat.format(new Date(routePoint.getTimestamp()))));
         }
 
         // Set status
         String status = routePoint.getStatus() != null ? routePoint.getStatus() : "assigned";
         holder.tvStatus.setText(status.replace("_", " ").toUpperCase());
         
-        // Set status color
+        // Set status color and background
         int statusColor;
+        int statusBgResource;
         if ("in_progress".equals(status)) {
-            statusColor = context.getResources().getColor(R.color.warning, null);
+            statusColor = context.getResources().getColor(R.color.status_in_progress, null);
+            statusBgResource = R.drawable.status_in_progress_bg;
         } else if ("completed".equals(status)) {
-            statusColor = context.getResources().getColor(R.color.success, null);
+            statusColor = context.getResources().getColor(R.color.status_completed, null);
+            statusBgResource = R.drawable.status_completed_bg;
         } else {
-            statusColor = context.getResources().getColor(R.color.primary, null);
+            statusColor = context.getResources().getColor(R.color.status_assigned, null);
+            statusBgResource = R.drawable.status_assigned_bg;
         }
         holder.tvStatus.setTextColor(statusColor);
+        holder.tvStatus.setBackground(context.getDrawable(statusBgResource));
 
+        // Show/hide "Mark Complete" button based on status
+        if ("completed".equals(status)) {
+            holder.btnMarkComplete.setVisibility(View.GONE);
+        } else {
+            holder.btnMarkComplete.setVisibility(View.VISIBLE);
+            holder.btnMarkComplete.setOnClickListener(v -> {
+                // TODO: Implement marking task as complete
+                // For now, just update the UI to show completed
+                holder.tvStatus.setText("COMPLETED");
+                holder.tvStatus.setTextColor(context.getResources().getColor(R.color.status_completed, null));
+                holder.tvStatus.setBackground(context.getDrawable(R.drawable.status_completed_bg));
+                holder.btnMarkComplete.setVisibility(View.GONE);
+            });
+        }
+        
         // Setup navigate button
         holder.btnNavigate.setOnClickListener(v -> {
             // Open Google Maps for navigation
@@ -97,7 +117,7 @@ public class RoutePointsAdapter extends RecyclerView.Adapter<RoutePointsAdapter.
 
     static class RoutePointViewHolder extends RecyclerView.ViewHolder {
         TextView tvRouteNumber, tvWasteType, tvSize, tvLocation, tvTime, tvStatus;
-        Button btnNavigate;
+        Button btnNavigate, btnMarkComplete;
 
         public RoutePointViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -108,6 +128,7 @@ public class RoutePointsAdapter extends RecyclerView.Adapter<RoutePointsAdapter.
             tvTime = itemView.findViewById(R.id.tvTime);
             tvStatus = itemView.findViewById(R.id.tvStatus);
             btnNavigate = itemView.findViewById(R.id.btnNavigate);
+            btnMarkComplete = itemView.findViewById(R.id.btnMarkComplete);
         }
     }
 }

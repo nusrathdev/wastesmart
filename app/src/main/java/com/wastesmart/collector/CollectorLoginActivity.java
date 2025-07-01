@@ -107,17 +107,34 @@ public class CollectorLoginActivity extends AppCompatActivity {
             
             // Determine collector type and navigate accordingly
             String collectorType = COLLECTOR_EMAIL.equals(email) ? "Waste Collector" : "Supervisor";
+            String collectorName = COLLECTOR_EMAIL.equals(email) ? "John Collector" : "Sarah Supervisor";
             
             Toast.makeText(CollectorLoginActivity.this, 
-                "Welcome " + collectorType + "!", Toast.LENGTH_SHORT).show();
+                "Welcome " + collectorName + "!", Toast.LENGTH_SHORT).show();
             
-            // Navigate to collector dashboard
-            Intent intent = new Intent(CollectorLoginActivity.this, CollectorDashboardActivity.class);
-            intent.putExtra("collector_type", collectorType);
-            intent.putExtra("collector_email", email);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
+            // Sign in with Firebase Auth first to maintain session consistency
+            mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Navigate to collector dashboard
+                        Intent intent = new Intent(CollectorLoginActivity.this, CollectorDashboardActivity.class);
+                        intent.putExtra("collector_type", collectorType);
+                        intent.putExtra("collector_email", email);
+                        intent.putExtra("collector_name", collectorName);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        // If Firebase Auth fails, continue anyway with default login
+                        Intent intent = new Intent(CollectorLoginActivity.this, CollectorDashboardActivity.class);
+                        intent.putExtra("collector_type", collectorType);
+                        intent.putExtra("collector_email", email);
+                        intent.putExtra("collector_name", collectorName);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
         }, 1000);
     }
 

@@ -8,17 +8,20 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.wastesmart.MainActivity;
 import com.wastesmart.R;
 import com.wastesmart.databinding.ActivityCollectorDashboardBinding;
+import com.wastesmart.models.Collector;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-public class CollectorDashboardActivity extends AppCompatActivity {
+public class CollectorDashboardActivity extends BaseCollectorActivity {
 
     private ActivityCollectorDashboardBinding binding;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private Collector currentCollector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,41 +30,135 @@ public class CollectorDashboardActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
-        // Initialize Firebase Auth
+        // Initialize Firebase components
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         // Set up toolbar
         setSupportActionBar(binding.toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Collector Dashboard");
-        }
-
-        // Set up button click listeners
-        setupClickListeners();
+        
+        // Setup bottom navigation
+        setupBottomNavigation();
+        
+        // Load collector data
+        loadCollectorData();
+    }
+    
+    @Override
+    protected int getActiveNavItemIndex() {
+        return 2; // Home is at index 2
     }
 
-    private void setupClickListeners() {
-        // Today's Routes button
-        binding.cardTodaysRoutes.setOnClickListener(v -> {
-            Intent intent = new Intent(CollectorDashboardActivity.this, RouteMapActivity.class);
+    private void loadCollectorData() {
+        // Check if we have collector data from the intent (default credentials)
+        String collectorType = getIntent().getStringExtra("collector_type");
+        String collectorEmail = getIntent().getStringExtra("collector_email");
+        String collectorName = getIntent().getStringExtra("collector_name");
+        
+        if (collectorType != null && collectorEmail != null) {
+            // This is a default collector login
+            currentCollector = new Collector();
+            currentCollector.setId("default_collector");
+            currentCollector.setName(collectorName != null ? collectorName : collectorType);
+            currentCollector.setEmail(collectorEmail);
+            
+            // For supervisor, set different values
+            if (collectorEmail.equals("supervisor@wastesmart.com")) {
+                currentCollector.setEmployeeId("SUP-001");
+                currentCollector.setAssignedArea("All Areas");
+            } else {
+                currentCollector.setEmployeeId("COL-001");
+                currentCollector.setAssignedArea("Downtown");
+            }
+            
+            updateUI();
+            return;
+        }
+        
+        // If not using default credentials, check Firebase Auth
+        if (mAuth.getCurrentUser() == null) {
+            // Not logged in, go back to login
+            Intent intent = new Intent(CollectorDashboardActivity.this, CollectorLoginActivity.class);
             startActivity(intent);
-        });
+            finish();
+            return;
+        }
 
-        // Collection Tasks button
-        binding.cardCollectionTasks.setOnClickListener(v -> {
-            Intent intent = new Intent(CollectorDashboardActivity.this, CollectionTasksActivity.class);
+        String collectorId = mAuth.getCurrentUser().getUid();
+        db.collection("collectors").document(collectorId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        currentCollector = documentSnapshot.toObject(Collector.class);
+                        updateUI();
+                    } else {
+                        // Create a fallback collector if document doesn't exist
+                        currentCollector = new Collector();
+                        currentCollector.setId(collectorId);
+                        currentCollector.setName("Waste Collector");
+                        currentCollector.setEmail(mAuth.getCurrentUser().getEmail());
+                        currentCollector.setEmployeeId("NEW-001");
+                        currentCollector.setAssignedArea("Not Assigned");
+                        updateUI();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(CollectorDashboardActivity.this, "Error loading collector data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void updateUI() {
+        if (currentCollector != null && binding != null) {
+            try {
+                // Set collector name
+                if (binding.tvCollectorName != null) {
+                    binding.tvCollectorName.setText(currentCollector.getName());
+                }
+                
+                // Set dynamic welcome message
+                String[] welcomeMessages = {
+                    "Ready to collect and clean up today?",
+                    "Your work keeps our city clean!",
+                    "Today's routes are ready for you!",
+                    "Thank you for your dedication!",
+                    "Making our environment better!"
+                };
+                int randomIndex = (int) (Math.random() * welcomeMessages.length);
+                if (binding.tvWelcomeMessage != null) {
+                    binding.tvWelcomeMessage.setText(welcomeMessages[randomIndex]);
+                }
+                
+                // Set the task count
+                // TODO: Load actual collector tasks from database
+                // For now, using placeholder values
+                if (binding.tvTasksCount != null) {
+                    binding.tvTasksCount.setText("8");
+                }
+                
+                // Setup route view button
+                setupViewRoutesButton();
+            } catch (Exception e) {
+                Toast.makeText(this, "Error updating UI: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        } else if (currentCollector == null) {
+            Toast.makeText(this, "No collector data available. Please log in again.", Toast.LENGTH_LONG).show();
+            // Redirect to login
+            Intent intent = new Intent(CollectorDashboardActivity.this, CollectorLoginActivity.class);
             startActivity(intent);
-        });
-
-        // Route Optimization button
-        binding.cardRouteOptimization.setOnClickListener(v -> {
-            Toast.makeText(this, "Route optimization feature coming soon", Toast.LENGTH_SHORT).show();
-        });
-
-        // Reports button
-        binding.cardReports.setOnClickListener(v -> {
-            Toast.makeText(this, "Reports feature coming soon", Toast.LENGTH_SHORT).show();
-        });
+            finish();
+        }
+    }
+    
+    // Setup route view button
+    private void setupViewRoutesButton() {
+        try {
+            if (binding != null && binding.btnViewRoutes != null) {
+                binding.btnViewRoutes.setOnClickListener(v -> {
+                    navigateToRoutes();
+                });
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error setting up route button: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

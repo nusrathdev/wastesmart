@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -20,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CollectionTasksActivity extends AppCompatActivity {
+public class CollectionTasksActivity extends BaseCollectorActivity {
 
     private static final String TAG = "CollectionTasks";
     private ActivityCollectionTasksBinding binding;
@@ -40,9 +39,11 @@ public class CollectionTasksActivity extends AppCompatActivity {
         // Setup toolbar
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Collection Tasks");
         }
+        
+        // Setup bottom navigation
+        setupBottomNavigation();
 
         // Setup RecyclerView
         tasksList = new ArrayList<>();
@@ -134,5 +135,10 @@ public class CollectionTasksActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    @Override
+    protected int getActiveNavItemIndex() {
+        return 0; // Tasks tab is index 0
     }
 }

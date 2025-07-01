@@ -32,4 +32,9 @@
     <color name="status_in_progress">#FF9800</color> <!-- Orange -->
     <color name="status_completed">#4CAF50</color> <!-- Green -->
     <color name="status_pending">#9E9E9E</color> <!-- Gray -->
+    
+    <!-- Leaderboard Medal Colors -->
+    <color name="gold">#FFD700</color> <!-- Gold medal -->
+    <color name="silver">#C0C0C0</color> <!-- Silver medal -->
+    <color name="bronze">#CD7F32</color> <!-- Bronze medal -->
 </resources>
