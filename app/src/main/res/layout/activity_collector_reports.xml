@@ -25,25 +25,45 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Main Content -->
+    <!-- Main Content Area -->
     <LinearLayout
-        android:id="@+id/mainContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/appBarLayout"
         android:layout_above="@+id/bottomNavigation"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- Filter and Sort Options -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Waste Collection Reports"
+            android:textColor="@color/primary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Filter Options -->
         <LinearLayout
             android:id="@+id/filtersLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:padding="12dp"
-            android:orientation="horizontal">
+            android:background="@android:color/transparent"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="8dp"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
 
-            <!-- Filter -->
+            <!-- Filter Spinner with Label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Filter: "
+                android:textColor="@color/dark_gray"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_gravity="center_vertical" />
+
             <Spinner
                 android:id="@+id/spinnerFilter"
                 android:layout_width="0dp"
@@ -62,16 +82,16 @@
                 android:id="@+id/rvReports"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="12dp"
                 android:clipToPadding="false"
-                tools:listitem="@layout/item_report" />
+                android:paddingBottom="8dp"
+                tools:listitem="@layout/item_collector_report" />
 
             <TextView
                 android:id="@+id/tvNoReports"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="No reports found"
+                android:text="No waste reports found"
                 android:textSize="18sp"
                 android:textColor="@color/dark_gray"
                 android:visibility="gone" />

@@ -1,6 +1,8 @@
 package com.wastesmart.collector;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,21 +14,24 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.wastesmart.R;
-import com.wastesmart.adapters.ReportAdapter;
+import com.wastesmart.adapters.CollectorReportAdapter;
 import com.wastesmart.databinding.ActivityCollectorReportsBinding;
-import com.wastesmart.models.Report;
+import com.wastesmart.models.WasteReport;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CollectorReportsActivity extends BaseCollectorActivity {
     
+    private static final String TAG = "CollectorReportsActivity";
     private ActivityCollectorReportsBinding binding;
-    private ReportAdapter reportAdapter;
-    private List<Report> reportsList;
+    private CollectorReportAdapter reportAdapter;
+    private List<WasteReport> reportsList;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     
@@ -42,16 +47,26 @@ public class CollectorReportsActivity extends BaseCollectorActivity {
         
         // Set up toolbar
         setSupportActionBar(binding.toolbar);
-        getSupportActionBar().setTitle("Collection Reports");
+        getSupportActionBar().setTitle("Waste Reports");
         
         // Setup bottom navigation
         setupBottomNavigation();
         
         // Initialize reports list and adapter
         reportsList = new ArrayList<>();
-        reportAdapter = new ReportAdapter(this, reportsList, (report, position) -> {
-            // Handle report click
-            Toast.makeText(this, "Report details coming soon", Toast.LENGTH_SHORT).show();
+        reportAdapter = new CollectorReportAdapter(this, reportsList, new CollectorReportAdapter.OnReportClickListener() {
+            @Override
+            public void onReportClick(WasteReport report, int position) {
+                // Handle report click - show details
+                Toast.makeText(CollectorReportsActivity.this, "Viewing report details", Toast.LENGTH_SHORT).show();
+                // You could navigate to a detail view here
+            }
+            
+            @Override
+            public void onUpdateStatusClick(WasteReport report, int position) {
+                // Handle update status click
+                showUpdateStatusDialog(report, position);
+            }
         });
         
         // Set up RecyclerView
@@ -66,7 +81,7 @@ public class CollectorReportsActivity extends BaseCollectorActivity {
     }
     
     private void setupFilterSpinner() {
-        String[] filterOptions = {"All Reports", "Completed", "In Progress", "Pending"};
+        String[] filterOptions = {"All Reports", "Completed", "In Progress", "Pending", "Assigned"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, R.layout.spinner_item, filterOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -89,28 +104,20 @@ public class CollectorReportsActivity extends BaseCollectorActivity {
     private void filterReports(String filter) {
         binding.progressBar.setVisibility(View.VISIBLE);
         
-        Query query;
-        
         if (mAuth.getCurrentUser() == null) {
             binding.progressBar.setVisibility(View.GONE);
             return;
         }
         
-        String collectorId = mAuth.getCurrentUser().getUid();
-        
-        if (filter.equals("All Reports")) {
-            query = db.collection("reports")
-                    .whereEqualTo("assignedCollectorId", collectorId)
-                    .orderBy("reportDate", Query.Direction.DESCENDING);
-        } else {
-            String status = filter.toUpperCase();
-            query = db.collection("reports")
-                    .whereEqualTo("assignedCollectorId", collectorId)
-                    .whereEqualTo("status", status)
-                    .orderBy("reportDate", Query.Direction.DESCENDING);
+        try {
+            // Load all waste reports and filter locally (simpler and avoids index issues)
+            loadAllReportsAndFilterLocally(filter);
+        } catch (Exception e) {
+            Log.e(TAG, "Error filtering reports: " + e.getMessage());
+            Toast.makeText(this, "Error filtering reports", Toast.LENGTH_SHORT).show();
+            binding.progressBar.setVisibility(View.GONE);
+            showNoReportsMessage(true);
         }
-        
-        fetchReports(query);
     }
     
     private void loadReports() {
@@ -121,70 +128,94 @@ public class CollectorReportsActivity extends BaseCollectorActivity {
             return;
         }
         
-        String collectorId = mAuth.getCurrentUser().getUid();
-        
-        Query query = db.collection("reports")
-                .whereEqualTo("assignedCollectorId", collectorId)
-                .orderBy("reportDate", Query.Direction.DESCENDING);
-        
-        fetchReports(query);
+        try {
+            // Use simple approach that loads all waste reports and sorts/filters locally
+            loadAllReportsAndFilterLocally("All Reports");
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading reports: " + e.getMessage());
+            Toast.makeText(this, "Error loading reports", Toast.LENGTH_SHORT).show();
+            binding.progressBar.setVisibility(View.GONE);
+            showNoReportsMessage(true);
+        }
     }
     
-    private void fetchReports(Query query) {
-        query.get().addOnSuccessListener(queryDocumentSnapshots -> {
-            reportsList.clear();
-            
-            if (!queryDocumentSnapshots.isEmpty()) {
-                for (int i = 0; i < queryDocumentSnapshots.size(); i++) {
-                    Report report = queryDocumentSnapshots.getDocuments().get(i).toObject(Report.class);
-                    report.setId(queryDocumentSnapshots.getDocuments().get(i).getId());
-                    reportsList.add(report);
-                }
+    /**
+     * New method that loads all waste reports instead of collector reports
+     */
+    private void loadAllReportsAndFilterLocally(String filterOption) {
+        reportsList.clear();
+        
+        // Simple query that loads all waste reports (no complex indexes needed)
+        db.collection("waste_reports")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                Log.d(TAG, "Retrieved " + queryDocumentSnapshots.size() + " waste reports");
                 
-                reportAdapter.notifyDataSetChanged();
-                showNoReportsMessage(false);
-            } else {
-                showNoReportsMessage(true);
-            }
-            
-            binding.progressBar.setVisibility(View.GONE);
-        }).addOnFailureListener(e -> {
-            binding.progressBar.setVisibility(View.GONE);
-            
-            // Check if error is about missing index
-            String errorMessage = e.getMessage();
-            if (errorMessage != null && errorMessage.contains("FAILED_PRECONDITION") && errorMessage.contains("index")) {
-                // Extract the index creation URL if available
-                String indexMessage = "This query requires a Firestore index. Please create it in the Firebase Console.";
-                
-                if (errorMessage.contains("https://console.firebase.google.com")) {
-                    int startIndex = errorMessage.indexOf("https://");
-                    if (startIndex > 0) {
-                        String indexUrl = errorMessage.substring(startIndex).trim();
-                        // For development purposes - show this message 
-                        Toast.makeText(CollectorReportsActivity.this, 
-                            "Index required. View logs for details.", Toast.LENGTH_LONG).show();
-                        
-                        // Log the URL for developers
-                        android.util.Log.e("Firestore", "Create index at: " + indexUrl);
-                        
-                        // Fallback: Load all reports and filter in-memory
-                        loadAllReportsAndFilterLocally();
-                        return;
+                if (!queryDocumentSnapshots.isEmpty()) {
+                    List<WasteReport> allReports = new ArrayList<>();
+                    
+                    // Process each waste report
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        try {
+                            WasteReport report = document.toObject(WasteReport.class);
+                            report.setId(document.getId());
+                            allReports.add(report);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing waste report: " + document.getId(), e);
+                        }
                     }
+                    
+                    // Sort by timestamp (descending)
+                    allReports.sort((r1, r2) -> {
+                        Long t1 = r1.getTimestamp();
+                        Long t2 = r2.getTimestamp();
+                        if (t1 == null && t2 == null) return 0;
+                        if (t1 == null) return 1;
+                        if (t2 == null) return -1;
+                        return t2.compareTo(t1); // Descending order (newest first)
+                    });
+                    
+                    // Filter based on selected spinner option
+                    if (filterOption != null && !filterOption.equals("All Reports")) {
+                        String status = filterOption.toUpperCase();
+                        // Handle special case for "IN PROGRESS"
+                        if (status.equals("IN PROGRESS")) {
+                            status = "IN_PROGRESS";
+                        }
+                        
+                        for (WasteReport report : allReports) {
+                            if (status.equalsIgnoreCase(report.getStatus())) {
+                                reportsList.add(report);
+                            }
+                        }
+                    } else {
+                        // No filter - add all
+                        reportsList.addAll(allReports);
+                    }
+                    
+                    reportAdapter.notifyDataSetChanged();
+                    showNoReportsMessage(reportsList.isEmpty());
+                    
+                    Log.d(TAG, "Displaying " + reportsList.size() + " waste reports after filtering");
+                } else {
+                    showNoReportsMessage(true);
+                    Log.d(TAG, "No waste reports found");
                 }
-                Toast.makeText(CollectorReportsActivity.this, indexMessage, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(CollectorReportsActivity.this, "Error loading reports: " + errorMessage, Toast.LENGTH_SHORT).show();
-            }
-            
-            // Attempt fallback loading
-            loadAllReportsAndFilterLocally();
-        });
+                
+                binding.progressBar.setVisibility(View.GONE);
+            })
+            .addOnFailureListener(e -> {
+                binding.progressBar.setVisibility(View.GONE);
+                Log.e(TAG, "Error loading waste reports: " + e.getMessage(), e);
+                Toast.makeText(CollectorReportsActivity.this, 
+                    "Error loading reports: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                showNoReportsMessage(true);
+            });
     }
     
     private void showNoReportsMessage(boolean show) {
         if (show) {
+            binding.tvNoReports.setText("No waste reports found");
             binding.tvNoReports.setVisibility(View.VISIBLE);
             binding.rvReports.setVisibility(View.GONE);
         } else {
@@ -216,64 +247,56 @@ public class CollectorReportsActivity extends BaseCollectorActivity {
         return 3; // Reports tab index
     }
     
+
+    
     /**
-     * Fallback method when Firestore indexes are not available
-     * Loads all reports for the collector and filters them locally
+     * Shows a dialog to update the report status
      */
-    private void loadAllReportsAndFilterLocally() {
-        if (mAuth.getCurrentUser() == null) {
-            binding.progressBar.setVisibility(View.GONE);
-            return;
-        }
+    private void showUpdateStatusDialog(WasteReport report, int position) {
+        if (report == null) return;
         
-        String collectorId = mAuth.getCurrentUser().getUid();
+        String[] statusOptions = {"IN_PROGRESS", "COMPLETED", "ASSIGNED"};
         
-        // Simple query that doesn't require a complex index
-        db.collection("reports")
-            .whereEqualTo("assignedCollectorId", collectorId)
-            .get()
-            .addOnSuccessListener(queryDocumentSnapshots -> {
-                reportsList.clear();
-                
-                if (!queryDocumentSnapshots.isEmpty()) {
-                    List<Report> allReports = new ArrayList<>();
-                    
-                    for (int i = 0; i < queryDocumentSnapshots.size(); i++) {
-                        Report report = queryDocumentSnapshots.getDocuments().get(i).toObject(Report.class);
-                        report.setId(queryDocumentSnapshots.getDocuments().get(i).getId());
-                        allReports.add(report);
-                    }
-                    
-                    // Sort by reportDate (descending)
-                    allReports.sort((r1, r2) -> Long.compare(r2.getReportDate(), r1.getReportDate()));
-                    
-                    // Filter based on selected spinner option
-                    String filterOption = (String) binding.spinnerFilter.getSelectedItem();
-                    if (filterOption != null && !filterOption.equals("All Reports")) {
-                        String status = filterOption.toUpperCase();
-                        for (Report report : allReports) {
-                            if (status.equals(report.getStatus())) {
-                                reportsList.add(report);
-                            }
-                        }
-                    } else {
-                        // No filter - add all
-                        reportsList.addAll(allReports);
-                    }
-                    
-                    reportAdapter.notifyDataSetChanged();
-                    showNoReportsMessage(reportsList.isEmpty());
-                } else {
-                    showNoReportsMessage(true);
-                }
-                
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Update Report Status")
+            .setSingleChoiceItems(statusOptions, -1, (dialog, which) -> {
+                String newStatus = statusOptions[which];
+                updateReportStatus(report, newStatus, position);
+                dialog.dismiss();
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+    
+    /**
+     * Updates the waste report status in Firestore
+     */
+    private void updateReportStatus(WasteReport report, String newStatus, int position) {
+        if (report == null || report.getId() == null) return;
+        
+        binding.progressBar.setVisibility(View.VISIBLE);
+        
+        db.collection("waste_reports")
+            .document(report.getId())
+            .update("status", newStatus)
+            .addOnSuccessListener(aVoid -> {
                 binding.progressBar.setVisibility(View.GONE);
+                Toast.makeText(this, "Status updated successfully", Toast.LENGTH_SHORT).show();
+                
+                // Update local list and UI
+                report.setStatus(newStatus);
+                reportAdapter.notifyItemChanged(position);
             })
             .addOnFailureListener(e -> {
                 binding.progressBar.setVisibility(View.GONE);
-                Toast.makeText(CollectorReportsActivity.this, 
-                    "Error loading reports: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                showNoReportsMessage(true);
+                Toast.makeText(this, "Failed to update status: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh reports when returning to this activity
+        loadReports();
     }
 }
