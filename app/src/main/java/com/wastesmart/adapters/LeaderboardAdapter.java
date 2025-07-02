@@ -42,8 +42,8 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         // Set name
         holder.tvName.setText(item.getName());
 
-        // Set score
-        holder.tvScore.setText(String.valueOf(item.getScore()));
+        // Set score - for users, this is the number of reports
+        holder.tvScore.setText(String.valueOf(item.getScore()) + " reports");
 
         // Set zone/area
         holder.tvZone.setText(item.getZone());

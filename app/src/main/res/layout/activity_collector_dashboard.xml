@@ -118,7 +118,7 @@
                     android:orientation="horizontal"
                     android:gravity="center">
 
-                    <!-- Routes (Left) -->
+                    <!-- Tasks (Left) -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -127,12 +127,12 @@
                         android:gravity="center">
 
                         <ImageView
-                            android:id="@+id/btnViewRoutes"
+                            android:id="@+id/btnViewTasks"
                             android:layout_width="35dp"
                             android:layout_height="35dp"
                             android:layout_marginTop="10dp"
-                            android:src="@drawable/ic_location_on"
-                            android:contentDescription="View Routes"
+                            android:src="@drawable/baseline_assignment_24"
+                            android:contentDescription="View Tasks"
                             android:layout_gravity="center"
                             android:clickable="true"
                             android:focusable="true"
@@ -141,7 +141,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Routes"
+                            android:text="Tasks"
                             android:textColor="@android:color/white"
                             android:textSize="14sp"
                             android:fontFamily="sans-serif" />
@@ -154,7 +154,7 @@
                         android:background="@android:color/white"
                         android:alpha="0.3" />
 
-                    <!-- Tasks (Right) -->
+                    <!-- Pending Tasks (Right) -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -175,7 +175,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Tasks"
+                            android:text="Pending"
                             android:textColor="@android:color/white"
                             android:textSize="14sp"
                             android:fontFamily="sans-serif" />
@@ -188,7 +188,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Ready for today's collection route!"
+                    android:text="Ready for today's collection tasks!"
                     android:textColor="@android:color/white"
                     android:textSize="14sp"
                     android:fontFamily="sans-serif"

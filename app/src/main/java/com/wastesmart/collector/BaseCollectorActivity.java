@@ -31,17 +31,13 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
     protected void setupBottomNavigation() {
         // Find navigation views
         LinearLayout navTasks = findViewById(R.id.navTasks);
-        LinearLayout navReports = findViewById(R.id.navReports);
         LinearLayout navHome = findViewById(R.id.navHome);
-        LinearLayout navLeaderboard = findViewById(R.id.navLeaderboard);
-        LinearLayout navProfile = findViewById(R.id.navProfile);
+        LinearLayout navReports = findViewById(R.id.navReports);
         
         // Reset all to inactive
         resetNavigationItem(navTasks);
-        resetNavigationItem(navReports);
         resetNavigationItem(navHome);
-        resetNavigationItem(navLeaderboard);
-        resetNavigationItem(navProfile);
+        resetNavigationItem(navReports);
         
         // Set active based on index
         int activeIndex = getActiveNavItemIndex();
@@ -50,16 +46,10 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
                 setActiveNavigationItem(navTasks);
                 break;
             case 1:
-                setActiveNavigationItem(navReports);
-                break;
-            case 2:
                 setActiveNavigationItem(navHome);
                 break;
-            case 3:
-                setActiveNavigationItem(navLeaderboard);
-                break;
-            case 4:
-                setActiveNavigationItem(navProfile);
+            case 2:
+                setActiveNavigationItem(navReports);
                 break;
         }
 
@@ -104,31 +94,24 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
     private void setupNavigationClickListeners() {
         // Find navigation views
         LinearLayout navTasks = findViewById(R.id.navTasks);
-        LinearLayout navReports = findViewById(R.id.navReports);
         LinearLayout navHome = findViewById(R.id.navHome);
-        LinearLayout navLeaderboard = findViewById(R.id.navLeaderboard);
-        LinearLayout navProfile = findViewById(R.id.navProfile);
+        LinearLayout navReports = findViewById(R.id.navReports);
 
         // Set click listeners
         if (navTasks != null) {
             navTasks.setOnClickListener(v -> navigateToTasks());
         }
-        if (navReports != null) {
-            navReports.setOnClickListener(v -> navigateToReports());
-        }
         if (navHome != null) {
             navHome.setOnClickListener(v -> navigateToHome());
         }
-        if (navLeaderboard != null) {
-            navLeaderboard.setOnClickListener(v -> navigateToRanking());
-        }
-        if (navProfile != null) {
-            navProfile.setOnClickListener(v -> navigateToProfile());
+        if (navReports != null) {
+            navReports.setOnClickListener(v -> navigateToReports());
         }
     }
 
     /**
-     * Override this method in child activities to specify which nav item index should be active (0-4)
+     * Override this method in child activities to specify which nav item index should be active (0-2)
+     * 0: Tasks, 1: Home, 2: Reports
      */
     protected abstract int getActiveNavItemIndex();
 
@@ -142,17 +125,8 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
         }
     }
 
-    protected void navigateToReports() {
-        if (getActiveNavItemIndex() != 1) {
-            Intent intent = new Intent(this, CollectorReportsActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
-            overridePendingTransition(0, 0);
-        }
-    }
-
     protected void navigateToHome() {
-        if (getActiveNavItemIndex() != 2) {
+        if (getActiveNavItemIndex() != 1) {
             Intent intent = new Intent(this, CollectorDashboardActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
@@ -160,18 +134,9 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
         }
     }
 
-    protected void navigateToRanking() {
-        if (getActiveNavItemIndex() != 3) {
-            Intent intent = new Intent(this, CollectorLeaderboardActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
-            overridePendingTransition(0, 0);
-        }
-    }
-
-    protected void navigateToProfile() {
-        if (getActiveNavItemIndex() != 4) {
-            Intent intent = new Intent(this, CollectorProfileActivity.class);
+    protected void navigateToReports() {
+        if (getActiveNavItemIndex() != 2) {
+            Intent intent = new Intent(this, CollectorReportsActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
             overridePendingTransition(0, 0);

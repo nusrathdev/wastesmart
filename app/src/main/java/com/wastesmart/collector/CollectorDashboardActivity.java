@@ -46,7 +46,7 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
     
     @Override
     protected int getActiveNavItemIndex() {
-        return 2; // Home tab index (0-based)
+        return 1; // Home tab index (0-based)
     }
 
     private void loadCollectorData() {
@@ -148,18 +148,17 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
         }
     }
     
-    // Setup route view button
+    // Setup task view button
     private void setupViewRoutesButton() {
         try {
-            if (binding != null && binding.btnViewRoutes != null) {
-                binding.btnViewRoutes.setOnClickListener(v -> {
-                    // Launch RouteMapActivity directly instead of using navigateToRoutes
-                    Intent intent = new Intent(this, RouteMapActivity.class);
-                    startActivity(intent);
+            if (binding != null && binding.btnViewTasks != null) {
+                binding.btnViewTasks.setOnClickListener(v -> {
+                    // Navigate to Tasks Activity using the navigation method
+                    navigateToTasks();
                 });
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Error setting up route button: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error setting up task button: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

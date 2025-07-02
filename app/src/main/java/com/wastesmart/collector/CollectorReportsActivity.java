@@ -244,7 +244,7 @@ public class CollectorReportsActivity extends BaseCollectorActivity {
     
     @Override
     protected int getActiveNavItemIndex() {
-        return 1; // Reports tab index (0-based)
+        return 2; // Reports tab index (0-based)
     }
     
 

@@ -72,10 +72,6 @@
             android:exported="false" />
         <activity android:name=".collector.CollectorReportsActivity"
             android:exported="false" />
-        <activity android:name=".collector.CollectorLeaderboardActivity"
-            android:exported="false" />
-        <activity android:name=".collector.CollectorProfileActivity"
-            android:exported="false" />
 
         <!-- Admin Features -->
         <activity android:name=".admin.AdminLoginActivity"
