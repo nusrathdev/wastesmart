@@ -27,22 +27,14 @@
 
     <!-- Main Content Area -->
     <LinearLayout
+        android:id="@+id/mainContentLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/appBarLayout"
         android:layout_above="@+id/bottomNavigation"
         android:orientation="vertical"
         android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Waste Collection Reports"
-            android:textColor="@color/primary"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp" />
-
+        
         <!-- Filter Options -->
         <LinearLayout
             android:id="@+id/filtersLayout"

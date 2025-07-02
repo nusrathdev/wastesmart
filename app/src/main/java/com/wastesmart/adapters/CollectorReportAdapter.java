@@ -108,26 +108,33 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
         if (status != null) {
             holder.tvStatus.setText(formatStatus(status));
             
+            int statusBackground;
             int statusColor;
             
             switch (status.toUpperCase()) {
                 case "COMPLETED":
-                    statusColor = ContextCompat.getColor(context, R.color.success);
+                    statusBackground = R.drawable.status_completed_circle_bg;
+                    statusColor = context.getResources().getColor(R.color.status_completed, null);
                     break;
                 case "IN_PROGRESS":
-                    statusColor = ContextCompat.getColor(context, R.color.status_in_progress);
+                    statusBackground = R.drawable.status_in_progress_circle_bg;
+                    statusColor = context.getResources().getColor(R.color.status_in_progress, null);
                     break;
                 case "PENDING":
-                    statusColor = ContextCompat.getColor(context, R.color.status_pending);
+                    statusBackground = R.drawable.status_pending_circle_bg;
+                    statusColor = context.getResources().getColor(R.color.status_pending, null);
                     break;
                 case "ASSIGNED":
-                    statusColor = ContextCompat.getColor(context, R.color.status_assigned);
+                    statusBackground = R.drawable.status_assigned_circle_bg;
+                    statusColor = context.getResources().getColor(R.color.status_assigned, null);
                     break;
                 default:
-                    statusColor = ContextCompat.getColor(context, R.color.primary);
+                    statusBackground = R.drawable.status_circle_bg;
+                    statusColor = context.getResources().getColor(R.color.primary, null);
                     break;
             }
             
+            holder.tvStatus.setBackgroundResource(statusBackground);
             holder.tvStatus.setTextColor(statusColor);
         }
         
