@@ -49,9 +49,9 @@
 
         </LinearLayout>
 
-        <!-- Routes -->
+        <!-- Reports -->
         <LinearLayout
-            android:id="@+id/navRoutes"
+            android:id="@+id/navReports"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -65,15 +65,15 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_location_on"
+                android:src="@drawable/ic_reports"
                 app:tint="@color/dark_gray"
-                android:contentDescription="View routes"
+                android:contentDescription="Collection reports"
                 android:layout_marginBottom="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Routes"
+                android:text="Reports"
                 android:textColor="@color/dark_gray"
                 android:textSize="12sp"
                 android:fontFamily="sans-serif-medium" />
@@ -112,38 +112,7 @@
 
         </LinearLayout>
 
-        <!-- Reports -->
-        <LinearLayout
-            android:id="@+id/navReports"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?android:attr/selectableItemBackgroundBorderless">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_reports"
-                app:tint="@color/dark_gray"
-                android:contentDescription="Collection reports"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Reports"
-                android:textColor="@color/dark_gray"
-                android:textSize="12sp"
-                android:fontFamily="sans-serif-medium" />
-
-        </LinearLayout>
-
-        <!-- Leaderboard -->
+        <!-- Ranking (formerly Leaderboard) -->
         <LinearLayout
             android:id="@+id/navLeaderboard"
             android:layout_width="0dp"
@@ -161,18 +130,49 @@
                 android:layout_height="24dp"
                 android:src="@drawable/ic_assignment"
                 app:tint="@color/dark_gray"
-                android:contentDescription="Collector leaderboard"
+                android:contentDescription="Collector ranking"
                 android:layout_marginBottom="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Leaders"
+                android:text="Ranking"
                 android:textColor="@color/dark_gray"
                 android:textSize="12sp"
                 android:fontFamily="sans-serif-medium"
                 android:maxLines="1"
                 android:ellipsize="end" />
+
+        </LinearLayout>
+
+        <!-- Profile (replacing Routes) -->
+        <LinearLayout
+            android:id="@+id/navProfile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/baseline_person24"
+                app:tint="@color/dark_gray"
+                android:contentDescription="View profile"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Profile"
+                android:textColor="@color/dark_gray"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium" />
 
         </LinearLayout>
 

@@ -46,7 +46,7 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
     
     @Override
     protected int getActiveNavItemIndex() {
-        return 2; // Home is at index 2
+        return 2; // Home tab index (0-based)
     }
 
     private void loadCollectorData() {
@@ -153,7 +153,9 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
         try {
             if (binding != null && binding.btnViewRoutes != null) {
                 binding.btnViewRoutes.setOnClickListener(v -> {
-                    navigateToRoutes();
+                    // Launch RouteMapActivity directly instead of using navigateToRoutes
+                    Intent intent = new Intent(this, RouteMapActivity.class);
+                    startActivity(intent);
                 });
             }
         } catch (Exception e) {

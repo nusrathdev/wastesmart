@@ -139,6 +139,6 @@ public class CollectionTasksActivity extends BaseCollectorActivity {
     
     @Override
     protected int getActiveNavItemIndex() {
-        return 0; // Tasks tab is index 0
+        return 0; // Tasks tab index (0-based)
     }
 }

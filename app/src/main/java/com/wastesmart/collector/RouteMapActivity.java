@@ -123,6 +123,6 @@ public class RouteMapActivity extends BaseCollectorActivity {
     
     @Override
     protected int getActiveNavItemIndex() {
-        return 1; // Routes tab is index 1
+        return -1; // Not in navigation anymore
     }
 }

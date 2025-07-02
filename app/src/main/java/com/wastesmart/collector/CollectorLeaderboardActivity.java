@@ -36,7 +36,7 @@ public class CollectorLeaderboardActivity extends BaseCollectorActivity {
 
         // Set up toolbar
         setSupportActionBar(binding.toolbar);
-        getSupportActionBar().setTitle("Collectors Leaderboard");
+        getSupportActionBar().setTitle("Collector Ranking");
 
         // Setup bottom navigation
         setupBottomNavigation();
@@ -123,6 +123,6 @@ public class CollectorLeaderboardActivity extends BaseCollectorActivity {
 
     @Override
     protected int getActiveNavItemIndex() {
-        return 4; // Leaderboard tab index
+        return 3; // Ranking tab index (0-based)
     }
 }
