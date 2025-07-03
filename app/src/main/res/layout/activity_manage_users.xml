@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/light_gray"
-    tools:context=".admin.ManageReportsActivity">
+    tools:context=".admin.ManageUsersActivity">
 
     <!-- Top Bar -->
     <com.google.android.material.appbar.AppBarLayout
@@ -21,7 +21,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/primary"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:title="Waste Reports" />
+            app:title="Manage Users" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -34,56 +34,61 @@
         android:layout_above="@+id/bottomNavigation"
         android:orientation="vertical"
         android:padding="16dp">
-        
-        <!-- Filter Options -->
-        <LinearLayout
-            android:id="@+id/filtersLayout"
+
+        <!-- Search Bar -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:paddingHorizontal="4dp"
-            android:paddingVertical="8dp"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            android:layout_marginBottom="16dp">
 
-            <!-- Filter Spinner with Label -->
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Filter: "
-                android:textColor="@color/dark_gray"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:layout_gravity="center_vertical" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp">
 
-            <Spinner
-                android:id="@+id/spinnerFilter"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent" />
+                <EditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Search users..."
+                    android:background="@null"
+                    android:padding="8dp"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch" />
 
-        </LinearLayout>
+                <ImageView
+                    android:id="@+id/ivSearch"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_menu_search"
+                    android:tint="@color/primary"
+                    android:contentDescription="Search" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-        <!-- Reports List -->
+        <!-- Users List -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvReports"
+                android:id="@+id/recyclerViewUsers"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingBottom="8dp"
-                tools:listitem="@layout/item_admin_report" />
+                android:paddingBottom="8dp" />
 
             <TextView
-                android:id="@+id/tvNoReports"
+                android:id="@+id/tvNoUsers"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="No waste reports found"
+                android:text="No users found"
                 android:textSize="18sp"
                 android:textColor="@color/dark_gray"
                 android:visibility="gone" />
@@ -94,9 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:visibility="gone" />
-
         </RelativeLayout>
-
     </LinearLayout>
 
     <!-- Include Bottom Navigation -->

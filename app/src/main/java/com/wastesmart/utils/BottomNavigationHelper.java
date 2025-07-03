@@ -53,6 +53,24 @@ public class BottomNavigationHelper {
 
         setupBottomNavigation(activity, items, activeItemIndex);
     }
+    
+    /**
+     * Set up the bottom navigation for the admin role
+     * @param activity The current activity
+     * @param activeItemIndex The index of the currently active item (0-4)
+     */
+    public static void setupAdminBottomNavigation(Activity activity, int activeItemIndex) {
+        // Define navigation items for admin
+        NavigationItem[] items = {
+                new NavigationItem(R.drawable.baseline_assignment_24, "Reports", null),
+                new NavigationItem(R.drawable.baseline_person_24, "Collector", null),
+                new NavigationItem(R.drawable.baseline_home24, "Home", null),
+                new NavigationItem(R.drawable.ic_reports, "Analytics", null),
+                new NavigationItem(R.drawable.baseline_person24, "Users", null)
+        };
+
+        setupBottomNavigation(activity, items, activeItemIndex);
+    }
 
     /**
      * Configure the shared bottom navigation with the provided items

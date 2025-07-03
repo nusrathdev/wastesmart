@@ -80,7 +80,9 @@
             android:exported="false" />
         <activity android:name=".admin.ManageReportsActivity"
             android:exported="false" />
-        <activity android:name=".admin.ManageCollectorsActivity"
+        <activity android:name=".admin.ManageCollectorActivity"
+            android:exported="false" />
+        <activity android:name=".admin.ManageUsersActivity"
             android:exported="false" />
         <activity android:name=".admin.AnalyticsActivity"
             android:exported="false" />

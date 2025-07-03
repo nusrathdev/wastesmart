@@ -6,26 +6,44 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.wastesmart.MainActivity;
 import com.wastesmart.R;
+import com.wastesmart.models.WasteReport;
 
-public class AdminDashboardActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class AdminDashboardActivity extends BaseAdminActivity {
 
     private static final String TAG = "AdminDashboard";
+    private static final int MAX_REPORTS_TO_SHOW = 5;
+    
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private TextView tvWelcomeAdmin;
-    private Button btnManageWasteReports, btnManageCollectors, btnViewAnalytics, btnSystemSettings, btnLogout;
+    private TextView tvPendingCount;
+    private TextView tvTodayCount;
+    private TextView tvNoReports;
+    private TextView tvViewAll;
+    private ProgressBar progressBar;
+    private RecyclerView recyclerViewRecentReports;
+    private SimpleAdminReportsAdapter adapter;
+    private List<WasteReport> reportsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +54,9 @@ public class AdminDashboardActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Setup toolbar
+        // Hide default action bar - we use our custom toolbar
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Admin Dashboard");
+            getSupportActionBar().hide();
         }
 
         // Initialize views
@@ -57,65 +74,118 @@ public class AdminDashboardActivity extends AppCompatActivity {
         // Setup click listeners
         setupClickListeners();
 
+        // Set up bottom navigation
+        setupBottomNavigation();
+        
+        // Set up RecyclerView
+        reportsList = new ArrayList<>();
+        adapter = new SimpleAdminReportsAdapter(reportsList, this);
+        recyclerViewRecentReports.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewRecentReports.setAdapter(adapter);
+
         // Load dashboard data
         loadDashboardData();
+        
+        if (adminEmail != null && !adminEmail.isEmpty()) {
+            Toast.makeText(this, "Logged in as: " + adminEmail, Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        Toast.makeText(this, "Logged in as: " + adminEmail, Toast.LENGTH_SHORT).show();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh data when returning to this screen
+        loadDashboardData();
     }
 
     private void initViews() {
         tvWelcomeAdmin = findViewById(R.id.tvWelcomeAdmin);
-        btnManageWasteReports = findViewById(R.id.btnManageWasteReports);
-        btnManageCollectors = findViewById(R.id.btnManageCollectors);
-        btnViewAnalytics = findViewById(R.id.btnViewAnalytics);
-        btnSystemSettings = findViewById(R.id.btnSystemSettings);
-        btnLogout = findViewById(R.id.btnLogout);
+        tvPendingCount = findViewById(R.id.tvPendingCount);
+        tvTodayCount = findViewById(R.id.tvTodayCount);
+        tvNoReports = findViewById(R.id.tvNoReports);
+        tvViewAll = findViewById(R.id.tvViewAll);
+        progressBar = findViewById(R.id.progressBar);
+        recyclerViewRecentReports = findViewById(R.id.recyclerViewRecentReports);
     }
 
     private void setupClickListeners() {
-        btnManageWasteReports.setOnClickListener(v -> {
+        // View All reports button
+        tvViewAll.setOnClickListener(v -> {
             Intent intent = new Intent(AdminDashboardActivity.this, ManageReportsActivity.class);
             startActivity(intent);
         });
-
-        btnManageCollectors.setOnClickListener(v -> {
-            Intent intent = new Intent(AdminDashboardActivity.this, ManageCollectorsActivity.class);
-            startActivity(intent);
-        });
-
-        btnViewAnalytics.setOnClickListener(v -> {
-            Intent intent = new Intent(AdminDashboardActivity.this, AnalyticsActivity.class);
-            startActivity(intent);
-        });
-
-        btnSystemSettings.setOnClickListener(v -> {
-            Toast.makeText(this, "System settings feature coming soon", Toast.LENGTH_SHORT).show();
-        });
-
-        btnLogout.setOnClickListener(v -> logout());
     }
 
     private void loadDashboardData() {
-        // Load waste reports count
+        progressBar.setVisibility(View.VISIBLE);
+        tvNoReports.setVisibility(View.GONE);
+        
+        // Load pending reports count
         db.collection("waste_reports")
+                .whereEqualTo("status", "pending")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    int reportCount = queryDocumentSnapshots.size();
-                    Log.d(TAG, "Total waste reports: " + reportCount);
+                    int pendingCount = queryDocumentSnapshots.size();
+                    tvPendingCount.setText(String.valueOf(pendingCount));
+                    Log.d(TAG, "Pending reports: " + pendingCount);
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading waste reports", e);
+                    Log.e(TAG, "Error loading pending reports", e);
+                    tvPendingCount.setText("--");
                 });
 
-        // Load collectors count
-        db.collection("collectors")
+        // Load today's reports count
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        long startOfDay = calendar.getTimeInMillis();
+        
+        db.collection("waste_reports")
+                .whereGreaterThan("timestamp", startOfDay)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    int collectorCount = queryDocumentSnapshots.size();
-                    Log.d(TAG, "Total collectors: " + collectorCount);
+                    int todayCount = queryDocumentSnapshots.size();
+                    tvTodayCount.setText(String.valueOf(todayCount));
+                    Log.d(TAG, "Today's reports: " + todayCount);
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading collectors", e);
+                    Log.e(TAG, "Error loading today's reports", e);
+                    tvTodayCount.setText("--");
+                });
+
+        // Load recent pending waste reports
+        db.collection("waste_reports")
+                .whereEqualTo("status", "pending")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .limit(MAX_REPORTS_TO_SHOW)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    progressBar.setVisibility(View.GONE);
+                    reportsList.clear();
+
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        try {
+                            WasteReport report = document.toObject(WasteReport.class);
+                            report.setId(document.getId());
+                            reportsList.add(report);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing report: " + document.getId(), e);
+                        }
+                    }
+
+                    adapter.notifyDataSetChanged();
+
+                    if (reportsList.isEmpty()) {
+                        tvNoReports.setVisibility(View.VISIBLE);
+                    } else {
+                        tvNoReports.setVisibility(View.GONE);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    progressBar.setVisibility(View.GONE);
+                    tvNoReports.setVisibility(View.VISIBLE);
+                    Log.e(TAG, "Error loading recent pending reports", e);
                 });
     }
 
@@ -140,14 +210,37 @@ public class AdminDashboardActivity extends AppCompatActivity {
         if (id == R.id.action_logout) {
             logout();
             return true;
-        } else if (id == android.R.id.home) {
-            onBackPressed();
-            return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
-
+    
+    @Override
+    protected int getActiveItemIndex() {
+        // Home tab is active
+        return 2;
+    }
+    
+    // Method to handle directly assigning reports to the collector
+    public void assignReportToCollector(String reportId) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", "assigned");
+        updates.put("assignedCollectorId", "default_collector");
+        updates.put("assignedCollectorName", "Waste Collector");
+        updates.put("assignedTimestamp", System.currentTimeMillis());
+        
+        db.collection("waste_reports").document(reportId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Report assigned to collector", Toast.LENGTH_SHORT).show();
+                    loadDashboardData(); // Refresh the dashboard data
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error assigning report", e);
+                    Toast.makeText(this, "Error assigning report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+    
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();

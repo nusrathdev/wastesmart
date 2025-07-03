@@ -19,13 +19,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportViewHolder> {
+/**
+ * Adapter for displaying a simplified version of waste reports in the admin dashboard
+ */
+public class SimpleAdminReportsAdapter extends RecyclerView.Adapter<SimpleAdminReportsAdapter.ReportViewHolder> {
 
     private List<WasteReport> reports;
-    private ManageReportsActivity context;
+    private AdminDashboardActivity context;
     private SimpleDateFormat dateFormat;
 
-    public ReportsAdapter(List<WasteReport> reports, ManageReportsActivity context) {
+    public SimpleAdminReportsAdapter(List<WasteReport> reports, AdminDashboardActivity context) {
         this.reports = reports;
         this.context = context;
         this.dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
@@ -34,7 +37,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
     @NonNull
     @Override
     public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_waste_report, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_admin_report, parent, false);
         return new ReportViewHolder(view);
     }
 
@@ -44,81 +47,49 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
 
         holder.tvWasteType.setText(report.getWasteType());
         holder.tvSize.setText(report.getSize());
-        holder.tvLocation.setText(String.format(Locale.getDefault(), "%.6f, %.6f", 
-                report.getLatitude(), report.getLongitude()));
-        holder.tvDescription.setText(report.getDescription());
+        
+        // Set location using coordinates
+        String location = String.format(Locale.getDefault(), "%.6f, %.6f", 
+                report.getLatitude(), report.getLongitude());
+        holder.tvLocation.setText(location);
+        
+        // Use shorter description display for dashboard
+        String description = report.getDescription();
+        if (description != null && description.length() > 50) {
+            description = description.substring(0, 47) + "...";
+        }
+        holder.tvDescription.setText(description);
         
         // Format timestamp
         if (report.getTimestamp() != null) {
             holder.tvTimestamp.setText(dateFormat.format(new Date(report.getTimestamp())));
         }
 
-        // Set status and assigned collector info
+        // Set status
         String status = report.getStatus() != null ? report.getStatus() : "pending";
         holder.tvStatus.setText(status.toUpperCase());
+        holder.tvStatus.setTextColor(context.getResources().getColor(R.color.error, null));
         
-        // Hide assigned collector info (no need to show collector name)
+        // Hide assigned collector info
         holder.tvAssignedTo.setVisibility(View.GONE);
         
-        // Set status color
-        int statusColor;
-        switch (status.toLowerCase()) {
-            case "completed":
-                statusColor = context.getResources().getColor(R.color.success, null);
-                break;
-            case "in_progress":
-                statusColor = context.getResources().getColor(R.color.warning, null);
-                break;
-            case "assigned":
-                statusColor = context.getResources().getColor(R.color.primary, null);
-                break;
-            default:
-                statusColor = context.getResources().getColor(R.color.error, null);
-                break;
-        }
-        holder.tvStatus.setTextColor(statusColor);        // Show image indicator if available
+        // Show image indicator if available
         if (report.getImageUrl() != null && !report.getImageUrl().isEmpty()) {
             holder.ivPhoto.setVisibility(View.VISIBLE);
-            // Simple placeholder - actual image loading can be implemented later
             holder.ivPhoto.setImageResource(R.drawable.ic_photo_placeholder);
         } else {
             holder.ivPhoto.setVisibility(View.GONE);
         }
 
-        final int currentPosition = position; // Capture the current position
-        
-        // Setup button listeners
+        // Setup button listeners for quick assignment
         holder.btnAssign.setOnClickListener(v -> {
-            context.assignReportToCollector(report, currentPosition);
+            context.assignReportToCollector(report.getId());
         });
-
-        holder.btnComplete.setOnClickListener(v -> {
-            context.updateReportStatus(report, "COMPLETED", currentPosition);
-        });
-
-        // Show/hide buttons based on current status
-        switch (status.toLowerCase()) {
-            case "completed":
-                holder.btnAssign.setVisibility(View.GONE);
-                holder.btnComplete.setVisibility(View.GONE);
-                holder.btnAssign.setText("COMPLETED");
-                break;
-            case "assigned":
-                holder.btnAssign.setVisibility(View.GONE);
-                holder.btnComplete.setVisibility(View.VISIBLE);
-                holder.btnComplete.setText("MARK COMPLETED");
-                break;
-            case "in_progress":
-                holder.btnAssign.setVisibility(View.GONE);
-                holder.btnComplete.setVisibility(View.VISIBLE);
-                holder.btnComplete.setText("MARK COMPLETED");
-                break;
-            default: // pending
-                holder.btnAssign.setVisibility(View.VISIBLE);
-                holder.btnComplete.setVisibility(View.GONE);
-                holder.btnAssign.setText("ASSIGN TO COLLECTOR");
-                break;
-        }
+        
+        // Only show assign button for pending reports
+        holder.btnAssign.setVisibility(View.VISIBLE);
+        holder.btnComplete.setVisibility(View.GONE);
+        holder.btnAssign.setText("ASSIGN");
     }
 
     @Override

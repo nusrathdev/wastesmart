@@ -86,6 +86,9 @@ dependencies {
 
     // Image loading
     implementation("com.squareup.picasso:picasso:2.8")
+    
+    // Charts
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
