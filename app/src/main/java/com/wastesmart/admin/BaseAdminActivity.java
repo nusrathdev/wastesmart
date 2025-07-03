@@ -1,11 +1,17 @@
 package com.wastesmart.admin;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 import com.wastesmart.R;
 import com.wastesmart.utils.BottomNavigationHelper;
@@ -64,4 +70,41 @@ public abstract class BaseAdminActivity extends AppCompatActivity {
      * @return The index (0-4) of the active item
      */
     protected abstract int getActiveItemIndex();
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_admin, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_sign_out) {
+            signOut();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    
+    /**
+     * Sign out the current admin user
+     */
+    protected void signOut() {
+        // Show confirmation dialog
+        new AlertDialog.Builder(this)
+            .setTitle("Sign Out")
+            .setMessage("Are you sure you want to sign out?")
+            .setPositiveButton("Yes", (dialog, which) -> {
+                // Sign out from Firebase Auth
+                FirebaseAuth.getInstance().signOut();
+                
+                // Clear activity stack and go to login
+                Intent intent = new Intent(this, AdminLoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            })
+            .setNegativeButton("No", null)
+            .show();
+    }
 }

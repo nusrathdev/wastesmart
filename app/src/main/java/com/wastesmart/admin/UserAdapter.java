@@ -59,11 +59,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         if (isBlocked) {
             holder.tvUserStatus.setText("BLOCKED");
             holder.tvUserStatus.setTextColor(ContextCompat.getColor(context, R.color.error));
+            holder.tvUserStatus.setBackground(ContextCompat.getDrawable(context, R.drawable.user_status_blocked_bg));
             holder.btnBlockUser.setText("Unblock User");
             holder.btnBlockUser.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.primary));
         } else {
             holder.tvUserStatus.setText("ACTIVE");
             holder.tvUserStatus.setTextColor(ContextCompat.getColor(context, R.color.success));
+            holder.tvUserStatus.setBackground(ContextCompat.getDrawable(context, R.drawable.user_status_active_bg));
             holder.btnBlockUser.setText("Block User");
             holder.btnBlockUser.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.error));
         }
