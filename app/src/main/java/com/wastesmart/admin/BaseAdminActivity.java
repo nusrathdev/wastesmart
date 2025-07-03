@@ -26,6 +26,13 @@ public abstract class BaseAdminActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         // Child activities should call setContentView() before calling setupBottomNavigation()
     }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Always update the active state of the bottom navigation when the activity resumes
+        setupBottomNavigation();
+    }
 
     /**
      * Set up the bottom navigation with the appropriate active tab
@@ -56,9 +63,11 @@ public abstract class BaseAdminActivity extends AppCompatActivity {
                     // Don't navigate if we're already on this page
                     if (BaseAdminActivity.this.getClass() != activityClass) {
                         Intent intent = new Intent(BaseAdminActivity.this, activityClass);
+                        // Add flags to prevent recreation and maintain state
+                        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(intent);
-                        // Optional: Add flags to control navigation stack
-                        // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        // Use a smooth transition
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                     }
                 }
             });

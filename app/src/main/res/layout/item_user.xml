@@ -60,7 +60,10 @@
                         android:layout_height="wrap_content"
                         android:text="user@example.com"
                         android:textColor="@color/dark_gray"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:maxWidth="160dp" />
 
                     <TextView
                         android:id="@+id/tvUserPhone"

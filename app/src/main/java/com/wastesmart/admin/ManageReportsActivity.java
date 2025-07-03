@@ -76,6 +76,12 @@ public class ManageReportsActivity extends BaseAdminActivity {
         binding.rvReports.setLayoutManager(new LinearLayoutManager(this));
         binding.rvReports.setAdapter(reportAdapter);
         
+        // Set up swipe refresh listener
+        binding.swipeRefreshLayout.setColorSchemeResources(R.color.primary, R.color.secondary);
+        binding.swipeRefreshLayout.setOnRefreshListener(() -> {
+            loadReports();
+        });
+        
         // Set up filter spinner
         setupFilterSpinner();
         
@@ -196,9 +202,17 @@ public class ManageReportsActivity extends BaseAdminActivity {
                 }
                 
                 binding.progressBar.setVisibility(View.GONE);
+                // Stop the refresh animation if it's running
+                if (binding.swipeRefreshLayout.isRefreshing()) {
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                }
             })
             .addOnFailureListener(e -> {
                 binding.progressBar.setVisibility(View.GONE);
+                // Stop the refresh animation if it's running
+                if (binding.swipeRefreshLayout.isRefreshing()) {
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                }
                 Log.e(TAG, "Error loading waste reports: " + e.getMessage(), e);
                 Toast.makeText(ManageReportsActivity.this, 
                     "Error loading reports: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -334,22 +348,24 @@ public class ManageReportsActivity extends BaseAdminActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_reports, menu);
-        return true;
-    }
+    // Use the admin menu with sign out button from BaseAdminActivity
+    // No need to override onCreateOptionsMenu since BaseAdminActivity handles it
     
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         
-        if (id == R.id.action_refresh) {
-            loadReports();
-            return true;
+        if (id == R.id.action_sign_out) {
+            // Let the parent class handle sign out
+            return super.onOptionsItemSelected(item);
         }
         
         return super.onOptionsItemSelected(item);
+    }
+    
+    // Add a method to refresh reports that can be called elsewhere if needed
+    public void refreshReports() {
+        loadReports();
     }
     
     @Override

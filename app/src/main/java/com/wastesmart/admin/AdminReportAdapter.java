@@ -1,6 +1,7 @@
 package com.wastesmart.admin;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -143,6 +144,14 @@ public class AdminReportAdapter extends RecyclerView.Adapter<AdminReportAdapter.
                 .placeholder(R.drawable.ic_photo_placeholder)
                 .error(R.drawable.ic_photo_error)
                 .into(holder.ivReportImage);
+                
+            // Make image clickable to view fullscreen
+            final String photoUrl = report.getPhotoUrl();
+            holder.ivReportImage.setOnClickListener(v -> {
+                Intent fullscreenIntent = new Intent(context, FullscreenImageActivity.class);
+                fullscreenIntent.putExtra("imageUrl", photoUrl);
+                context.startActivity(fullscreenIntent);
+            });
         } else {
             holder.ivReportImage.setVisibility(View.GONE);
         }

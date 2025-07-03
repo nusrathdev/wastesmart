@@ -68,7 +68,7 @@
                 android:id="@+id/navItem2Icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/baseline_person_24"
+                android:src="@drawable/baseline_person_search_24"
                 app:tint="@color/dark_gray"
                 android:contentDescription="Collector"
                 android:layout_marginBottom="4dp" />

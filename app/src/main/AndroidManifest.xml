@@ -77,15 +77,23 @@
         <activity android:name=".admin.AdminLoginActivity"
             android:exported="false" />
         <activity android:name=".admin.AdminDashboardActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleTask" />
         <activity android:name=".admin.ManageReportsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleTask" />
         <activity android:name=".admin.ManageCollectorActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleTask" />
         <activity android:name=".admin.ManageUsersActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleTask" />
         <activity android:name=".admin.AnalyticsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleTask" />
+        <activity android:name=".admin.FullscreenImageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <!-- FileProvider for camera functionality -->
         <provider
