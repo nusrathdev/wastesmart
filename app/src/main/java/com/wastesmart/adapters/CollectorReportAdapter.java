@@ -139,16 +139,66 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
             holder.tvStatus.setTextColor(statusColor);
         }
         
-        // Load image if available
+        // Load image if available - try both photoUrl and imageUrl
+        // Determine the image URL to use
+        String tempImageUrl = null;
         if (report.getPhotoUrl() != null && !report.getPhotoUrl().isEmpty()) {
-            holder.ivReportImage.setVisibility(View.VISIBLE);
-            Picasso.get()
-                .load(report.getPhotoUrl())
-                .placeholder(R.drawable.ic_photo_placeholder)
-                .error(R.drawable.ic_photo_error)
-                .into(holder.ivReportImage);
+            tempImageUrl = report.getPhotoUrl();
+        } else if (report.getImageUrl() != null && !report.getImageUrl().isEmpty()) {
+            tempImageUrl = report.getImageUrl();
+        }
+        
+        // Always show the image view
+        holder.ivReportImage.setVisibility(View.VISIBLE);
+        
+        // Make the URL final so it can be used in the inner class callback
+        final String imageUrl = tempImageUrl;
+        
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            Log.d(TAG, "Loading image from URL: " + imageUrl + " for report ID: " + report.getId());
+            
+            // Use a fallback image based on waste type if the URL fails
+            // Make this variable final so it can be accessed from the inner class
+            final String fallbackUrl = getFallbackImageUrl(report.getWasteType());
+            
+            // Try to load the image with Picasso, with extra reliability features
+            try {
+                Picasso.get()
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_photo_placeholder)
+                    .error(R.drawable.ic_photo_error)
+                    .into(holder.ivReportImage, new com.squareup.picasso.Callback() {
+                        @Override
+                        public void onSuccess() {
+                            Log.d(TAG, "Successfully loaded image for report ID: " + report.getId());
+                        }
+                        
+                        @Override
+                        public void onError(Exception e) {
+                            Log.e(TAG, "Error loading image for report ID: " + report.getId() + 
+                                ", trying fallback URL: " + fallbackUrl, e);
+                            
+                            // Try fallback URL if primary URL failed
+                            if (fallbackUrl != null && !fallbackUrl.equals(imageUrl)) {
+                                Picasso.get()
+                                    .load(fallbackUrl)
+                                    .placeholder(R.drawable.ic_photo_placeholder)
+                                    .error(R.drawable.ic_photo_error)
+                                    .into(holder.ivReportImage);
+                            }
+                        }
+                    });
+            } catch (Exception e) {
+                Log.e(TAG, "Exception while setting up Picasso image load", e);
+                // Set error drawable directly if Picasso throws an exception
+                holder.ivReportImage.setImageResource(R.drawable.ic_photo_error);
+            }
         } else {
-            holder.ivReportImage.setVisibility(View.GONE);
+            Log.d(TAG, "No image URL available for report ID: " + report.getId() + 
+                  ", using default image based on waste type");
+            
+            // Show a waste-type specific default image
+            setDefaultWasteImage(holder.ivReportImage, report.getWasteType());
         }
         
         // Set button visibility based on status
@@ -246,6 +296,74 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
                 });
         } else {
             holder.tvUserInfo.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Get a fallback image URL based on waste type
+     */
+    private String getFallbackImageUrl(String wasteType) {
+        String baseUrl = "https://firebasestorage.googleapis.com/v0/b/wastesmart-app.appspot.com/o/waste_images%2F";
+        
+        if (wasteType == null) {
+            return baseUrl + "general_waste.jpg?alt=media";
+        }
+        
+        wasteType = wasteType.toLowerCase();
+        
+        if (wasteType.contains("household")) {
+            return baseUrl + "household_waste.jpg?alt=media";
+        } else if (wasteType.contains("recycl")) {
+            return baseUrl + "recyclable_waste.jpg?alt=media";
+        } else if (wasteType.contains("electronic")) {
+            return baseUrl + "electronic_waste.jpg?alt=media";
+        } else if (wasteType.contains("garden") || wasteType.contains("yard")) {
+            return baseUrl + "garden_waste.jpg?alt=media";
+        } else if (wasteType.contains("commercial")) {
+            return baseUrl + "commercial_waste.jpg?alt=media";
+        } else if (wasteType.contains("construction") || wasteType.contains("debris")) {
+            return baseUrl + "construction_waste.jpg?alt=media";
+        } else if (wasteType.contains("hazard")) {
+            return baseUrl + "hazardous_waste.jpg?alt=media";
+        } else {
+            return baseUrl + "general_waste.jpg?alt=media";
+        }
+    }
+    
+    /**
+     * Set a default image on the ImageView based on waste type
+     */
+    private void setDefaultWasteImage(ImageView imageView, String wasteType) {
+        try {
+            if (wasteType == null) {
+                imageView.setImageResource(R.drawable.ic_recycling);
+                return;
+            }
+            
+            wasteType = wasteType.toLowerCase();
+            
+            // Use appropriate drawable based on waste type - only use drawables we know exist
+            if (wasteType.contains("household")) {
+                imageView.setImageResource(R.drawable.baseline_home24);
+            } else if (wasteType.contains("recycl")) {
+                imageView.setImageResource(R.drawable.ic_recycling);
+            } else if (wasteType.contains("electronic")) {
+                imageView.setImageResource(R.drawable.ic_description);
+            } else if (wasteType.contains("garden") || wasteType.contains("yard")) {
+                imageView.setImageResource(R.drawable.ic_assignment);
+            } else if (wasteType.contains("construction") || wasteType.contains("debris")) {
+                imageView.setImageResource(R.drawable.ic_straighten);
+            } else {
+                imageView.setImageResource(R.drawable.ic_recycling);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting default waste image", e);
+            try {
+                // Last resort - use a placeholder icon we know must exist
+                imageView.setImageResource(R.drawable.ic_photo_placeholder);
+            } catch (Exception ex) {
+                Log.e(TAG, "Failed to set even placeholder image", ex);
+            }
         }
     }
 

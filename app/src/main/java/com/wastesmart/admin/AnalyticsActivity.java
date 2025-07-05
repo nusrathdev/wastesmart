@@ -101,12 +101,24 @@ public class AnalyticsActivity extends BaseAdminActivity {
                         }
                     }
                     
-                    // Update counters
+                    // Update counters with appropriate colors
                     binding.tvTotalReports.setText(String.valueOf(queryDocumentSnapshots.size()));
+                    
+                    // Set text and color for pending count
                     binding.tvPendingCount.setText(String.valueOf(pendingCount.get()));
+                    binding.tvPendingCount.setTextColor(getResources().getColor(R.color.status_pending, null));
+                    
+                    // Set text and color for completed count
                     binding.tvCompletedCount.setText(String.valueOf(completedCount.get()));
+                    binding.tvCompletedCount.setTextColor(getResources().getColor(R.color.status_completed, null));
+                    
+                    // Set text and color for assigned count
                     binding.tvAssignedCount.setText(String.valueOf(assignedCount.get()));
+                    binding.tvAssignedCount.setTextColor(getResources().getColor(R.color.status_assigned, null));
+                    
+                    // Set text and color for in progress count
                     binding.tvInProgressCount.setText(String.valueOf(inProgressCount.get()));
+                    binding.tvInProgressCount.setTextColor(getResources().getColor(R.color.status_in_progress, null));
                     
                     // Set up pie chart
                     setupStatusPieChart(pendingCount.get(), inProgressCount.get(), 
@@ -197,13 +209,21 @@ public class AnalyticsActivity extends BaseAdminActivity {
             entries.add(new PieEntry(1, "No Data"));
         }
         
-        // Create dataset
+        // Create dataset with fixed colors matching our requirements
         PieDataSet dataSet = new PieDataSet(entries, "Report Status");
+        
+        // Define fixed status colors from the color resources
+        int pendingColor = getResources().getColor(R.color.status_pending, null); // Gray
+        int inProgressColor = getResources().getColor(R.color.status_in_progress, null); // Orange
+        int completedColor = getResources().getColor(R.color.status_completed, null); // Green
+        int assignedColor = getResources().getColor(R.color.status_assigned, null); // Blue
+        
+        // Apply colors
         dataSet.setColors(
-            Color.parseColor("#FF9800"), // Orange for Pending
-            Color.parseColor("#2196F3"), // Blue for In Progress
-            Color.parseColor("#4CAF50"), // Green for Completed
-            Color.parseColor("#673AB7")  // Purple for Assigned
+            pendingColor,
+            inProgressColor,
+            completedColor,
+            assignedColor
         );
         
         // Format chart

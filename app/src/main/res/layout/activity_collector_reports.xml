@@ -35,9 +35,9 @@
         android:orientation="vertical"
         android:padding="16dp">
         
-        <!-- Enhanced Filter Options -->
+        <!-- Title Card -->
         <androidx.cardview.widget.CardView
-            android:id="@+id/filterCardView"
+            android:id="@+id/titleCardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="8dp"
@@ -45,7 +45,6 @@
             android:layout_marginBottom="12dp">
             
             <LinearLayout
-                android:id="@+id/filtersLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
@@ -53,23 +52,15 @@
                 android:paddingVertical="12dp"
                 android:orientation="horizontal">
     
-                <!-- Filter Spinner with Label -->
+                <!-- Title Text -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Filter Reports: "
+                    android:text="Your Collection Reports"
                     android:textColor="@color/primary"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_gravity="center_vertical" />
-    
-                <Spinner
-                    android:id="@+id/spinnerFilter"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@android:color/transparent"
-                    android:minHeight="36dp" />
     
             </LinearLayout>
             

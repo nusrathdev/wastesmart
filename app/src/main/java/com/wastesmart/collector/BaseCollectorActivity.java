@@ -119,6 +119,8 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
     protected void navigateToTasks() {
         if (getActiveNavItemIndex() != 0) {
             Intent intent = new Intent(this, CollectionTasksActivity.class);
+            // Add a flag to indicate this is a navigation action to prevent login redirect
+            intent.putExtra("isNavigationAction", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
             overridePendingTransition(0, 0);
@@ -128,7 +130,9 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
     protected void navigateToHome() {
         if (getActiveNavItemIndex() != 1) {
             Intent intent = new Intent(this, CollectorDashboardActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            // Add a flag to indicate this is a navigation action to prevent login redirect
+            intent.putExtra("isNavigationAction", true);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
             overridePendingTransition(0, 0);
         }
@@ -137,6 +141,8 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
     protected void navigateToReports() {
         if (getActiveNavItemIndex() != 2) {
             Intent intent = new Intent(this, CollectorReportsActivity.class);
+            // Add a flag to indicate this is a navigation action to prevent login redirect
+            intent.putExtra("isNavigationAction", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
             overridePendingTransition(0, 0);

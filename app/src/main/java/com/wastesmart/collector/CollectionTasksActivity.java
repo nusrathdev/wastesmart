@@ -197,6 +197,13 @@ public class CollectionTasksActivity extends BaseCollectorActivity {
         testReport.put("assignedCollectorName", "Default Collector");
         testReport.put("userId", "test_user");
         
+        // Add realistic image URL for better testing
+        String imageUrl = "https://firebasestorage.googleapis.com/v0/b/wastesmart-app.appspot.com/o/waste_images%2Fgeneral_waste.jpg?alt=media";
+        testReport.put("photoUrl", imageUrl);
+        testReport.put("imageUrl", imageUrl);
+        
+        Log.d(TAG, "Creating test report with image URL: " + imageUrl);
+        
         // Add to Firestore
         db.collection("waste_reports")
             .add(testReport)

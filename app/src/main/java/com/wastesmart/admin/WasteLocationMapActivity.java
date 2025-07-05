@@ -3,6 +3,7 @@ package com.wastesmart.admin;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -49,6 +50,9 @@ public class WasteLocationMapActivity extends AppCompatActivity implements OnMap
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Waste Location");
         }
+        
+        // Setup report details
+        setupReportDetails(intent);
 
         // Get the SupportMapFragment and request notification when the map is ready
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -77,6 +81,56 @@ public class WasteLocationMapActivity extends AppCompatActivity implements OnMap
         
         // Move camera to the location with appropriate zoom
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(wasteLocation, 15));
+    }
+
+    /**
+     * Sets up the report details card with information from the intent
+     */
+    private void setupReportDetails(Intent intent) {
+        if (intent == null) return;
+        
+        TextView tvWasteType = findViewById(R.id.tvWasteType);
+        TextView tvDescription = findViewById(R.id.tvDescription);
+        TextView tvStatus = findViewById(R.id.tvStatus);
+        
+        String wasteType = intent.getStringExtra("wasteType");
+        String description = intent.getStringExtra("description");
+        String status = intent.getStringExtra("status");
+        
+        // Set waste type
+        if (wasteType != null && !wasteType.isEmpty()) {
+            tvWasteType.setText("Waste Type: " + wasteType);
+        } else {
+            tvWasteType.setText("Waste Type: Unknown");
+        }
+        
+        // Set description
+        if (description != null && !description.isEmpty()) {
+            tvDescription.setText(description);
+        } else {
+            tvDescription.setText("No description available");
+        }
+        
+        // Set status with appropriate background
+        if (status != null && !status.isEmpty()) {
+            tvStatus.setText(status.toUpperCase());
+            
+            // Set appropriate background color
+            int backgroundResId;
+            if (status.equalsIgnoreCase("completed")) {
+                backgroundResId = R.drawable.status_completed_bg;
+            } else if (status.equalsIgnoreCase("in_progress")) {
+                backgroundResId = R.drawable.status_in_progress_bg;
+            } else if (status.equalsIgnoreCase("assigned")) {
+                backgroundResId = R.drawable.status_assigned_bg;
+            } else {
+                backgroundResId = R.drawable.status_pending_circle_bg;
+            }
+            tvStatus.setBackgroundResource(backgroundResId);
+        } else {
+            tvStatus.setText("UNKNOWN");
+            tvStatus.setBackgroundResource(R.drawable.status_badge_bg);
+        }
     }
 
     @Override
