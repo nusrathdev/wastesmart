@@ -35,35 +35,45 @@
         android:orientation="vertical"
         android:padding="16dp">
         
-        <!-- Filter Options -->
-        <LinearLayout
-            android:id="@+id/filtersLayout"
+        <!-- Enhanced Filter Options -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/filterCardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:paddingHorizontal="4dp"
-            android:paddingVertical="8dp"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <!-- Filter Spinner with Label -->
-            <TextView
-                android:layout_width="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            android:layout_marginBottom="12dp">
+            
+            <LinearLayout
+                android:id="@+id/filtersLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Filter: "
-                android:textColor="@color/dark_gray"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:layout_gravity="center_vertical" />
-
-            <Spinner
-                android:id="@+id/spinnerFilter"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent" />
-
-        </LinearLayout>
+                android:background="@color/white"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="12dp"
+                android:orientation="horizontal">
+    
+                <!-- Filter Spinner with Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Filter Reports: "
+                    android:textColor="@color/primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center_vertical" />
+    
+                <Spinner
+                    android:id="@+id/spinnerFilter"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:minHeight="36dp" />
+    
+            </LinearLayout>
+            
+        </androidx.cardview.widget.CardView>
 
         <!-- Reports List -->
         <RelativeLayout

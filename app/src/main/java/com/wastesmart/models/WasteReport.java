@@ -11,9 +11,11 @@ public class WasteReport {
     private double latitude;
     private double longitude;
     private String photoUrl;
-    private String status; // PENDING, ASSIGNED, COLLECTED, CANCELED
+    private String status; // PENDING, ASSIGNED, IN_PROGRESS, COMPLETED
     private Date reportDate;
     private Long timestamp; // Added for compatibility with adapters
+    private String submittedBy; // User ID who submitted the report
+    private String submitterName; // Name of the user who submitted the report
 
     private String assignedCollectorId;
     private String assignedCollectorName;
@@ -105,11 +107,15 @@ public class WasteReport {
     }
 
     public String getStatus() {
-        return status;
+        return status != null ? status.toUpperCase() : "PENDING";
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        if (status != null) {
+            this.status = status.toUpperCase();
+        } else {
+            this.status = "PENDING";
+        }
     }
 
     public Date getReportDate() {
@@ -174,5 +180,21 @@ public class WasteReport {
 
     public void setAssignedTimestamp(Long assignedTimestamp) {
         this.assignedTimestamp = assignedTimestamp;
+    }
+
+    public String getSubmittedBy() {
+        return submittedBy;
+    }
+
+    public void setSubmittedBy(String submittedBy) {
+        this.submittedBy = submittedBy;
+    }
+
+    public String getSubmitterName() {
+        return submitterName;
+    }
+
+    public void setSubmitterName(String submitterName) {
+        this.submitterName = submitterName;
     }
 }

@@ -22,8 +22,10 @@ import com.wastesmart.models.WasteReport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ManageReportsActivity extends BaseAdminActivity {
 
@@ -114,6 +116,10 @@ public class ManageReportsActivity extends BaseAdminActivity {
         binding.progressBar.setVisibility(View.VISIBLE);
         
         try {
+            // Important: Clear the list before applying the filter to avoid duplicates
+            reportsList.clear();
+            reportAdapter.notifyDataSetChanged();
+            
             // Load all waste reports and filter locally (simpler and avoids index issues)
             loadAllReportsAndFilterLocally(filter);
         } catch (Exception e) {
@@ -142,27 +148,44 @@ public class ManageReportsActivity extends BaseAdminActivity {
      * Loads all waste reports and filters them locally
      */
     private void loadAllReportsAndFilterLocally(String filterOption) {
+        // Make absolutely sure the list is cleared to prevent duplicates
         reportsList.clear();
+        
+        // Log the start of loading with specific filter
+        Log.d(TAG, "Loading reports with filter: " + filterOption);
         
         // Simple query that loads all waste reports (no complex indexes needed)
         db.collection("waste_reports")
             .get()
             .addOnSuccessListener(queryDocumentSnapshots -> {
-                Log.d(TAG, "Retrieved " + queryDocumentSnapshots.size() + " waste reports");
+                Log.d(TAG, "Retrieved " + queryDocumentSnapshots.size() + " waste reports from database");
                 
                 if (!queryDocumentSnapshots.isEmpty()) {
+                    // Create a new list and map for this filter operation
                     List<WasteReport> allReports = new ArrayList<>();
+                    // Use a map to track unique IDs and prevent duplicates
+                    Map<String, WasteReport> uniqueReports = new HashMap<>();
                     
                     // Process each waste report
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         try {
-                            WasteReport report = document.toObject(WasteReport.class);
-                            report.setId(document.getId());
-                            allReports.add(report);
+                            String reportId = document.getId();
+                            // Only add if we haven't already processed this report ID
+                            if (!uniqueReports.containsKey(reportId)) {
+                                WasteReport report = document.toObject(WasteReport.class);
+                                report.setId(reportId);
+                                uniqueReports.put(reportId, report);
+                                Log.d(TAG, "Adding report with ID: " + reportId);
+                            } else {
+                                Log.w(TAG, "Duplicate report ID detected: " + reportId + ", skipping");
+                            }
                         } catch (Exception e) {
                             Log.e(TAG, "Error parsing waste report: " + document.getId(), e);
                         }
                     }
+                    
+                    // Convert map to list
+                    allReports.addAll(uniqueReports.values());
                     
                     // Sort by timestamp (descending)
                     allReports.sort((r1, r2) -> {
@@ -174,6 +197,9 @@ public class ManageReportsActivity extends BaseAdminActivity {
                         return t2.compareTo(t1); // Descending order (newest first)
                     });
                     
+                    // Make sure the reportsList is empty before applying filter
+                    reportsList.clear();
+                    
                     // Filter based on selected spinner option
                     if (filterOption != null && !filterOption.equals("All Reports")) {
                         String status = filterOption.toUpperCase();
@@ -182,16 +208,24 @@ public class ManageReportsActivity extends BaseAdminActivity {
                             status = "IN_PROGRESS";
                         }
                         
+                        // Create a set to track added report IDs during filtering
+                        Set<String> addedReportIds = new HashSet<>();
+                        
                         for (WasteReport report : allReports) {
-                            if (status.equalsIgnoreCase(report.getStatus())) {
+                            if (status.equalsIgnoreCase(report.getStatus()) && !addedReportIds.contains(report.getId())) {
                                 reportsList.add(report);
+                                addedReportIds.add(report.getId());
+                                Log.d(TAG, "Added filtered report with ID: " + report.getId() + ", status: " + report.getStatus());
                             }
                         }
+                        Log.d(TAG, "Added " + reportsList.size() + " filtered reports with status: " + status);
                     } else {
-                        // No filter - add all
+                        // No filter - add all reports (already deduplicated via the uniqueReports map)
                         reportsList.addAll(allReports);
+                        Log.d(TAG, "Added all " + allReports.size() + " reports (no filter applied)");
                     }
                     
+                    // Always notify adapter after all data changes
                     reportAdapter.notifyDataSetChanged();
                     showNoReportsMessage(reportsList.isEmpty());
                     
@@ -355,8 +389,8 @@ public class ManageReportsActivity extends BaseAdminActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         
-        if (id == R.id.action_sign_out) {
-            // Let the parent class handle sign out
+        if (id == R.id.action_logout) {
+            // Let the parent class handle logout
             return super.onOptionsItemSelected(item);
         }
         
@@ -377,7 +411,7 @@ public class ManageReportsActivity extends BaseAdminActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh reports when returning to this activity
-        loadReports();
+        // We don't need to refresh reports here as it's already called in onCreate
+        // This prevents duplicate loading
     }
 }

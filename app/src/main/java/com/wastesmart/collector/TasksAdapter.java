@@ -78,18 +78,19 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
         int statusColor;
         
         // Update status badge with emoji and background color
-        switch (status.toLowerCase()) {
-            case "completed":
+        String statusUpperCase = status.toUpperCase();
+        switch (statusUpperCase) {
+            case "COMPLETED":
                 holder.tvStatus.setText("COMPLETED");
                 statusBackground = R.drawable.status_completed_circle_bg;
                 statusColor = context.getResources().getColor(R.color.status_completed, null);
                 break;
-            case "in_progress":
+            case "IN_PROGRESS":
                 holder.tvStatus.setText("IN PROGRESS");
                 statusBackground = R.drawable.status_in_progress_circle_bg;
                 statusColor = context.getResources().getColor(R.color.status_in_progress, null);
                 break;
-            default: // assigned
+            default: // ASSIGNED
                 holder.tvStatus.setText("ASSIGNED");
                 statusBackground = R.drawable.status_assigned_circle_bg;
                 statusColor = context.getResources().getColor(R.color.status_assigned, null);
@@ -144,21 +145,21 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
         });
 
         holder.btnStart.setOnClickListener(v -> {
-            // Update task status to in_progress
+            // Update task status to in_progress (using consistent uppercase)
             if (context instanceof CollectionTasksActivity) {
-                ((CollectionTasksActivity) context).updateTaskStatus(task.getId(), "in_progress");
+                ((CollectionTasksActivity) context).updateTaskStatus(task.getId(), "IN_PROGRESS");
             }
         });
 
         holder.btnComplete.setOnClickListener(v -> {
-            // Update task status to completed
+            // Update task status to completed (using consistent uppercase)
             if (context instanceof CollectionTasksActivity) {
-                ((CollectionTasksActivity) context).updateTaskStatus(task.getId(), "completed");
+                ((CollectionTasksActivity) context).updateTaskStatus(task.getId(), "COMPLETED");
             }
         });
 
-        // Show/hide complete button based on status
-        if ("in_progress".equals(status)) {
+        // Show/hide complete button based on status (case-insensitive comparison)
+        if (status.equalsIgnoreCase("in_progress")) {
             holder.btnComplete.setVisibility(View.VISIBLE);
             holder.btnStart.setVisibility(View.GONE);
         } else {

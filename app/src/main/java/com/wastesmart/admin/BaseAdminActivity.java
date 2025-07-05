@@ -88,7 +88,7 @@ public abstract class BaseAdminActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_sign_out) {
+        if (item.getItemId() == R.id.action_logout) {
             signOut();
             return true;
         }

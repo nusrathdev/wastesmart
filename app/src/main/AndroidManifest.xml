@@ -94,6 +94,8 @@
         <activity android:name=".admin.FullscreenImageActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity android:name=".admin.WasteLocationMapActivity"
+            android:exported="false" />
 
         <!-- FileProvider for camera functionality -->
         <provider

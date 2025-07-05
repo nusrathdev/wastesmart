@@ -37,13 +37,14 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
+                android:paddingStart="@dimen/status_padding_horizontal"
+                android:paddingEnd="@dimen/status_padding_horizontal"
+                android:paddingTop="@dimen/status_padding_vertical"
+                android:paddingBottom="@dimen/status_padding_vertical"
                 android:text="PENDING"
-                android:textColor="@color/dark_gray"
-                android:textSize="11sp"
+                android:textColor="@android:color/white"
+                android:background="@drawable/status_background"
+                android:textSize="@dimen/text_size_small"
                 android:textStyle="bold"
                 android:textAllCaps="true" />
         </RelativeLayout>
@@ -128,7 +129,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_marginTop="8dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnViewDetails"
@@ -136,12 +138,13 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="4dp"
+                android:layout_marginEnd="8dp"
                 android:text="View Details"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_size_medium"
                 android:textAllCaps="false"
                 android:textColor="@color/primary"
                 app:strokeColor="@color/primary"
+                app:cornerRadius="8dp"
                 app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -150,11 +153,12 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="8dp"
                 android:text="Assign"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_size_medium"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
+                app:cornerRadius="8dp"
                 android:backgroundTint="@color/primary" />
 
         </LinearLayout>

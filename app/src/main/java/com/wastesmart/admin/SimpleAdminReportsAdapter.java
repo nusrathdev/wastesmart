@@ -1,12 +1,14 @@
 package com.wastesmart.admin;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -43,53 +45,129 @@ public class SimpleAdminReportsAdapter extends RecyclerView.Adapter<SimpleAdminR
 
     @Override
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
-        WasteReport report = reports.get(position);
+        try {
+            WasteReport report = reports.get(position);
+            
+            Log.d("SimpleAdminReportsAdapter", "Binding report at position " + position + ": " + report.getId());
 
-        holder.tvWasteType.setText(report.getWasteType());
-        holder.tvSize.setText(report.getSize());
-        
-        // Set location using coordinates
-        String location = String.format(Locale.getDefault(), "%.6f, %.6f", 
-                report.getLatitude(), report.getLongitude());
-        holder.tvLocation.setText(location);
-        
-        // Use shorter description display for dashboard
-        String description = report.getDescription();
-        if (description != null && description.length() > 50) {
-            description = description.substring(0, 47) + "...";
-        }
-        holder.tvDescription.setText(description);
-        
-        // Format timestamp
-        if (report.getTimestamp() != null) {
-            holder.tvTimestamp.setText(dateFormat.format(new Date(report.getTimestamp())));
-        }
+            // Set the waste type (bold and prominent like in the screenshot)
+            holder.tvWasteType.setText(report.getWasteType());
+            
+            // Format waste size and description in a more user-friendly way
+            String sizeAndDescription = report.getSize() + " Size Waste";
+            holder.tvTitle.setText(sizeAndDescription);
+            
+            // Set location using coordinates with emoji for better readability
+            String location = String.format(Locale.getDefault(), "📍 Lat: %.4f, Long: %.4f", 
+                    report.getLatitude(), report.getLongitude());
+            holder.tvLocation.setText(location);
+            
+            // Format the date with emoji for better readability
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
+            if (report.getTimestamp() != null) {
+                holder.tvDate.setText("🕒 " + dateFormat.format(new Date(report.getTimestamp())));
+            }
+            
+            // For the description, just use the raw description field
+            holder.tvDescription.setText(report.getDescription());
+            
+            // Set reported by exactly like in the screenshot
+            if (report.getSubmitterName() != null && !report.getSubmitterName().isEmpty()) {
+                holder.tvUserInfo.setText("Reported by: " + report.getSubmitterName());
+                holder.tvUserInfo.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvUserInfo.setVisibility(View.GONE);
+            }
+            
+            // Set status - getStatus() already returns uppercase from WasteReport
+            String status = report.getStatus();
+            holder.tvStatus.setText(status);
+            Log.d("SimpleAdminReportsAdapter", "Status for report " + report.getId() + ": " + status);
+            
+            // Set background drawable and badge style to match user dashboard
+            int backgroundRes;
+            int textColor;
+            switch(status.toUpperCase()) {
+                case "ASSIGNED":
+                    backgroundRes = R.drawable.status_assigned_bg;
+                    textColor = context.getResources().getColor(R.color.white);
+                    break;
+                case "IN_PROGRESS":
+                    backgroundRes = R.drawable.status_in_progress_bg;
+                    textColor = context.getResources().getColor(R.color.white);
+                    break;
+                case "COMPLETED":
+                    backgroundRes = R.drawable.status_completed_bg;
+                    textColor = context.getResources().getColor(R.color.white);
+                    break;
+                case "PENDING":
+                default:
+                    // Use a styled badge for pending
+                    backgroundRes = R.drawable.status_background;
+                    textColor = context.getResources().getColor(R.color.white);
+                    break;
+            }
+            holder.tvStatus.setBackground(context.getDrawable(backgroundRes));
+            holder.tvStatus.setTextColor(textColor);
+            
+            // Make the status badge more prominent
+            holder.tvStatus.setPadding(
+                context.getResources().getDimensionPixelSize(R.dimen.status_padding_horizontal),
+                context.getResources().getDimensionPixelSize(R.dimen.status_padding_vertical),
+                context.getResources().getDimensionPixelSize(R.dimen.status_padding_horizontal),
+                context.getResources().getDimensionPixelSize(R.dimen.status_padding_vertical)
+            );
+            
+            // Show image if available, otherwise hide
+            if (report.getImageUrl() != null && !report.getImageUrl().isEmpty()) {
+                holder.ivReportImage.setVisibility(View.VISIBLE);
+                holder.ivReportImage.setImageResource(R.drawable.ic_photo_placeholder);
+            } else {
+                // Match the screenshot - don't show an image if there isn't one
+                holder.ivReportImage.setVisibility(View.GONE);
+            }
 
-        // Set status
-        String status = report.getStatus() != null ? report.getStatus() : "pending";
-        holder.tvStatus.setText(status.toUpperCase());
-        holder.tvStatus.setTextColor(context.getResources().getColor(R.color.error, null));
-        
-        // Hide assigned collector info
-        holder.tvAssignedTo.setVisibility(View.GONE);
-        
-        // Show image indicator if available
-        if (report.getImageUrl() != null && !report.getImageUrl().isEmpty()) {
-            holder.ivPhoto.setVisibility(View.VISIBLE);
-            holder.ivPhoto.setImageResource(R.drawable.ic_photo_placeholder);
-        } else {
-            holder.ivPhoto.setVisibility(View.GONE);
+            // Setup view details button (left button in screenshot)
+            holder.btnViewDetails.setText("View Details");
+            holder.btnViewDetails.setOnClickListener(v -> {
+                // This could be implemented to show full report details
+                Toast.makeText(context, "Viewing details for report: " + report.getId(), Toast.LENGTH_SHORT).show();
+            });
+            
+            // Setup assign button (right button in screenshot)
+            holder.btnAssign.setText("Assign");
+            holder.btnAssign.setOnClickListener(v -> {
+                try {
+                    // First remove this item from the adapter
+                    int adapterPosition = holder.getAdapterPosition();
+                    if (adapterPosition != RecyclerView.NO_POSITION) {
+                        reports.remove(adapterPosition);
+                        notifyItemRemoved(adapterPosition);
+                        
+                        // Then update the database
+                        context.assignReportToCollector(report.getId());
+                        
+                        // If list is now empty, update UI
+                        if (reports.isEmpty()) {
+                            // Update the UI to reflect that all reports have been assigned
+                            Toast.makeText(context, "All reports have been assigned", Toast.LENGTH_SHORT).show();
+                            
+                            // Update the pending count
+                            TextView pendingCountView = context.findViewById(R.id.tvPendingCount);
+                            if (pendingCountView != null) {
+                                pendingCountView.setText("0");
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e("SimpleAdminReportsAdapter", "Error assigning report", e);
+                    Toast.makeText(context, "Error assigning report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+            
+        } catch (Exception e) {
+            Log.e("SimpleAdminReportsAdapter", "Error in onBindViewHolder", e);
         }
-
-        // Setup button listeners for quick assignment
-        holder.btnAssign.setOnClickListener(v -> {
-            context.assignReportToCollector(report.getId());
-        });
-        
-        // Only show assign button for pending reports
-        holder.btnAssign.setVisibility(View.VISIBLE);
-        holder.btnComplete.setVisibility(View.GONE);
-        holder.btnAssign.setText("ASSIGN");
     }
 
     @Override
@@ -98,22 +176,22 @@ public class SimpleAdminReportsAdapter extends RecyclerView.Adapter<SimpleAdminR
     }
 
     static class ReportViewHolder extends RecyclerView.ViewHolder {
-        TextView tvWasteType, tvSize, tvLocation, tvDescription, tvTimestamp, tvStatus, tvAssignedTo;
-        ImageView ivPhoto;
-        Button btnAssign, btnComplete;
+        TextView tvWasteType, tvLocation, tvDescription, tvDate, tvStatus, tvTitle, tvUserInfo;
+        ImageView ivReportImage;
+        Button btnAssign, btnViewDetails;
 
         public ReportViewHolder(@NonNull View itemView) {
             super(itemView);
             tvWasteType = itemView.findViewById(R.id.tvWasteType);
-            tvSize = itemView.findViewById(R.id.tvSize);
+            tvTitle = itemView.findViewById(R.id.tvTitle);
             tvLocation = itemView.findViewById(R.id.tvLocation);
             tvDescription = itemView.findViewById(R.id.tvDescription);
-            tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
+            tvDate = itemView.findViewById(R.id.tvDate);
             tvStatus = itemView.findViewById(R.id.tvStatus);
-            tvAssignedTo = itemView.findViewById(R.id.tvAssignedTo);
-            ivPhoto = itemView.findViewById(R.id.ivPhoto);
+            tvUserInfo = itemView.findViewById(R.id.tvUserInfo);
+            ivReportImage = itemView.findViewById(R.id.ivReportImage);
             btnAssign = itemView.findViewById(R.id.btnAssign);
-            btnComplete = itemView.findViewById(R.id.btnComplete);
+            btnViewDetails = itemView.findViewById(R.id.btnViewDetails);
         }
     }
 }

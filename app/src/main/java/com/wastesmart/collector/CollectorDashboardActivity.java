@@ -2,6 +2,7 @@ package com.wastesmart.collector;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -127,11 +128,12 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
                     binding.tvWelcomeMessage.setText(welcomeMessages[randomIndex]);
                 }
                 
-                // Set the task count
-                // TODO: Load actual collector tasks from database
-                // For now, using placeholder values
+                // Load assigned task count
+                loadAssignedTaskCount();
+                
+                // Initially set a placeholder value that will be updated
                 if (binding.tvTasksCount != null) {
-                    binding.tvTasksCount.setText("8");
+                    binding.tvTasksCount.setText("0");
                 }
                 
                 // Setup route view button
@@ -162,9 +164,45 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
         }
     }
 
+    /**
+     * Load the count of assigned waste reports for this collector
+     */
+    private void loadAssignedTaskCount() {
+        if (mAuth.getCurrentUser() == null) {
+            // If not logged in, just use placeholder
+            if (binding.tvTasksCount != null) {
+                binding.tvTasksCount.setText("0");
+            }
+            return;
+        }
+
+        // Get collector ID
+        String collectorId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : "default_collector";
+
+        // Query Firestore for assigned waste reports
+        db.collection("waste_reports")
+            .whereEqualTo("assignedCollectorId", collectorId)
+            .whereEqualTo("status", "ASSIGNED")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                // Set the count to the TextView
+                int assignedCount = queryDocumentSnapshots.size();
+                if (binding.tvTasksCount != null) {
+                    binding.tvTasksCount.setText(String.valueOf(assignedCount));
+                }
+            })
+            .addOnFailureListener(e -> {
+                // On failure, log error but don't show to user
+                Log.e("CollectorDashboard", "Error getting assigned task count: " + e.getMessage());
+                if (binding.tvTasksCount != null) {
+                    binding.tvTasksCount.setText("?");
+                }
+            });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_user, menu);
+        getMenuInflater().inflate(R.menu.menu_logout_only, menu);
         return true;
     }
 

@@ -172,9 +172,19 @@ public class AdminReportAdapter extends RecyclerView.Adapter<AdminReportAdapter.
         
         // Set click listeners
         holder.btnViewDetails.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onReportClick(report, position);
-            }
+            // Launch Map Activity to show waste location
+            Intent mapIntent = new Intent(context, WasteLocationMapActivity.class);
+            mapIntent.putExtra("latitude", report.getLatitude());
+            mapIntent.putExtra("longitude", report.getLongitude());
+            
+            // Add some descriptive information
+            String mapTitle = report.getWasteType() != null ? report.getWasteType() + " Waste" : "Waste Location";
+            mapIntent.putExtra("title", mapTitle);
+            
+            String description = report.getDescription() != null ? report.getDescription() : "";
+            mapIntent.putExtra("description", description);
+            
+            context.startActivity(mapIntent);
         });
         
         holder.btnAssign.setOnClickListener(v -> {

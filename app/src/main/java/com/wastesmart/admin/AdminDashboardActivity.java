@@ -3,29 +3,22 @@ package com.wastesmart.admin;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.wastesmart.MainActivity;
 import com.wastesmart.R;
-import com.wastesmart.models.WasteReport;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class AdminDashboardActivity extends BaseAdminActivity {
@@ -38,12 +31,8 @@ public class AdminDashboardActivity extends BaseAdminActivity {
     private TextView tvWelcomeAdmin;
     private TextView tvPendingCount;
     private TextView tvTodayCount;
-    private TextView tvNoReports;
     private TextView tvViewAll;
     private ProgressBar progressBar;
-    private RecyclerView recyclerViewRecentReports;
-    private SimpleAdminReportsAdapter adapter;
-    private List<WasteReport> reportsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,10 +55,12 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         String adminType = getIntent().getStringExtra("admin_type");
         String adminEmail = getIntent().getStringExtra("admin_email");
 
-        // Display welcome message
+        // Display admin type in the welcome card
         if (tvWelcomeAdmin != null) {
-            tvWelcomeAdmin.setText("Welcome, " + (adminType != null ? adminType : "Admin"));
+            tvWelcomeAdmin.setText(adminType != null ? adminType : "Administrator");
         }
+        
+        // Top right corner buttons have been removed per request
 
         // Setup click listeners
         setupClickListeners();
@@ -77,11 +68,8 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         // Set up bottom navigation
         setupBottomNavigation();
         
-        // Set up RecyclerView
-        reportsList = new ArrayList<>();
-        adapter = new SimpleAdminReportsAdapter(reportsList, this);
-        recyclerViewRecentReports.setLayoutManager(new LinearLayoutManager(this));
-        recyclerViewRecentReports.setAdapter(adapter);
+        // RecyclerView setup removed as we no longer need it
+        Log.d(TAG, "Dashboard setup complete");
 
         // Load dashboard data
         loadDashboardData();
@@ -102,36 +90,72 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         tvWelcomeAdmin = findViewById(R.id.tvWelcomeAdmin);
         tvPendingCount = findViewById(R.id.tvPendingCount);
         tvTodayCount = findViewById(R.id.tvTodayCount);
-        tvNoReports = findViewById(R.id.tvNoReports);
         tvViewAll = findViewById(R.id.tvViewAll);
         progressBar = findViewById(R.id.progressBar);
-        recyclerViewRecentReports = findViewById(R.id.recyclerViewRecentReports);
     }
 
     private void setupClickListeners() {
-        // View All reports button
+        // View All reports button in stats card
         tvViewAll.setOnClickListener(v -> {
             Intent intent = new Intent(AdminDashboardActivity.this, ManageReportsActivity.class);
             startActivity(intent);
         });
+        
+        // Logout button in toolbar
+        ImageView btnLogout = findViewById(R.id.btnLogout);
+        if (btnLogout != null) {
+            btnLogout.setOnClickListener(v -> logout());
+        }
     }
 
     private void loadDashboardData() {
-        progressBar.setVisibility(View.VISIBLE);
-        tvNoReports.setVisibility(View.GONE);
+        try {
+            // Show progress bar
+            if (progressBar != null) {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+            
+            // Set welcome message dynamically
+            String[] welcomeMessages = {
+                "Here's your waste management overview",
+                "Manage pending reports efficiently",
+                "Stay on top of waste collection",
+                "Monitor community waste reports",
+                "Keep your city clean and sustainable"
+            };
+            int randomIndex = (int) (Math.random() * welcomeMessages.length);
+            TextView tvOverview = findViewById(R.id.tvOverview);
+            if (tvOverview != null) {
+                tvOverview.setText(welcomeMessages[randomIndex]);
+            }
         
         // Load pending reports count
         db.collection("waste_reports")
-                .whereEqualTo("status", "pending")
+                .whereEqualTo("status", "PENDING")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    int pendingCount = queryDocumentSnapshots.size();
-                    tvPendingCount.setText(String.valueOf(pendingCount));
-                    Log.d(TAG, "Pending reports: " + pendingCount);
+                    try {
+                        int pendingCount = queryDocumentSnapshots.size();
+                        if (tvPendingCount != null) {
+                            tvPendingCount.setText(String.valueOf(pendingCount));
+                        }
+                        Log.d(TAG, "Pending reports: " + pendingCount);
+                        
+                // No need to create sample reports in production code
+                            Log.d(TAG, "Found " + pendingCount + " pending reports");
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error updating pending count", e);
+                    }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading pending reports", e);
-                    tvPendingCount.setText("--");
+                    try {
+                        Log.e(TAG, "Error loading pending reports", e);
+                        if (tvPendingCount != null) {
+                            tvPendingCount.setText("--");
+                        }
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error handling pending reports failure", ex);
+                    }
                 });
 
         // Load today's reports count
@@ -145,49 +169,42 @@ public class AdminDashboardActivity extends BaseAdminActivity {
                 .whereGreaterThan("timestamp", startOfDay)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    int todayCount = queryDocumentSnapshots.size();
-                    tvTodayCount.setText(String.valueOf(todayCount));
-                    Log.d(TAG, "Today's reports: " + todayCount);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading today's reports", e);
-                    tvTodayCount.setText("--");
-                });
-
-        // Load recent pending waste reports
-        db.collection("waste_reports")
-                .whereEqualTo("status", "pending")
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .limit(MAX_REPORTS_TO_SHOW)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    progressBar.setVisibility(View.GONE);
-                    reportsList.clear();
-
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        try {
-                            WasteReport report = document.toObject(WasteReport.class);
-                            report.setId(document.getId());
-                            reportsList.add(report);
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error parsing report: " + document.getId(), e);
+                    try {
+                        int todayCount = queryDocumentSnapshots.size();
+                        if (tvTodayCount != null) {
+                            tvTodayCount.setText(String.valueOf(todayCount));
                         }
-                    }
-
-                    adapter.notifyDataSetChanged();
-
-                    if (reportsList.isEmpty()) {
-                        tvNoReports.setVisibility(View.VISIBLE);
-                    } else {
-                        tvNoReports.setVisibility(View.GONE);
+                        Log.d(TAG, "Today's reports: " + todayCount);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error updating today count", e);
                     }
                 })
                 .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    tvNoReports.setVisibility(View.VISIBLE);
-                    Log.e(TAG, "Error loading recent pending reports", e);
+                    try {
+                        Log.e(TAG, "Error loading today's reports", e);
+                        if (tvTodayCount != null) {
+                            tvTodayCount.setText("--");
+                        }
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error handling today's reports failure", ex);
+                    }
                 });
+
+        // Hide progress bar when all data is loaded
+        if (progressBar != null) {
+            progressBar.setVisibility(View.GONE);
+        }
+        
+        } catch (Exception e) {
+            Log.e(TAG, "Error in loadDashboardData", e);
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
+            Toast.makeText(this, "Error loading dashboard data", Toast.LENGTH_SHORT).show();
+        }
     }
+
+    // Sample report creation methods removed as they're not needed in production
 
     private void logout() {
         mAuth.signOut();
@@ -197,23 +214,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         finish();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_user, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_logout) {
-            logout();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+    // Removed options menu methods as we now have a dedicated logout button in the toolbar
     
     @Override
     protected int getActiveItemIndex() {
@@ -224,7 +225,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
     // Method to handle directly assigning reports to the collector
     public void assignReportToCollector(String reportId) {
         Map<String, Object> updates = new HashMap<>();
-        updates.put("status", "assigned");
+        updates.put("status", "ASSIGNED");
         updates.put("assignedCollectorId", "default_collector");
         updates.put("assignedCollectorName", "Waste Collector");
         updates.put("assignedTimestamp", System.currentTimeMillis());
@@ -245,5 +246,13 @@ public class AdminDashboardActivity extends BaseAdminActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+    
+    // Removed forceUpdateUI method as it's no longer needed
+    
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        // No need for forced UI updates since we removed the RecyclerView
     }
 }

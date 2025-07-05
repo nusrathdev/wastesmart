@@ -1,6 +1,7 @@
 package com.wastesmart.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -157,11 +158,24 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
             holder.btnUpdateStatus.setVisibility(View.VISIBLE);
         }
         
+        // Always ensure the View Details button is visible regardless of status
+        holder.btnViewDetails.setVisibility(View.VISIBLE);
+        
         // Set click listeners
         holder.btnViewDetails.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onReportClick(report, position);
-            }
+            // Launch Map Activity to show waste location
+            Intent mapIntent = new Intent(context, com.wastesmart.admin.WasteLocationMapActivity.class);
+            mapIntent.putExtra("latitude", report.getLatitude());
+            mapIntent.putExtra("longitude", report.getLongitude());
+            
+            // Add some descriptive information
+            String mapTitle = report.getWasteType() != null ? report.getWasteType() + " Waste" : "Waste Location";
+            mapIntent.putExtra("title", mapTitle);
+            
+            String description = report.getDescription() != null ? report.getDescription() : "";
+            mapIntent.putExtra("description", description);
+            
+            context.startActivity(mapIntent);
         });
         
         holder.btnUpdateStatus.setOnClickListener(v -> {
