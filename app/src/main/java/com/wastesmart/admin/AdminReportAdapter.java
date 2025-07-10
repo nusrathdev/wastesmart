@@ -148,7 +148,7 @@ public class AdminReportAdapter extends RecyclerView.Adapter<AdminReportAdapter.
             // Make image clickable to view fullscreen
             final String photoUrl = report.getPhotoUrl();
             holder.ivReportImage.setOnClickListener(v -> {
-                Intent fullscreenIntent = new Intent(context, FullscreenImageActivity.class);
+                Intent fullscreenIntent = new Intent(context, com.wastesmart.ui.FullscreenImageActivity.class);
                 fullscreenIntent.putExtra("imageUrl", photoUrl);
                 context.startActivity(fullscreenIntent);
             });

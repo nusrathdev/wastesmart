@@ -91,7 +91,7 @@
         <activity android:name=".admin.AnalyticsActivity"
             android:exported="false"
             android:launchMode="singleTask" />
-        <activity android:name=".admin.FullscreenImageActivity"
+        <activity android:name=".ui.FullscreenImageActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity android:name=".admin.WasteLocationMapActivity"

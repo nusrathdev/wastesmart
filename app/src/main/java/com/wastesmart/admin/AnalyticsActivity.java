@@ -101,22 +101,22 @@ public class AnalyticsActivity extends BaseAdminActivity {
                         }
                     }
                     
-                    // Update counters with appropriate colors
+                    // Update counters with appropriate colors - always use fixed colors regardless of count
                     binding.tvTotalReports.setText(String.valueOf(queryDocumentSnapshots.size()));
                     
-                    // Set text and color for pending count
+                    // Set text and fixed color for pending count (always gray)
                     binding.tvPendingCount.setText(String.valueOf(pendingCount.get()));
                     binding.tvPendingCount.setTextColor(getResources().getColor(R.color.status_pending, null));
                     
-                    // Set text and color for completed count
+                    // Set text and fixed color for completed count (always green)
                     binding.tvCompletedCount.setText(String.valueOf(completedCount.get()));
                     binding.tvCompletedCount.setTextColor(getResources().getColor(R.color.status_completed, null));
                     
-                    // Set text and color for assigned count
+                    // Set text and fixed color for assigned count (always blue)
                     binding.tvAssignedCount.setText(String.valueOf(assignedCount.get()));
                     binding.tvAssignedCount.setTextColor(getResources().getColor(R.color.status_assigned, null));
                     
-                    // Set text and color for in progress count
+                    // Set text and fixed color for in progress count (always orange)
                     binding.tvInProgressCount.setText(String.valueOf(inProgressCount.get()));
                     binding.tvInProgressCount.setTextColor(getResources().getColor(R.color.status_in_progress, null));
                     
@@ -197,17 +197,19 @@ public class AnalyticsActivity extends BaseAdminActivity {
     private void setupStatusPieChart(int pending, int inProgress, int completed, int assigned) {
         PieChart pieChart = binding.chartReportStatus;
         
-        // Create entries
+        // Create entries for statuses, ensuring all active statuses are displayed
         List<PieEntry> entries = new ArrayList<>();
-        if (pending > 0) entries.add(new PieEntry(pending, "Pending"));
-        if (inProgress > 0) entries.add(new PieEntry(inProgress, "In Progress"));
-        if (completed > 0) entries.add(new PieEntry(completed, "Completed"));
-        if (assigned > 0) entries.add(new PieEntry(assigned, "Assigned"));
         
-        // If no data, add a placeholder
-        if (entries.isEmpty()) {
-            entries.add(new PieEntry(1, "No Data"));
+        // We'll only include Pending if it has a count > 0
+        if (pending > 0) {
+            entries.add(new PieEntry(pending, "Pending"));
         }
+        
+        // For the other statuses, always show them with at least a value of 1
+        // This ensures their colors are always displayed
+        entries.add(new PieEntry(Math.max(inProgress, 1), "In Progress"));
+        entries.add(new PieEntry(Math.max(completed, 1), "Completed"));
+        entries.add(new PieEntry(Math.max(assigned, 1), "Assigned"));
         
         // Create dataset with fixed colors matching our requirements
         PieDataSet dataSet = new PieDataSet(entries, "Report Status");
@@ -218,13 +220,20 @@ public class AnalyticsActivity extends BaseAdminActivity {
         int completedColor = getResources().getColor(R.color.status_completed, null); // Green
         int assignedColor = getResources().getColor(R.color.status_assigned, null); // Blue
         
-        // Apply colors
-        dataSet.setColors(
-            pendingColor,
-            inProgressColor,
-            completedColor,
-            assignedColor
-        );
+        // Apply colors in the exact same order as the entries
+        List<Integer> colors = new ArrayList<>();
+        
+        // Only add pending color if pending entries exist
+        if (pending > 0) {
+            colors.add(pendingColor);
+        }
+        
+        // Always add these colors
+        colors.add(inProgressColor);
+        colors.add(completedColor);
+        colors.add(assignedColor);
+        
+        dataSet.setColors(colors);
         
         // Format chart
         dataSet.setValueTextSize(12f);
