@@ -3,134 +3,264 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
-    app:cardUseCompatPadding="true">
+    android:layout_margin="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="24dp">
 
-        <!-- Header with waste type and status -->
-        <RelativeLayout
+        <!-- Header with Status Badge -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
 
             <TextView
-                android:id="@+id/tvWasteType"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvTitle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:text="Organic"
+                android:layout_weight="1"
+                android:text="Report Details"
                 android:textColor="@color/primary"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="start|center_vertical"
+                android:letterSpacing="0.02" />
 
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:paddingStart="@dimen/status_padding_horizontal"
-                android:paddingEnd="@dimen/status_padding_horizontal"
-                android:paddingTop="@dimen/status_padding_vertical"
-                android:paddingBottom="@dimen/status_padding_vertical"
+                android:background="@drawable/status_circle_bg"
+                android:paddingHorizontal="18dp"
+                android:paddingVertical="10dp"
                 android:text="PENDING"
-                android:textColor="@android:color/white"
-                android:background="@drawable/status_background"
-                android:textSize="@dimen/text_size_small"
+                android:textColor="@color/white"
+                android:textSize="10sp"
                 android:textStyle="bold"
-                android:textAllCaps="true" />
-        </RelativeLayout>
+                android:gravity="center"
+                android:letterSpacing="0.1" />
 
-        <!-- Task details -->
+        </LinearLayout>
+
+        <!-- Waste Type and Size -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="20dp"
+            android:gravity="top">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginEnd="16dp">
 
                 <TextView
-                    android:id="@+id/tvTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Waste Collection Report"
+                    android:text="Waste Type:"
                     android:textColor="@color/dark_gray"
-                    android:textSize="15sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="4dp" />
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
-                    android:id="@+id/tvLocation"
+                    android:id="@+id/tvWasteType"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📍 6.980969, 81.078339"
+                    android:text="Plastic"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.02" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="-25dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Size:"
                     android:textColor="@color/dark_gray"
-                    android:textSize="13sp"
-                    android:layout_marginBottom="4dp" />
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tvSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Medium(Fits in a box)"
+                    android:textColor="@color/dark_gray"
+                    android:textSize="14sp"
+                    android:textStyle="normal"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Description -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description:"
+                android:textColor="@color/dark_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Description of the waste report..."
+                android:textColor="@color/dark_gray"
+                android:textSize="13sp"
+                android:lineSpacingExtra="4dp"
+                android:lineSpacingMultiplier="1.2" />
+
+        </LinearLayout>
+
+        <!-- Location - Hidden -->
+        <LinearLayout
+            android:id="@+id/locationContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location:"
+                android:textColor="@color/dark_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@color/dark_gray"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.02" />
+
+        </LinearLayout>
+
+        <!-- User Info section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reported by:"
+                android:textColor="@color/dark_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvUserInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="John Doe"
+                android:textColor="@color/primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+        </LinearLayout>
+
+        <!-- Report Date and Photo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Submitted:"
+                    android:textColor="@color/dark_gray"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:id="@+id/tvDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🕒 Jun 25, 2025 23:16"
+                    android:text="Dec 15, 2024 14:30"
                     android:textColor="@color/dark_gray"
-                    android:textSize="13sp"
-                    android:layout_marginBottom="4dp" />
-
-                <TextView
-                    android:id="@+id/tvUserInfo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="👤 Reported by: John Doe"
-                    android:textColor="@color/primary"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="2dp"
-                    android:visibility="visible" />
-
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.02" />
             </LinearLayout>
 
+            <!-- Photo Display (Right Side) -->
             <ImageView
                 android:id="@+id/ivReportImage"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_marginStart="12dp"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
                 android:scaleType="centerCrop"
                 android:background="@drawable/image_rounded_bg"
-                android:src="@drawable/ic_photo_placeholder"
-                android:contentDescription="Waste photo" />
-
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Waste photo thumbnail" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="Description of the waste report..."
-            android:textColor="@color/dark_gray"
-            android:textSize="14sp" />
 
         <!-- Action buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginTop="8dp">
+            android:gravity="center">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnViewDetails"
@@ -138,13 +268,12 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="4dp"
                 android:text="View Details"
-                android:textSize="@dimen/text_size_medium"
+                android:textSize="12sp"
                 android:textAllCaps="false"
                 android:textColor="@color/primary"
                 app:strokeColor="@color/primary"
-                app:cornerRadius="8dp"
                 app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -153,16 +282,14 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="4dp"
                 android:text="Assign"
-                android:textSize="@dimen/text_size_medium"
+                android:textSize="12sp"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                app:cornerRadius="8dp"
                 android:backgroundTint="@color/primary" />
 
         </LinearLayout>
-
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

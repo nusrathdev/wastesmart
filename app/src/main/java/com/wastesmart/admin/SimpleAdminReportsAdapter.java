@@ -1,6 +1,7 @@
 package com.wastesmart.admin;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,14 +54,11 @@ public class SimpleAdminReportsAdapter extends RecyclerView.Adapter<SimpleAdminR
             // Set the waste type (bold and prominent like in the screenshot)
             holder.tvWasteType.setText(report.getWasteType());
             
-            // Format waste size and description in a more user-friendly way
-            String sizeAndDescription = report.getSize() + " Size Waste";
-            holder.tvTitle.setText(sizeAndDescription);
+            // Always set title to "Report Details"
+            holder.tvTitle.setText("Report Details");
             
-            // Set location using coordinates with emoji for better readability
-            String location = String.format(Locale.getDefault(), "📍 Lat: %.4f, Long: %.4f", 
-                    report.getLatitude(), report.getLongitude());
-            holder.tvLocation.setText(location);
+            // Hide location information
+            holder.tvLocation.setVisibility(View.GONE);
             
             // Format the date with emoji for better readability
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
@@ -118,12 +116,46 @@ public class SimpleAdminReportsAdapter extends RecyclerView.Adapter<SimpleAdminR
                 context.getResources().getDimensionPixelSize(R.dimen.status_padding_vertical)
             );
             
-            // Show image if available, otherwise hide
+            // Determine the image URL to use - try both imageUrl and photoUrl
+            String imageUrl = null;
             if (report.getImageUrl() != null && !report.getImageUrl().isEmpty()) {
+                imageUrl = report.getImageUrl();
+            } else if (report.getPhotoUrl() != null && !report.getPhotoUrl().isEmpty()) {
+                imageUrl = report.getPhotoUrl();
+            }
+            
+            // Show image if available, otherwise hide
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                // Make the image visible
                 holder.ivReportImage.setVisibility(View.VISIBLE);
-                holder.ivReportImage.setImageResource(R.drawable.ic_photo_placeholder);
+                
+                // Use Picasso to load the image
+                try {
+                    com.squareup.picasso.Picasso.get()
+                        .load(imageUrl)
+                        .into(holder.ivReportImage);
+                    
+                    // Convert dp to pixels to ensure consistent size across all devices
+                    int sizeInDp = 120;
+                    float scale = context.getResources().getDisplayMetrics().density;
+                    int sizeInPixels = (int) (sizeInDp * scale + 0.5f);
+                    
+                    holder.ivReportImage.getLayoutParams().width = sizeInPixels;
+                    holder.ivReportImage.getLayoutParams().height = sizeInPixels;
+                    
+                    // Set up click listener for fullscreen image viewing
+                    final String finalImageUrl = imageUrl;
+                    holder.ivReportImage.setOnClickListener(v -> {
+                        Intent fullscreenIntent = new Intent(context, com.wastesmart.ui.FullscreenImageActivity.class);
+                        fullscreenIntent.putExtra("imageUrl", finalImageUrl);
+                        context.startActivity(fullscreenIntent);
+                    });
+                } catch (Exception e) {
+                    Log.e("SimpleAdminReportsAdapter", "Error loading image: " + e.getMessage());
+                    holder.ivReportImage.setVisibility(View.GONE);
+                }
             } else {
-                // Match the screenshot - don't show an image if there isn't one
+                // Hide the image if there's no URL available
                 holder.ivReportImage.setVisibility(View.GONE);
             }
 

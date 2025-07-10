@@ -139,8 +139,8 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
                 float scale = context.getResources().getDisplayMetrics().density;
                 int sizeInPixels = (int) (sizeInDp * scale + 0.5f);
                 
-                holder.ivPhoto.getLayoutParams().width = sizeInPixels; // match the layout size of 200dp
-                holder.ivPhoto.getLayoutParams().height = sizeInPixels; // match the layout size of 200dp
+                holder.ivPhoto.getLayoutParams().width = sizeInPixels; // match the layout size of 120dp
+                holder.ivPhoto.getLayoutParams().height = sizeInPixels; // match the layout size of 120dp
             } catch (Exception e) {
                 // If Glide fails, fall back to placeholder
                 android.util.Log.e("TasksAdapter", "Error loading image: " + e.getMessage());

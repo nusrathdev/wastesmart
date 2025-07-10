@@ -89,11 +89,17 @@ public class WasteLocationMapActivity extends AppCompatActivity implements OnMap
     private void setupReportDetails(Intent intent) {
         if (intent == null) return;
         
+        TextView tvReportTitle = findViewById(R.id.tvReportTitle);
         TextView tvWasteType = findViewById(R.id.tvWasteType);
         TextView tvDescription = findViewById(R.id.tvDescription);
         TextView tvStatus = findViewById(R.id.tvStatus);
         
+        // Set report title
+        tvReportTitle.setText("Waste Report Details");
+        
+        // Get waste type directly from intent
         String wasteType = intent.getStringExtra("wasteType");
+        
         String description = intent.getStringExtra("description");
         String status = intent.getStringExtra("status");
         
@@ -101,7 +107,13 @@ public class WasteLocationMapActivity extends AppCompatActivity implements OnMap
         if (wasteType != null && !wasteType.isEmpty()) {
             tvWasteType.setText("Waste Type: " + wasteType);
         } else {
-            tvWasteType.setText("Waste Type: Unknown");
+            // Extract wasteType directly if passed separately
+            String directWasteType = intent.getStringExtra("wasteType");
+            if (directWasteType != null && !directWasteType.isEmpty()) {
+                tvWasteType.setText("Waste Type: " + directWasteType);
+            } else {
+                tvWasteType.setText("Waste Type");
+            }
         }
         
         // Set description
@@ -128,8 +140,7 @@ public class WasteLocationMapActivity extends AppCompatActivity implements OnMap
             }
             tvStatus.setBackgroundResource(backgroundResId);
         } else {
-            tvStatus.setText("UNKNOWN");
-            tvStatus.setBackgroundResource(R.drawable.status_badge_bg);
+            tvStatus.setVisibility(android.view.View.GONE); // Hide the status if not available
         }
     }
 
