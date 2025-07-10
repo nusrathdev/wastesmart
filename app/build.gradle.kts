@@ -29,7 +29,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
         // Add Google Maps API key from local.properties
-        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = localProperties.getProperty("GOOGLE_MAPS_API_KEY", "")
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = localProperties.getProperty("GOOGLE_MAPS_API_KEY", "AIzaSyBfWOlel1IE0iotcydfNxfJJXWwKAyZ0Kk")
     }
 
     buildTypes {
@@ -83,9 +83,15 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.cardview:cardview:1.0.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     // Image loading
     implementation("com.squareup.picasso:picasso:2.8")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+    
+    // Charts
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

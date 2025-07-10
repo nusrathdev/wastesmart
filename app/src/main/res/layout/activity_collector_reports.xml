@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_gray"
+    tools:context=".collector.CollectorReportsActivity">
+
+    <!-- Top Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/primary"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="Collection Reports" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main Content Area -->
+    <LinearLayout
+        android:id="@+id/mainContentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/appBarLayout"
+        android:layout_above="@+id/bottomNavigation"
+        android:orientation="vertical"
+        android:padding="16dp">
+        
+        <!-- Title Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/titleCardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            android:layout_marginBottom="12dp">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="12dp"
+                android:orientation="horizontal">
+    
+                <!-- Title Text -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Your Collection Reports"
+                    android:textColor="@color/primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center_vertical" />
+    
+            </LinearLayout>
+            
+        </androidx.cardview.widget.CardView>
+
+        <!-- Reports List -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvReports"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp"
+                tools:listitem="@layout/item_collector_report" />
+
+            <TextView
+                android:id="@+id/tvNoReports"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="No waste reports found"
+                android:textSize="18sp"
+                android:textColor="@color/dark_gray"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <!-- Include Bottom Navigation -->
+    <include
+        android:id="@+id/bottomNavigation"
+        layout="@layout/collector_bottom_navigation_bar" />
+
+</RelativeLayout>

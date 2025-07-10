@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -19,7 +18,7 @@ import com.wastesmart.models.WasteReport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RouteMapActivity extends AppCompatActivity {
+public class RouteMapActivity extends BaseCollectorActivity {
 
     private static final String TAG = "RouteMap";
     private ActivityRouteMapBinding binding;
@@ -39,9 +38,11 @@ public class RouteMapActivity extends AppCompatActivity {
         // Setup toolbar
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Today's Routes");
         }
+        
+        // Setup bottom navigation
+        setupBottomNavigation();
 
         // Setup RecyclerView for route points
         routePoints = new ArrayList<>();
@@ -118,5 +119,10 @@ public class RouteMapActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    @Override
+    protected int getActiveNavItemIndex() {
+        return -1; // Not in navigation anymore
     }
 }

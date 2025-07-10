@@ -1,40 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/light_gray"
     tools:context=".admin.ManageReportsActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <!-- Top Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/primary"
-        android:theme="@style/ThemeOverlay.Material3.Dark"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_alignParentTop="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewReports"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/primary"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="Waste Reports" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main Content Area -->
+    <LinearLayout
+        android:id="@+id/mainContentLayout"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:padding="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        tools:listitem="@layout/item_waste_report" />
+        android:layout_height="match_parent"
+        android:layout_below="@id/appBarLayout"
+        android:layout_above="@+id/bottomNavigation"
+        android:orientation="vertical"
+        android:padding="16dp">
+        
+        <!-- Filter Options -->
+        <LinearLayout
+            android:id="@+id/filtersLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="8dp"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- Filter Spinner with Label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Filter: "
+                android:textColor="@color/dark_gray"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_gravity="center_vertical" />
+
+            <Spinner
+                android:id="@+id/spinnerFilter"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent" />
+
+        </LinearLayout>
+
+        <!-- Reports List -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipeRefreshLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvReports"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="8dp"
+                    tools:listitem="@layout/item_admin_report" />
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            <TextView
+                android:id="@+id/tvNoReports"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="No waste reports found"
+                android:textSize="18sp"
+                android:textColor="@color/dark_gray"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <!-- Include Bottom Navigation -->
+    <include
+        android:id="@+id/bottomNavigation"
+        layout="@layout/admin_bottom_navigation_bar" />
+
+</RelativeLayout>

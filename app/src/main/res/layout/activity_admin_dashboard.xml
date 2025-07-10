@@ -1,90 +1,247 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:background="@color/light_gray"
     tools:context=".admin.AdminDashboardActivity">
 
-    <TextView
-        android:id="@+id/tvWelcomeAdmin"
-        android:layout_width="wrap_content"
+    <!-- Top Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:text="Welcome, Admin"
-        android:textColor="@color/primary"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_alignParentTop="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvWelcomeAdmin"
-        app:layout_constraintWidth_percent="0.9">
-
-        <Button
-            android:id="@+id/btnManageWasteReports"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_height="?attr/actionBarSize"
             android:background="@color/primary"
-            android:padding="16dp"
-            android:text="Manage Waste Reports"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="Admin Dashboard">
+            
+            <!-- Logout button in top-right corner -->
+            <ImageView
+                android:id="@+id/btnLogout"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_logout"
+                android:contentDescription="@string/logout" />
+                
+        </androidx.appcompat.widget.Toolbar>
 
-        <Button
-            android:id="@+id/btnManageCollectors"
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main Content Area -->
+    <LinearLayout
+        android:id="@+id/mainContentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/appBarLayout"
+        android:layout_above="@+id/bottomNavigation"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal"
+        android:weightSum="10">
+
+        <!-- Space for top centering -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2" />
+            
+        <!-- Welcome Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@color/secondary"
-            android:padding="16dp"
-            android:text="Manage Collectors"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:layout_marginBottom="32dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:strokeWidth="0dp">
 
-        <Button
-            android:id="@+id/btnViewAnalytics"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Welcome,"
+                    android:textColor="@color/dark_gray"
+                    android:textSize="18sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:id="@+id/tvWelcomeAdmin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Administrator"
+                    android:textColor="@color/primary"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif" />
+
+                <TextView
+                    android:id="@+id/tvOverview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Here's your waste management overview"
+                    android:textColor="@color/dark_gray"
+                    android:textSize="16sp"
+                    android:textAlignment="center"
+                    android:fontFamily="sans-serif" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Stats Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@color/primary_dark"
-            android:padding="16dp"
-            android:text="View Analytics"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/primary"
+            android:layout_marginBottom="32dp">
 
-        <Button
-            android:id="@+id/btnSystemSettings"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reports Overview"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <!-- Pending Reports (Left) -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tvPendingCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="--"
+                            android:textColor="@android:color/white"
+                            android:textSize="32sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Pending"
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp"
+                            android:fontFamily="sans-serif" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="60dp"
+                        android:background="@android:color/white"
+                        android:alpha="0.3" />
+
+                    <!-- Today's Reports (Right) -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tvTodayCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="--"
+                            android:textColor="@android:color/white"
+                            android:textSize="32sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Today"
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp"
+                            android:fontFamily="sans-serif" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+                    
+                    <TextView
+                        android:id="@+id/tvViewAll"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="View All Reports"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Space to maintain vertical centering -->
+        <Space
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@color/secondary_light"
-            android:padding="16dp"
-            android:text="System Settings"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:layout_height="0dp"
+            android:layout_weight="2" />
 
-        <Button
-            android:id="@+id/btnLogout"
-            android:layout_width="match_parent"
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:background="@color/error"
-            android:padding="16dp"
-            android:text="Logout"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
-
+            android:layout_gravity="center"
+            android:visibility="gone" />
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Include Bottom Navigation -->
+    <include
+        android:id="@+id/bottomNavigation"
+        layout="@layout/admin_bottom_navigation_bar" />
+
+</RelativeLayout>

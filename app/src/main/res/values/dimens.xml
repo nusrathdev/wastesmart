@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common padding dimensions -->
+    <dimen name="spacing_xxsmall">2dp</dimen>
+    <dimen name="spacing_xsmall">4dp</dimen>
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_large">24dp</dimen>
+    <dimen name="spacing_xlarge">32dp</dimen>
+    <dimen name="spacing_xxlarge">48dp</dimen>
+
+    <!-- Status badge padding -->
+    <dimen name="status_padding_horizontal">12dp</dimen>
+    <dimen name="status_padding_vertical">6dp</dimen>
+    
+    <!-- Card dimensions -->
+    <dimen name="card_corner_radius">16dp</dimen>
+    <dimen name="card_elevation">6dp</dimen>
+    <dimen name="card_margin">8dp</dimen>
+    <dimen name="card_padding">16dp</dimen>
+    
+    <!-- Text sizes -->
+    <dimen name="text_size_small">12sp</dimen>
+    <dimen name="text_size_medium">14sp</dimen>
+    <dimen name="text_size_large">16sp</dimen>
+    <dimen name="text_size_xlarge">18sp</dimen>
+    <dimen name="text_size_xxlarge">20sp</dimen>
+    <dimen name="text_size_header">24sp</dimen>
+    <dimen name="text_size_display">28sp</dimen>
+</resources>

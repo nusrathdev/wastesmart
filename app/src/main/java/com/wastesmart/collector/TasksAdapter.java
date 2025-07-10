@@ -78,18 +78,19 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
         int statusColor;
         
         // Update status badge with emoji and background color
-        switch (status.toLowerCase()) {
-            case "completed":
+        String statusUpperCase = status.toUpperCase();
+        switch (statusUpperCase) {
+            case "COMPLETED":
                 holder.tvStatus.setText("COMPLETED");
                 statusBackground = R.drawable.status_completed_circle_bg;
                 statusColor = context.getResources().getColor(R.color.status_completed, null);
                 break;
-            case "in_progress":
+            case "IN_PROGRESS":
                 holder.tvStatus.setText("IN PROGRESS");
                 statusBackground = R.drawable.status_in_progress_circle_bg;
                 statusColor = context.getResources().getColor(R.color.status_in_progress, null);
                 break;
-            default: // assigned
+            default: // ASSIGNED
                 holder.tvStatus.setText("ASSIGNED");
                 statusBackground = R.drawable.status_assigned_circle_bg;
                 statusColor = context.getResources().getColor(R.color.status_assigned, null);
@@ -111,13 +112,33 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
         holder.tvStatus.setTextColor(statusColor);
         holder.tvStatus.setBackgroundResource(statusBackground);
 
-        // Show image indicator if available
+        // Show image if available - try both imageUrl and photoUrl properties
+        String imageUrl = null;
         if (task.getImageUrl() != null && !task.getImageUrl().isEmpty()) {
-            holder.ivPhoto.setVisibility(View.VISIBLE);
-            // Simple placeholder - actual image loading can be implemented later
-            holder.ivPhoto.setImageResource(R.drawable.ic_photo_placeholder);
+            imageUrl = task.getImageUrl();
+        } else if (task.getPhotoUrl() != null && !task.getPhotoUrl().isEmpty()) {
+            imageUrl = task.getPhotoUrl();
+        }
+            
+        holder.ivPhoto.setVisibility(View.VISIBLE);
+            
+        if (imageUrl != null) {
+            // Use Glide to load and display the image
+            try {
+                android.util.Log.d("TasksAdapter", "Loading image from URL: " + imageUrl + " for task ID: " + task.getId());
+                com.bumptech.glide.Glide.with(context)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_photo_placeholder)
+                    .error(R.drawable.ic_photo_error)
+                    .centerCrop()
+                    .into(holder.ivPhoto);
+            } catch (Exception e) {
+                // If Glide fails, fall back to placeholder
+                android.util.Log.e("TasksAdapter", "Error loading image: " + e.getMessage());
+                holder.ivPhoto.setImageResource(R.drawable.ic_photo_placeholder);
+            }
         } else {
-            holder.ivPhoto.setVisibility(View.VISIBLE);
+            android.util.Log.d("TasksAdapter", "No image URL available for task ID: " + task.getId());
             holder.ivPhoto.setImageResource(R.drawable.ic_photo_placeholder);
         }
 
@@ -144,21 +165,21 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
         });
 
         holder.btnStart.setOnClickListener(v -> {
-            // Update task status to in_progress
+            // Update task status to in_progress (using consistent uppercase)
             if (context instanceof CollectionTasksActivity) {
-                ((CollectionTasksActivity) context).updateTaskStatus(task.getId(), "in_progress");
+                ((CollectionTasksActivity) context).updateTaskStatus(task.getId(), "IN_PROGRESS");
             }
         });
 
         holder.btnComplete.setOnClickListener(v -> {
-            // Update task status to completed
+            // Update task status to completed (using consistent uppercase)
             if (context instanceof CollectionTasksActivity) {
-                ((CollectionTasksActivity) context).updateTaskStatus(task.getId(), "completed");
+                ((CollectionTasksActivity) context).updateTaskStatus(task.getId(), "COMPLETED");
             }
         });
 
-        // Show/hide complete button based on status
-        if ("in_progress".equals(status)) {
+        // Show/hide complete button based on status (case-insensitive comparison)
+        if (status.equalsIgnoreCase("in_progress")) {
             holder.btnComplete.setVisibility(View.VISIBLE);
             holder.btnStart.setVisibility(View.GONE);
         } else {

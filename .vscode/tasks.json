@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run WasteSmart App",
+			"type": "shell",
+			"command": "./gradlew :app:assembleDebug",
+			"group": "build",
+			"problemMatcher": [
+				"$android"
+			]
+		}
+	]
+}

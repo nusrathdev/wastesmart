@@ -18,6 +18,7 @@
     <color name="accent">#FFD600</color> <!-- Yellow Accent -->
     <color name="light_gray">#EEEEEE</color>
     <color name="medium_gray">#9E9E9E</color>
+    <color name="light_blue">#E3F2FD</color>
     <color name="dark_gray">#616161</color>
     <color name="text_secondary">#757575</color> <!-- Secondary text color -->
     <color name="error">#D32F2F</color> <!-- Red for errors -->
@@ -25,11 +26,15 @@
     <color name="success_light">#E8F5E8</color> <!-- Light green background -->
     <color name="success_dark">#2E7D32</color> <!-- Dark green text -->
     <color name="warning">#FFA000</color> <!-- Amber for warnings -->
-    <color name="light_blue">#E3F2FD</color> <!-- Light blue background -->
 
     <!-- Status Badge Colors -->
     <color name="status_assigned">#2196F3</color> <!-- Blue -->
     <color name="status_in_progress">#FF9800</color> <!-- Orange -->
     <color name="status_completed">#4CAF50</color> <!-- Green -->
     <color name="status_pending">#9E9E9E</color> <!-- Gray -->
+    
+    <!-- Leaderboard Medal Colors -->
+    <color name="gold">#FFD700</color> <!-- Gold medal -->
+    <color name="silver">#C0C0C0</color> <!-- Silver medal -->
+    <color name="bronze">#CD7F32</color> <!-- Bronze medal -->
 </resources>

@@ -85,13 +85,15 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
             holder.ivPhoto.setVisibility(View.GONE);
         }
 
+        final int currentPosition = position; // Capture the current position
+        
         // Setup button listeners
         holder.btnAssign.setOnClickListener(v -> {
-            context.assignReportToCollector(report.getId(), report);
+            context.assignReportToCollector(report, currentPosition);
         });
 
         holder.btnComplete.setOnClickListener(v -> {
-            context.updateReportStatus(report.getId(), "completed");
+            context.updateReportStatus(report, "COMPLETED", currentPosition);
         });
 
         // Show/hide buttons based on current status
