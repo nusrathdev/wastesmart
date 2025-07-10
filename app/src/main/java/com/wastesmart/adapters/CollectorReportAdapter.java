@@ -72,12 +72,13 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
             holder.tvWasteType.setVisibility(View.GONE);
         }
         
-        // Set title with waste size
-        String title = "Waste Report";
+        // Set waste size if available
         if (report.getWasteSize() != null && !report.getWasteSize().isEmpty()) {
-            title = report.getWasteSize() + " Size Waste";
+            holder.tvSize.setText(report.getWasteSize());
+            holder.tvSize.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvSize.setText("Unknown size");
         }
-        holder.tvTitle.setText(title);
         
         // Set report description
         if (report.getDescription() != null && !report.getDescription().isEmpty()) {
@@ -96,13 +97,13 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
         // Set date
         if (report.getTimestamp() != null && report.getTimestamp() > 0) {
             Date date = new Date(report.getTimestamp());
-            holder.tvDate.setText("🕒 " + dateFormat.format(date));
+            holder.tvTimestamp.setText(dateFormat.format(date));
         } else {
-            holder.tvDate.setText("🕒 Date not available");
+            holder.tvTimestamp.setText("Date not available");
         }
         
-        // Set user info
-        setUserInfo(holder, report);
+        // User info not displayed in new layout
+        // setUserInfo(holder, report);
         
         // Set status with appropriate styling
         String status = report.getStatus();
@@ -148,13 +149,13 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
             tempImageUrl = report.getImageUrl();
         }
         
-        // Always show the image view
-        holder.ivReportImage.setVisibility(View.VISIBLE);
-        
         // Make the URL final so it can be used in the inner class callback
         final String imageUrl = tempImageUrl;
         
         if (imageUrl != null && !imageUrl.isEmpty()) {
+            // Make the image visible
+            holder.ivReportImage.setVisibility(View.VISIBLE);
+            
             Log.d(TAG, "Loading image from URL: " + imageUrl + " for report ID: " + report.getId());
             
             // Use a fallback image based on waste type if the URL fails
@@ -165,8 +166,6 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
             try {
                 Picasso.get()
                     .load(imageUrl)
-                    .placeholder(R.drawable.ic_photo_placeholder)
-                    .error(R.drawable.ic_photo_error)
                     .into(holder.ivReportImage, new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
@@ -182,23 +181,31 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
                             if (fallbackUrl != null && !fallbackUrl.equals(imageUrl)) {
                                 Picasso.get()
                                     .load(fallbackUrl)
-                                    .placeholder(R.drawable.ic_photo_placeholder)
-                                    .error(R.drawable.ic_photo_error)
                                     .into(holder.ivReportImage);
+                            } else {
+                                // Hide the image if both main and fallback URLs fail
+                                holder.ivReportImage.setVisibility(View.GONE);
                             }
                         }
                     });
+                
+                // Set image size to match the layout - convert dp to pixels
+                int sizeInDp = 120;
+                float scale = context.getResources().getDisplayMetrics().density;
+                int sizeInPixels = (int) (sizeInDp * scale + 0.5f);
+                
+                holder.ivReportImage.getLayoutParams().width = sizeInPixels; // match the layout size of 200dp
+                holder.ivReportImage.getLayoutParams().height = sizeInPixels; // match the layout size of 200dp
             } catch (Exception e) {
                 Log.e(TAG, "Exception while setting up Picasso image load", e);
-                // Set error drawable directly if Picasso throws an exception
-                holder.ivReportImage.setImageResource(R.drawable.ic_photo_error);
+                // Hide the image if there's an error
+                holder.ivReportImage.setVisibility(View.GONE);
             }
         } else {
-            Log.d(TAG, "No image URL available for report ID: " + report.getId() + 
-                  ", using default image based on waste type");
+            Log.d(TAG, "No image URL available for report ID: " + report.getId());
             
-            // Show a waste-type specific default image
-            setDefaultWasteImage(holder.ivReportImage, report.getWasteType());
+            // Hide the image view when there's no image
+            holder.ivReportImage.setVisibility(View.GONE);
         }
         
         // Set button visibility based on status
@@ -240,8 +247,17 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
             }
         });
         
-        // Set user info
-        setUserInfo(holder, report);
+        // Add click listener for the image to open fullscreen view
+        holder.ivReportImage.setOnClickListener(v -> {
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                Intent fullscreenIntent = new Intent(context, com.wastesmart.ui.FullscreenImageActivity.class);
+                fullscreenIntent.putExtra("imageUrl", imageUrl);
+                context.startActivity(fullscreenIntent);
+            }
+        });
+        
+        // User info not displayed in new layout
+        // setUserInfo(holder, report);
     }
 
     @Override
@@ -270,7 +286,13 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
     }
     
     // Helper method to get user info and display it
+    // Note: This method is commented out as tvUserInfo is no longer part of the new layout
+    // Keeping the implementation for reference if user info needs to be added back
     private void setUserInfo(ReportViewHolder holder, WasteReport report) {
+        // Skip this method as tvUserInfo is not in the new layout
+        if (true) return;
+        
+        /* 
         // Get user ID
         String userId = report.getUserId();
         
@@ -297,6 +319,7 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
         } else {
             holder.tvUserInfo.setVisibility(View.GONE);
         }
+        */
     }
 
     /**
@@ -368,19 +391,18 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
     }
 
     static class ReportViewHolder extends RecyclerView.ViewHolder {
-        TextView tvWasteType, tvTitle, tvDescription, tvLocation, tvDate, tvStatus, tvUserInfo;
+        TextView tvWasteType, tvDescription, tvLocation, tvStatus, tvTimestamp, tvSize;
         ImageView ivReportImage;
         MaterialButton btnViewDetails, btnUpdateStatus;
         
         ReportViewHolder(@NonNull View itemView) {
             super(itemView);
             tvWasteType = itemView.findViewById(R.id.tvWasteType);
-            tvTitle = itemView.findViewById(R.id.tvTitle);
+            tvSize = itemView.findViewById(R.id.tvSize);
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvLocation = itemView.findViewById(R.id.tvLocation);
-            tvDate = itemView.findViewById(R.id.tvDate);
+            tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
             tvStatus = itemView.findViewById(R.id.tvStatus);
-            tvUserInfo = itemView.findViewById(R.id.tvUserInfo);
             ivReportImage = itemView.findViewById(R.id.ivReportImage);
             btnViewDetails = itemView.findViewById(R.id.btnViewDetails);
             btnUpdateStatus = itemView.findViewById(R.id.btnUpdateStatus);

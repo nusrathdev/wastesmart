@@ -113,13 +113,16 @@
 
             <ImageView
                 android:id="@+id/ivPhoto"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_marginStart="12dp"
                 android:scaleType="centerCrop"
                 android:background="@drawable/image_rounded_bg"
                 android:src="@drawable/ic_photo_placeholder"
-                android:contentDescription="Waste photo" />
+                android:contentDescription="Waste photo"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"/>
 
         </LinearLayout>
 

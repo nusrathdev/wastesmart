@@ -38,15 +38,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Page title -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Analytics Dashboard"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="@color/primary"
-                android:layout_marginBottom="16dp" />
+            <!-- Remove Analytics Dashboard title as requested -->
 
             <!-- Report Statistics Cards -->
             <androidx.cardview.widget.CardView

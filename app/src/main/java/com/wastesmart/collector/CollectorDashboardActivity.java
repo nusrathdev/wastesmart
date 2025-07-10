@@ -1,6 +1,7 @@
 package com.wastesmart.collector;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -10,18 +11,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.wastesmart.MainActivity;
 import com.wastesmart.R;
 import com.wastesmart.databinding.ActivityCollectorDashboardBinding;
 import com.wastesmart.models.Collector;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class CollectorDashboardActivity extends BaseCollectorActivity {
 
@@ -30,6 +25,10 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private Collector currentCollector;
+    private SharedPreferences sharedPreferences;
+    private static final String PREFS_NAME = "WasteSmartPrefs";
+    private static final String COLLECTOR_KEY = "currentCollector";
+    private static final String TASKS_COUNT_KEY = "assignedTasksCount";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +40,9 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
         // Initialize Firebase components
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        
+        // Initialize SharedPreferences
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         // Set up toolbar
         setSupportActionBar(binding.toolbar);
@@ -53,29 +55,73 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
     }
     
     @Override
+    protected void onResume() {
+        super.onResume();
+        // When resuming, refresh assigned task count
+        if (currentCollector != null) {
+            loadAssignedTaskCount();
+        }
+        
+        // Restore state if available
+        restoreState();
+    }
+    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Save state when pausing
+        saveState();
+    }
+    
+    @Override
     protected int getActiveNavItemIndex() {
         return 1; // Home tab index (0-based)
     }
 
     private void loadCollectorData() {
+        // First try to restore collector from SharedPreferences
+        String collectorId = sharedPreferences.getString(COLLECTOR_KEY + "_id", null);
+        String collectorName = sharedPreferences.getString(COLLECTOR_KEY + "_name", null);
+        String collectorEmail = sharedPreferences.getString(COLLECTOR_KEY + "_email", null);
+        String employeeId = sharedPreferences.getString(COLLECTOR_KEY + "_employeeId", null);
+        String assignedArea = sharedPreferences.getString(COLLECTOR_KEY + "_area", null);
+        
+        if (collectorId != null && collectorName != null) {
+            try {
+                currentCollector = new Collector();
+                currentCollector.setId(collectorId);
+                currentCollector.setName(collectorName);
+                currentCollector.setEmail(collectorEmail);
+                currentCollector.setEmployeeId(employeeId);
+                currentCollector.setAssignedArea(assignedArea);
+                
+                Log.d(TAG, "Loaded collector from SharedPreferences: " + currentCollector.getName());
+                updateUI();
+                return;
+            } catch (Exception e) {
+                Log.e(TAG, "Error loading collector from SharedPreferences", e);
+                // Continue with normal loading
+            }
+        }
+        
         // Check if we have collector data from the intent (default credentials)
         String collectorType = getIntent().getStringExtra("collector_type");
-        String collectorEmail = getIntent().getStringExtra("collector_email");
-        String collectorName = getIntent().getStringExtra("collector_name");
+        String intentEmail = getIntent().getStringExtra("collector_email");
+        String intentName = getIntent().getStringExtra("collector_name");
         
         // Add debug logging to track login flow
         Log.d(TAG, "Loading collector data. Intent has collector type: " + 
-              (collectorType != null) + ", email: " + collectorEmail);
+              (collectorType != null) + ", email: " + intentEmail);
         
-        if (collectorType != null && collectorEmail != null) {
+        if (collectorType != null && intentEmail != null) {
             // This is a default collector login
             currentCollector = new Collector();
             currentCollector.setId("default_collector");
-            currentCollector.setName(collectorName != null ? collectorName : collectorType);
-            currentCollector.setEmail(collectorEmail);
+            currentCollector.setName(intentName != null ? intentName : collectorType);
+            currentCollector.setEmail(intentEmail);
             
             // For supervisor, set different values
-            if (collectorEmail.equals("supervisor@wastesmart.com")) {
+            if (intentEmail.equals("supervisor@wastesmart.com")) {
                 currentCollector.setEmployeeId("SUP-001");
                 currentCollector.setAssignedArea("All Areas");
             } else {
@@ -84,6 +130,7 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
             }
             
             updateUI();
+            saveState(); // Save to SharedPreferences
             return;
         }
         
@@ -109,25 +156,28 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
                 currentCollector.setEmployeeId("NAV-001");
                 currentCollector.setAssignedArea("Navigation Area");
                 updateUI();
+                saveState(); // Save to SharedPreferences
                 return;
             }
         }
 
-        String collectorId = mAuth.getCurrentUser().getUid();
-        db.collection("collectors").document(collectorId).get()
+        String currentUserId = mAuth.getCurrentUser().getUid();
+        db.collection("collectors").document(currentUserId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         currentCollector = documentSnapshot.toObject(Collector.class);
                         updateUI();
+                        saveState(); // Save to SharedPreferences
                     } else {
                         // Create a fallback collector if document doesn't exist
                         currentCollector = new Collector();
-                        currentCollector.setId(collectorId);
+                        currentCollector.setId(currentUserId);
                         currentCollector.setName("Waste Collector");
                         currentCollector.setEmail(mAuth.getCurrentUser().getEmail());
                         currentCollector.setEmployeeId("NEW-001");
                         currentCollector.setAssignedArea("Not Assigned");
                         updateUI();
+                        saveState(); // Save to SharedPreferences
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -156,12 +206,18 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
                     binding.tvWelcomeMessage.setText(welcomeMessages[randomIndex]);
                 }
                 
-                // Load assigned task count
-                loadAssignedTaskCount();
-                
-                // Initially set a placeholder value that will be updated
-                if (binding.tvTasksCount != null) {
-                    binding.tvTasksCount.setText("0");
+                // Restore task count if available
+                String savedCount = sharedPreferences.getString(TASKS_COUNT_KEY, null);
+                if (savedCount != null && binding.tvTasksCount != null) {
+                    binding.tvTasksCount.setText(savedCount);
+                } else {
+                    // Load assigned task count
+                    loadAssignedTaskCount();
+                    
+                    // Initially set a placeholder value that will be updated
+                    if (binding.tvTasksCount != null) {
+                        binding.tvTasksCount.setText("0");
+                    }
                 }
                 
                 // Setup route view button
@@ -182,6 +238,7 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
                 currentCollector.setEmail("collector@wastesmart.com");
                 currentCollector.setEmployeeId("NAV-001");
                 currentCollector.setAssignedArea("Navigation Area");
+                saveState(); // Save to SharedPreferences
                 // Try updating UI again
                 updateUI();
                 return;
@@ -227,20 +284,6 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
         
         Log.d(TAG, "Loading assigned task count for collector ID: " + collectorId);
         
-        // First check if we should create some test data for empty cases
-        db.collection("waste_reports")
-            .whereEqualTo("assignedCollectorId", collectorId)
-            .limit(1)
-            .get()
-            .addOnSuccessListener(querySnapshot -> {
-                if (querySnapshot.isEmpty() && 
-                    ("default_collector".equals(collectorId) || 
-                     "navigation_collector".equals(collectorId))) {
-                    Log.d(TAG, "No assigned reports found, creating test reports");
-                    createTestReports(collectorId);
-                }
-            });
-
         // Query Firestore for assigned waste reports (use uppercase for consistent comparison)
         db.collection("waste_reports")
             .whereEqualTo("assignedCollectorId", collectorId)
@@ -252,7 +295,13 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
                 Log.d(TAG, "Found " + assignedCount + " assigned tasks for collector ID: " + collectorId);
                 
                 if (binding.tvTasksCount != null) {
-                    binding.tvTasksCount.setText(String.valueOf(assignedCount));
+                    String countStr = String.valueOf(assignedCount);
+                    binding.tvTasksCount.setText(countStr);
+                    
+                    // Save the count to SharedPreferences
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(TASKS_COUNT_KEY, countStr);
+                    editor.apply();
                 }
             })
             .addOnFailureListener(e -> {
@@ -265,80 +314,47 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
     }
 
     /**
-     * Creates test reports for demonstration purposes
+     * Save current state to SharedPreferences
      */
-    private void createTestReports(String collectorId) {
-        // Notify user that we're creating test data
-        Toast.makeText(this, "Creating test reports for demonstration", Toast.LENGTH_SHORT).show();
-        
-        Log.d(TAG, "Creating test reports for collector ID: " + collectorId);
-        
-        // Create test reports with different statuses
-        createTestReport("ASSIGNED", "Household Waste", "Large", "Test household waste collection near downtown area", collectorId);
-        createTestReport("ASSIGNED", "Recyclable Items", "Medium", "Recyclable materials ready for pickup", collectorId);
-        createTestReport("IN_PROGRESS", "Electronic Waste", "Medium", "Used electronics waiting for collection", collectorId);
-        createTestReport("COMPLETED", "Garden Waste", "Large", "Garden waste including branches, leaves and grass clippings", collectorId);
-        
-        Log.d(TAG, "Created test reports, will reload after 2 seconds");
-        
-        // Reload the dashboard after a delay
-        new android.os.Handler().postDelayed(() -> {
-            Log.d(TAG, "Reloading dashboard data after creating test reports");
-            loadAssignedTaskCount();
-        }, 2000);
+    private void saveState() {
+        if (currentCollector != null && sharedPreferences != null) {
+            try {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                
+                // Save collector fields individually
+                editor.putString(COLLECTOR_KEY + "_id", currentCollector.getId());
+                editor.putString(COLLECTOR_KEY + "_name", currentCollector.getName());
+                editor.putString(COLLECTOR_KEY + "_email", currentCollector.getEmail());
+                editor.putString(COLLECTOR_KEY + "_employeeId", currentCollector.getEmployeeId());
+                editor.putString(COLLECTOR_KEY + "_area", currentCollector.getAssignedArea());
+                
+                // Also save the current tasks count if available
+                if (binding != null && binding.tvTasksCount != null) {
+                    String count = binding.tvTasksCount.getText().toString();
+                    editor.putString(TASKS_COUNT_KEY, count);
+                }
+                
+                editor.apply();
+                Log.d(TAG, "Saved collector state to SharedPreferences");
+            } catch (Exception e) {
+                Log.e(TAG, "Error saving state", e);
+            }
+        }
     }
     
     /**
-     * Creates a single test waste report
+     * Restore state from SharedPreferences
      */
-    private void createTestReport(String status, String wasteType, String wasteSize, String description, String collectorId) {
-        Map<String, Object> testReport = new HashMap<>();
-        testReport.put("wasteType", wasteType);
-        testReport.put("wasteSize", wasteSize);
-        testReport.put("description", description);
-        testReport.put("latitude", 37.7749 + (Math.random() - 0.5) / 100); // San Francisco with small random variation
-        testReport.put("longitude", -122.4194 + (Math.random() - 0.5) / 100);
-        testReport.put("status", status);
-        testReport.put("timestamp", System.currentTimeMillis() - (long)(Math.random() * 86400000)); // Within last 24h
-        testReport.put("assignedTimestamp", System.currentTimeMillis() - (long)(Math.random() * 43200000)); // Within last 12h
-        testReport.put("assignedCollectorId", collectorId);
-        testReport.put("assignedCollectorName", currentCollector != null ? currentCollector.getName() : "Default Collector");
-        testReport.put("userId", "test_user");
-        
-        // Add realistic image URL based on waste type
-        String imageUrl = "https://firebasestorage.googleapis.com/v0/b/wastesmart-app.appspot.com/o/waste_images%2F";
-        
-        if (wasteType.contains("Household")) {
-            imageUrl += "household_waste.jpg";
-        } else if (wasteType.contains("Recyclable")) {
-            imageUrl += "recyclable_waste.jpg";
-        } else if (wasteType.contains("Electronic")) {
-            imageUrl += "electronic_waste.jpg";
-        } else if (wasteType.contains("Garden")) {
-            imageUrl += "garden_waste.jpg";
-        } else {
-            imageUrl += "general_waste.jpg";
+    private void restoreState() {
+        // Already handled in loadCollectorData for collector object
+        // Just need to restore task count if not already done
+        if (binding != null && binding.tvTasksCount != null) {
+            String savedCount = sharedPreferences.getString(TASKS_COUNT_KEY, null);
+            if (savedCount != null) {
+                binding.tvTasksCount.setText(savedCount);
+                Log.d(TAG, "Restored tasks count: " + savedCount);
+            }
         }
-        
-        imageUrl += "?alt=media";
-        
-        // Set both imageUrl and photoUrl for maximum compatibility with different parts of the app
-        testReport.put("imageUrl", imageUrl);
-        testReport.put("photoUrl", imageUrl);
-        
-        // Log the report details we're creating for better debugging
-        Log.d(TAG, "Creating test report: status=" + status + ", wasteType=" + wasteType + 
-              ", assignedTo=" + collectorId + ", imageUrl=" + imageUrl);
-        
-        // Add to Firestore
-        db.collection("waste_reports")
-            .add(testReport)
-            .addOnSuccessListener(documentReference -> {
-                Log.d(TAG, "Test report created with status " + status + " and ID: " + documentReference.getId());
-            })
-            .addOnFailureListener(e -> {
-                Log.e(TAG, "Error creating test report with status " + status, e);
-            });
     }
 
     @Override
@@ -352,6 +368,11 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_logout) {
+            // Clear SharedPreferences when logging out
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear();
+            editor.apply();
+            
             mAuth.signOut();
             Intent intent = new Intent(CollectorDashboardActivity.this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

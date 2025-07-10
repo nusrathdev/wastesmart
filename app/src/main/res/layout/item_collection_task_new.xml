@@ -25,7 +25,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Report Details"
+                android:text="Collection Task"
                 android:textColor="@color/primary"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -139,7 +139,7 @@
                 android:id="@+id/tvDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Description of the waste report..."
+                android:text="Description of the collection task..."
                 android:textColor="@color/dark_gray"
                 android:textSize="13sp"
                 android:lineSpacingExtra="4dp"
@@ -152,7 +152,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="20dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -176,12 +176,50 @@
 
         </LinearLayout>
 
+        <!-- Assignment Info -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Assignment:"
+                android:textColor="@color/dark_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvAssignedInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Assigned to: John Doe"
+                android:textColor="@color/primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+                
+            <TextView
+                android:id="@+id/tvAssignedTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Jun 25, 2025 at 23:17"
+                android:textColor="@color/dark_gray"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
         <!-- Report Date and Photo -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -193,7 +231,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Submitted:"
+                    android:text="Reported:"
                     android:textColor="@color/dark_gray"
                     android:textSize="11sp"
                     android:textStyle="bold"
@@ -214,7 +252,7 @@
 
             <!-- Photo Display (Right Side) -->
             <ImageView
-                android:id="@+id/ivReportImage"
+                android:id="@+id/ivPhoto"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:scaleType="centerCrop"
@@ -224,6 +262,7 @@
                 android:contentDescription="Waste photo thumbnail" />
 
         </LinearLayout>
+        
         <!-- Action buttons -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -232,13 +271,13 @@
             android:gravity="center">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnViewDetails"
+                android:id="@+id/btnNavigate"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="4dp"
-                android:text="View Details"
+                android:text="Navigate"
                 android:textSize="12sp"
                 android:textAllCaps="false"
                 android:textColor="@color/primary"
@@ -246,17 +285,32 @@
                 app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnUpdateStatus"
+                android:id="@+id/btnStart"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
-                android:text="Update Status"
+                android:layout_marginEnd="4dp"
+                android:text="Start Task"
                 android:textSize="12sp"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnComplete"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="Complete"
+                android:textSize="12sp"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/success"
+                android:visibility="gone" />
 
         </LinearLayout>
     </LinearLayout>

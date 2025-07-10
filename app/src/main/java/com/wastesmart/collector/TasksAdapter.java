@@ -38,7 +38,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
     @Override
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_collection_task, parent, false);
+                .inflate(R.layout.item_collection_task_new, parent, false);
         return new TaskViewHolder(view);
     }
 
@@ -122,25 +122,49 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
             
         holder.ivPhoto.setVisibility(View.VISIBLE);
             
-        if (imageUrl != null) {
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            // Make the image visible
+            holder.ivPhoto.setVisibility(View.VISIBLE);
+            
             // Use Glide to load and display the image
             try {
                 android.util.Log.d("TasksAdapter", "Loading image from URL: " + imageUrl + " for task ID: " + task.getId());
                 com.bumptech.glide.Glide.with(context)
                     .load(imageUrl)
-                    .placeholder(R.drawable.ic_photo_placeholder)
-                    .error(R.drawable.ic_photo_error)
                     .centerCrop()
                     .into(holder.ivPhoto);
+                
+                // Convert dp to pixels to ensure consistent size across all devices
+                int sizeInDp = 120;
+                float scale = context.getResources().getDisplayMetrics().density;
+                int sizeInPixels = (int) (sizeInDp * scale + 0.5f);
+                
+                holder.ivPhoto.getLayoutParams().width = sizeInPixels; // match the layout size of 200dp
+                holder.ivPhoto.getLayoutParams().height = sizeInPixels; // match the layout size of 200dp
             } catch (Exception e) {
                 // If Glide fails, fall back to placeholder
                 android.util.Log.e("TasksAdapter", "Error loading image: " + e.getMessage());
-                holder.ivPhoto.setImageResource(R.drawable.ic_photo_placeholder);
+                // Don't set a placeholder - just hide the ImageView
+                holder.ivPhoto.setVisibility(View.GONE);
             }
         } else {
             android.util.Log.d("TasksAdapter", "No image URL available for task ID: " + task.getId());
-            holder.ivPhoto.setImageResource(R.drawable.ic_photo_placeholder);
+            // Hide the ImageView when there's no image
+            holder.ivPhoto.setVisibility(View.GONE);
         }
+
+        // Set up image click listener to view full image
+        final String finalImageUrl = imageUrl;
+        holder.ivPhoto.setOnClickListener(v -> {
+            if (finalImageUrl != null && !finalImageUrl.isEmpty()) {
+                // Open image in fullscreen activity
+                Intent fullscreenIntent = new Intent(context, com.wastesmart.ui.FullscreenImageActivity.class);
+                fullscreenIntent.putExtra("imageUrl", finalImageUrl);
+                context.startActivity(fullscreenIntent);
+            } else {
+                Toast.makeText(context, "No image available", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Setup button listeners
         holder.btnNavigate.setOnClickListener(v -> {
