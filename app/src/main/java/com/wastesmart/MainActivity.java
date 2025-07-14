@@ -27,24 +27,34 @@ public class MainActivity extends AppCompatActivity {
         binding.btnUserLogin.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, UserLoginActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         });
 
         // User register button
         binding.btnUserRegister.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, UserRegisterActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         });
 
         // Collector login button
         binding.btnCollectorLogin.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, CollectorLoginActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         });
 
         // Admin login button
         binding.btnAdminLogin.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AdminLoginActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 }

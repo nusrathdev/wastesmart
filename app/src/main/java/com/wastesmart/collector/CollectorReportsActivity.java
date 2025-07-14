@@ -53,7 +53,7 @@ public class CollectorReportsActivity extends BaseCollectorActivity {
         
         // Set up toolbar
         setSupportActionBar(binding.toolbar);
-        getSupportActionBar().setTitle("My Reports");
+        getSupportActionBar().setTitle("All Reports");
         
         // Setup bottom navigation
         setupBottomNavigation();

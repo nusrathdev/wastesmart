@@ -40,7 +40,13 @@ public class AdminLoginActivity extends AppCompatActivity {
         }
 
         // Login button click listener
-        binding.btnAdminLogin.setOnClickListener(v -> attemptLogin());
+        binding.btnLogin.setOnClickListener(v -> attemptLogin());
+
+        // Back button click listener
+        binding.btnBack.setOnClickListener(v -> {
+            finish(); // This will close the current activity and return to MainActivity
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        });
 
         // Add a hint for default credentials
         showDefaultCredentials();
@@ -55,27 +61,27 @@ public class AdminLoginActivity extends AppCompatActivity {
 
     private void attemptLogin() {
         // Reset errors
-        binding.etAdminEmail.setError(null);
-        binding.etAdminPassword.setError(null);
+        binding.etEmail.setError(null);
+        binding.etPassword.setError(null);
 
         // Store values
-        String email = binding.etAdminEmail.getText().toString().trim();
-        String password = binding.etAdminPassword.getText().toString().trim();
+        String email = binding.etEmail.getText().toString().trim();
+        String password = binding.etPassword.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password
         if (TextUtils.isEmpty(password)) {
-            binding.etAdminPassword.setError("Password is required");
-            focusView = binding.etAdminPassword;
+            binding.etPassword.setError("Password is required");
+            focusView = binding.etPassword;
             cancel = true;
         }
 
         // Check for a valid email address
         if (TextUtils.isEmpty(email)) {
-            binding.etAdminEmail.setError("Email is required");
-            focusView = binding.etAdminEmail;
+            binding.etEmail.setError("Email is required");
+            focusView = binding.etEmail;
             cancel = true;
         }
 
@@ -117,6 +123,7 @@ public class AdminLoginActivity extends AppCompatActivity {
             intent.putExtra("admin_email", email);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             finish();
         }, 1000);
     }
@@ -134,6 +141,7 @@ public class AdminLoginActivity extends AppCompatActivity {
                         intent.putExtra("admin_email", email);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                         finish();
                     } else {
                         // Login failed
@@ -148,5 +156,11 @@ public class AdminLoginActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 }

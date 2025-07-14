@@ -37,4 +37,9 @@
     <color name="gold">#FFD700</color> <!-- Gold medal -->
     <color name="silver">#C0C0C0</color> <!-- Silver medal -->
     <color name="bronze">#CD7F32</color> <!-- Bronze medal -->
+    
+    <!-- Additional UI Colors -->
+    <color name="transparent">#00000000</color> <!-- Transparent -->
+    <color name="text_primary">#212121</color> <!-- Primary text color -->
+    <color name="orange">#FF5722</color> <!-- Orange for collector theme -->
 </resources>

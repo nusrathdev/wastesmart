@@ -69,12 +69,8 @@ public class AdminReportAdapter extends RecyclerView.Adapter<AdminReportAdapter.
             holder.tvWasteType.setVisibility(View.GONE);
         }
         
-        // Set title with waste size
-        String title = "Waste Report";
-        if (report.getWasteSize() != null && !report.getWasteSize().isEmpty()) {
-            title = report.getWasteSize() + " Size Waste";
-        }
-        holder.tvTitle.setText(title);
+        // Set title to "Report Details" regardless of waste size
+        holder.tvTitle.setText("Report Details");
         
         // Set report description
         if (report.getDescription() != null && !report.getDescription().isEmpty()) {
@@ -84,10 +80,10 @@ public class AdminReportAdapter extends RecyclerView.Adapter<AdminReportAdapter.
             holder.tvDescription.setVisibility(View.GONE);
         }
         
-        // Set location from coordinates
-        String locationText = String.format(Locale.getDefault(), 
-            "📍 Lat: %.4f, Long: %.4f", report.getLatitude(), report.getLongitude());
-        holder.tvLocation.setText(locationText);
+        // Hide location section
+        if (holder.tvLocation != null && holder.tvLocation.getParent() instanceof View) {
+            ((View) holder.tvLocation.getParent()).setVisibility(View.GONE);
+        }
         holder.tvLocation.setVisibility(View.VISIBLE);
         
         // Set date
@@ -136,23 +132,65 @@ public class AdminReportAdapter extends RecyclerView.Adapter<AdminReportAdapter.
             holder.tvStatus.setTextColor(statusColor);
         }
         
-        // Load image if available
+        // Load image if available - try both photoUrl and imageUrl
+        // Determine the image URL to use
+        String tempImageUrl = null;
         if (report.getPhotoUrl() != null && !report.getPhotoUrl().isEmpty()) {
+            tempImageUrl = report.getPhotoUrl();
+        } else if (report.getImageUrl() != null && !report.getImageUrl().isEmpty()) {
+            tempImageUrl = report.getImageUrl();
+        }
+        
+        // Make the URL final so it can be used in the inner class callback
+        final String imageUrl = tempImageUrl;
+        
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            // Make the image visible
             holder.ivReportImage.setVisibility(View.VISIBLE);
-            Picasso.get()
-                .load(report.getPhotoUrl())
-                .placeholder(R.drawable.ic_photo_placeholder)
-                .error(R.drawable.ic_photo_error)
-                .into(holder.ivReportImage);
+            
+            Log.d(TAG, "Loading image from URL: " + imageUrl + " for report ID: " + report.getId());
+            
+            // Try to load the image with Picasso, with extra reliability features
+            try {
+                Picasso.get()
+                    .load(imageUrl)
+                    .into(holder.ivReportImage, new com.squareup.picasso.Callback() {
+                        @Override
+                        public void onSuccess() {
+                            Log.d(TAG, "Successfully loaded image for report ID: " + report.getId());
+                        }
+                        
+                        @Override
+                        public void onError(Exception e) {
+                            Log.e(TAG, "Error loading image for report ID: " + report.getId(), e);
+                            // Hide the image if loading fails
+                            holder.ivReportImage.setVisibility(View.GONE);
+                        }
+                    });
                 
-            // Make image clickable to view fullscreen
-            final String photoUrl = report.getPhotoUrl();
-            holder.ivReportImage.setOnClickListener(v -> {
-                Intent fullscreenIntent = new Intent(context, com.wastesmart.ui.FullscreenImageActivity.class);
-                fullscreenIntent.putExtra("imageUrl", photoUrl);
-                context.startActivity(fullscreenIntent);
-            });
+                // Convert dp to pixels to ensure consistent size across all devices
+                int sizeInDp = 120; // Changed from 200dp to 120dp
+                float scale = context.getResources().getDisplayMetrics().density;
+                int sizeInPixels = (int) (sizeInDp * scale + 0.5f);
+                
+                holder.ivReportImage.getLayoutParams().width = sizeInPixels; // match the layout size of 120dp
+                holder.ivReportImage.getLayoutParams().height = sizeInPixels; // match the layout size of 120dp
+                
+                // Set up click listener for fullscreen image viewing
+                holder.ivReportImage.setOnClickListener(v -> {
+                    Intent fullscreenIntent = new Intent(context, com.wastesmart.ui.FullscreenImageActivity.class);
+                    fullscreenIntent.putExtra("imageUrl", imageUrl);
+                    context.startActivity(fullscreenIntent);
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "Exception while setting up Picasso image load", e);
+                // Hide the image if there's an error
+                holder.ivReportImage.setVisibility(View.GONE);
+            }
         } else {
+            Log.d(TAG, "No image URL available for report ID: " + report.getId());
+            
+            // Hide the image view when there's no image
             holder.ivReportImage.setVisibility(View.GONE);
         }
         
@@ -177,12 +215,18 @@ public class AdminReportAdapter extends RecyclerView.Adapter<AdminReportAdapter.
             mapIntent.putExtra("latitude", report.getLatitude());
             mapIntent.putExtra("longitude", report.getLongitude());
             
-            // Add some descriptive information
-            String mapTitle = report.getWasteType() != null ? report.getWasteType() + " Waste" : "Waste Location";
-            mapIntent.putExtra("title", mapTitle);
+            // Add waste type directly
+            mapIntent.putExtra("wasteType", report.getWasteType());
             
+            // Add title for map marker (just for the marker, not for display in UI)
+            mapIntent.putExtra("title", "Waste Location");
+            
+            // Add description
             String description = report.getDescription() != null ? report.getDescription() : "";
             mapIntent.putExtra("description", description);
+            
+            // Add status
+            mapIntent.putExtra("status", report.getStatus());
             
             context.startActivity(mapIntent);
         });

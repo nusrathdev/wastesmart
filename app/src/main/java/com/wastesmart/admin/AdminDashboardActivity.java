@@ -28,6 +28,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
     
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private String actualCollectorId = "default_collector"; // fallback to default
     private TextView tvWelcomeAdmin;
     private TextView tvPendingCount;
     private TextView tvTodayCount;
@@ -74,6 +75,9 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         // Load dashboard data
         loadDashboardData();
         
+        // Load the actual collector ID from database
+        loadActualCollectorId();
+        
         if (adminEmail != null && !adminEmail.isEmpty()) {
             Toast.makeText(this, "Logged in as: " + adminEmail, Toast.LENGTH_SHORT).show();
         }
@@ -99,6 +103,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         tvViewAll.setOnClickListener(v -> {
             Intent intent = new Intent(AdminDashboardActivity.this, ManageReportsActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
         
         // Logout button in toolbar
@@ -204,6 +209,24 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         }
     }
 
+    private void loadActualCollectorId() {
+        // Get the actual collector ID from the database
+        db.collection("collectors")
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        actualCollectorId = queryDocumentSnapshots.iterator().next().getId();
+                        Log.d(TAG, "Loaded actual collector ID: " + actualCollectorId);
+                    } else {
+                        Log.w(TAG, "No collector found, using default collector ID");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading collector ID", e);
+                });
+    }
+
     // Sample report creation methods removed as they're not needed in production
 
     private void logout() {
@@ -211,6 +234,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         Intent intent = new Intent(AdminDashboardActivity.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         finish();
     }
 
@@ -226,7 +250,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
     public void assignReportToCollector(String reportId) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", "ASSIGNED");
-        updates.put("assignedCollectorId", "default_collector");
+        updates.put("assignedCollectorId", actualCollectorId); // Use actual collector ID
         updates.put("assignedCollectorName", "Waste Collector");
         updates.put("assignedTimestamp", System.currentTimeMillis());
         

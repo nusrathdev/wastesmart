@@ -8,16 +8,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.wastesmart.R;
-import com.wastesmart.databinding.ActivityCollectionScheduleBinding;
+import com.wastesmart.databinding.ActivityUserAboutBinding;
 
 public class CollectionScheduleActivity extends BaseUserActivity {
 
-    private ActivityCollectionScheduleBinding binding;
+    private ActivityUserAboutBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityCollectionScheduleBinding.inflate(getLayoutInflater());
+        binding = ActivityUserAboutBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         // Setup toolbar
@@ -60,5 +60,11 @@ public class CollectionScheduleActivity extends BaseUserActivity {
     @Override
     protected String getActiveNavItem() {
         return "about";
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }

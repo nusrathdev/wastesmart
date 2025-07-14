@@ -123,7 +123,7 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
             intent.putExtra("isNavigationAction", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-            overridePendingTransition(0, 0);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
     }
 
@@ -134,7 +134,7 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
             intent.putExtra("isNavigationAction", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-            overridePendingTransition(0, 0);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
     }
 
@@ -145,7 +145,7 @@ public abstract class BaseCollectorActivity extends AppCompatActivity {
             intent.putExtra("isNavigationAction", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-            overridePendingTransition(0, 0);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
     }
 }

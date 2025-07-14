@@ -78,6 +78,7 @@ public class MyReportsActivity extends BaseUserActivity {
         btnSubmitFirstReport.setOnClickListener(v -> {
             Intent intent = new Intent(MyReportsActivity.this, ReportWasteActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
 
         // Load user's reports
@@ -166,5 +167,11 @@ public class MyReportsActivity extends BaseUserActivity {
     @Override
     protected String getActiveNavItem() {
         return "reports";
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }

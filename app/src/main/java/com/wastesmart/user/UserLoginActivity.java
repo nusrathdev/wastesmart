@@ -30,10 +30,24 @@ public class UserLoginActivity extends AppCompatActivity {
         // Login button click listener
         binding.btnLogin.setOnClickListener(v -> attemptLogin());
 
+        // Back button click listener
+        binding.btnBack.setOnClickListener(v -> {
+            finish(); // This will close the current activity and return to MainActivity
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        });
+
         // Forgot password click listener
         binding.tvForgotPassword.setOnClickListener(v -> {
             Intent intent = new Intent(UserLoginActivity.this, UserForgotPasswordActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
+
+        // Register click listener
+        binding.tvRegister.setOnClickListener(v -> {
+            Intent intent = new Intent(UserLoginActivity.this, UserRegisterActivity.class);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
     }
 
@@ -78,6 +92,7 @@ public class UserLoginActivity extends AppCompatActivity {
                             Intent intent = new Intent(UserLoginActivity.this, UserDashboardActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                             finish();
                         } else {
                             // If sign in fails, display a message to the user
@@ -86,5 +101,11 @@ public class UserLoginActivity extends AppCompatActivity {
                         }
                     });
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 }

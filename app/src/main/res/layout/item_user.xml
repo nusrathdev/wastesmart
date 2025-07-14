@@ -34,7 +34,7 @@
                         android:id="@+id/ivUserAvatar"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:src="@drawable/ic_profile_person"
+                        android:src="@drawable/ic_user_avatar"
                         android:padding="8dp"
                         android:background="@color/light_blue" />
                 </androidx.cardview.widget.CardView>

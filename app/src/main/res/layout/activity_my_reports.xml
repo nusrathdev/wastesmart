@@ -21,7 +21,20 @@
             android:background="@color/primary"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:title="My Waste Reports"
-            app:titleTextColor="@android:color/white" />
+            app:titleTextColor="@android:color/white">
+
+            <ImageView
+                android:id="@+id/btnLogout"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_logout"
+                android:contentDescription="@string/logout"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:padding="4dp" />
+
+        </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 

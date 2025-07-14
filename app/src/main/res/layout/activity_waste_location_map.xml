@@ -62,7 +62,7 @@
                 android:drawablePadding="@dimen/spacing_small"
                 android:gravity="center_vertical"
                 android:padding="@dimen/spacing_xsmall"
-                android:text="Waste Type: Unknown"
+                android:text="Waste Type"
                 android:textColor="@color/dark_gray"
                 android:textSize="@dimen/text_size_medium" />
 
@@ -74,7 +74,7 @@
                 android:drawablePadding="@dimen/spacing_small"
                 android:gravity="center_vertical"
                 android:padding="@dimen/spacing_xsmall"
-                android:text="No description available"
+                android:text="Description"
                 android:textColor="@color/dark_gray"
                 android:textSize="@dimen/text_size_medium" />
 
@@ -88,34 +88,21 @@
                 android:paddingTop="@dimen/status_padding_vertical"
                 android:paddingEnd="@dimen/status_padding_horizontal"
                 android:paddingBottom="@dimen/status_padding_vertical"
-                android:text="Unknown"
+                android:visibility="gone"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/text_size_small" />
                 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <TextView
-        android:id="@+id/tvInstructions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:background="#80FFFFFF"
-        android:padding="8dp"
-        android:text="Waste location on map"
-        android:textColor="@color/black"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardReportDetails" />
-
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="@dimen/spacing_medium"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvInstructions"
+        app:layout_constraintTop_toBottomOf="@+id/cardReportDetails"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:context=".admin.WasteLocationMapActivity" />

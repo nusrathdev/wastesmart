@@ -194,8 +194,8 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
                 float scale = context.getResources().getDisplayMetrics().density;
                 int sizeInPixels = (int) (sizeInDp * scale + 0.5f);
                 
-                holder.ivReportImage.getLayoutParams().width = sizeInPixels; // match the layout size of 200dp
-                holder.ivReportImage.getLayoutParams().height = sizeInPixels; // match the layout size of 200dp
+                holder.ivReportImage.getLayoutParams().width = sizeInPixels; // match the layout size of 120dp
+                holder.ivReportImage.getLayoutParams().height = sizeInPixels; // match the layout size of 120dp
             } catch (Exception e) {
                 Log.e(TAG, "Exception while setting up Picasso image load", e);
                 // Hide the image if there's an error
@@ -225,12 +225,18 @@ public class CollectorReportAdapter extends RecyclerView.Adapter<CollectorReport
             mapIntent.putExtra("latitude", report.getLatitude());
             mapIntent.putExtra("longitude", report.getLongitude());
             
-            // Add some descriptive information
-            String mapTitle = report.getWasteType() != null ? report.getWasteType() + " Waste" : "Waste Location";
-            mapIntent.putExtra("title", mapTitle);
+            // Add waste type directly
+            mapIntent.putExtra("wasteType", report.getWasteType());
             
+            // Add title for map marker (just for the marker, not for display in UI)
+            mapIntent.putExtra("title", "Waste Location");
+            
+            // Add description
             String description = report.getDescription() != null ? report.getDescription() : "";
             mapIntent.putExtra("description", description);
+            
+            // Add status
+            mapIntent.putExtra("status", report.getStatus());
             
             context.startActivity(mapIntent);
         });
