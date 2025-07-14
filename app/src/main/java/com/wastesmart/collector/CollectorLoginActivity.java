@@ -40,7 +40,12 @@ public class CollectorLoginActivity extends AppCompatActivity {
         }
 
         // Login button click listener
-        binding.btnCollectorLogin.setOnClickListener(v -> attemptLogin());
+        binding.btnLogin.setOnClickListener(v -> attemptLogin());
+
+        // Back button click listener
+        binding.btnBack.setOnClickListener(v -> {
+            finish(); // This will close the current activity and return to MainActivity
+        });
 
         // Add a hint for default credentials
         showDefaultCredentials();
@@ -55,27 +60,27 @@ public class CollectorLoginActivity extends AppCompatActivity {
 
     private void attemptLogin() {
         // Reset errors
-        binding.etCollectorEmail.setError(null);
-        binding.etCollectorPassword.setError(null);
+        binding.etEmail.setError(null);
+        binding.etPassword.setError(null);
 
         // Store values
-        String email = binding.etCollectorEmail.getText().toString().trim();
-        String password = binding.etCollectorPassword.getText().toString().trim();
+        String email = binding.etEmail.getText().toString().trim();
+        String password = binding.etPassword.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password
         if (TextUtils.isEmpty(password)) {
-            binding.etCollectorPassword.setError("Password is required");
-            focusView = binding.etCollectorPassword;
+            binding.etPassword.setError("Password is required");
+            focusView = binding.etPassword;
             cancel = true;
         }
 
         // Check for a valid email address
         if (TextUtils.isEmpty(email)) {
-            binding.etCollectorEmail.setError("Email is required");
-            focusView = binding.etCollectorEmail;
+            binding.etEmail.setError("Email is required");
+            focusView = binding.etEmail;
             cancel = true;
         }
 

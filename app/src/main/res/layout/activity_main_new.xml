@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/collector_gradient"
+    android:background="@drawable/gradient_background"
     android:fillViewport="true"
     tools:context=".MainActivity">
 
@@ -27,7 +27,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            
+            <ImageView
+                android:id="@+id/imgLogo"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/app_logo"
+                android:src="@mipmap/ic_launcher" />
 
             <TextView
                 android:id="@+id/tvAppTitle"
@@ -76,6 +82,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="28dp">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_profile"
+                    android:tint="@color/primary" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -150,6 +163,13 @@
                 android:orientation="vertical"
                 android:padding="28dp">
 
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_assignment"
+                    android:tint="@color/secondary" />
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -188,7 +208,7 @@
                         android:text="Collector"
                         android:textAllCaps="false"
                         android:textSize="14sp"
-                        app:backgroundTint="@color/primary"
+                        app:backgroundTint="@color/secondary"
                         app:cornerRadius="24dp" />
 
                     <com.google.android.material.button.MaterialButton
@@ -201,7 +221,7 @@
                         android:text="Admin"
                         android:textAllCaps="false"
                         android:textSize="14sp"
-                        app:backgroundTint="@color/primary"
+                        app:backgroundTint="@color/secondary_dark"
                         app:cornerRadius="24dp" />
 
                 </LinearLayout>

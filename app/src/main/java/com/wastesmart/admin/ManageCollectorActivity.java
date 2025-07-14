@@ -51,11 +51,8 @@ public class ManageCollectorActivity extends BaseAdminActivity {
         // Set up edit button listener
         binding.btnEditCollector.setOnClickListener(v -> showEditCollectorDialog());
 
-        // Load collector information
+        // Load collector information (this will also load performance metrics)
         loadCollectorInfo();
-
-        // Load performance metrics
-        loadPerformanceMetrics();
     }
 
     private void loadCollectorInfo() {
@@ -70,13 +67,20 @@ public class ManageCollectorActivity extends BaseAdminActivity {
                         currentCollector = document.toObject(Collector.class);
                         currentCollector.setId(document.getId());
                         
+                        Log.d(TAG, "Loaded collector with ID: " + currentCollector.getId());
+                        Log.d(TAG, "Collector name: " + currentCollector.getName());
+                        
                         // Update UI with collector info
                         updateCollectorUI();
+
+                        // Load performance metrics after we have the collector
+                        loadPerformanceMetrics();
 
                         // Also try to find the User record for this collector to get the user ID
                         findCollectorUser();
                     } else {
                         // No collector found - create default one
+                        Log.w(TAG, "No collector found in database, creating default one");
                         createDefaultCollector();
                     }
                 })
@@ -123,6 +127,9 @@ public class ManageCollectorActivity extends BaseAdminActivity {
                     collector.setId(documentReference.getId());
                     currentCollector = collector;
                     updateCollectorUI();
+                    
+                    // Load performance metrics after creating the collector
+                    loadPerformanceMetrics();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error creating default collector", e);
@@ -141,20 +148,58 @@ public class ManageCollectorActivity extends BaseAdminActivity {
     }
 
     private void loadPerformanceMetrics() {
-        // Query for completed reports
+        if (currentCollector == null || currentCollector.getId() == null) {
+            Log.w(TAG, "Cannot load performance metrics: collector is null or has no ID");
+            return;
+        }
+        
+        Log.d(TAG, "Loading performance metrics for collector ID: " + currentCollector.getId());
+        
+        // Get all reports and count them
         db.collection("waste_reports")
-                .whereEqualTo("status", "COMPLETED")
                 .get()
-                .addOnSuccessListener(completedReports -> {
-                    binding.tvCompletedCount.setText(String.valueOf(completedReports.size()));
-                });
-
-        // Query for assigned reports
-        db.collection("waste_reports")
-                .whereEqualTo("status", "ASSIGNED")
-                .get()
-                .addOnSuccessListener(assignedReports -> {
-                    binding.tvAssignedCount.setText(String.valueOf(assignedReports.size()));
+                .addOnSuccessListener(allReports -> {
+                    Log.d(TAG, "Total reports in database: " + allReports.size());
+                    int completedCount = 0;
+                    int assignedCount = 0;
+                    int inProgressCount = 0;
+                    
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : allReports) {
+                        String status = doc.getString("status");
+                        String assignedCollectorId = doc.getString("assignedCollectorId");
+                        
+                        Log.d(TAG, "Report ID: " + doc.getId() + ", Status: " + status + ", AssignedCollectorId: " + assignedCollectorId);
+                        
+                        // Count reports assigned to this collector or count all if no specific assignment
+                        boolean isAssignedToThisCollector = (assignedCollectorId != null && currentCollector.getId().equals(assignedCollectorId));
+                        boolean isAssignedToDefaultCollector = (assignedCollectorId != null && assignedCollectorId.equals("default_collector"));
+                        boolean noAssignmentSpecified = (assignedCollectorId == null || assignedCollectorId.isEmpty());
+                        
+                        Log.d(TAG, "Collector matching - ThisCollector: " + isAssignedToThisCollector + 
+                               ", DefaultCollector: " + isAssignedToDefaultCollector + 
+                               ", NoAssignment: " + noAssignmentSpecified);
+                        
+                        if (isAssignedToThisCollector || isAssignedToDefaultCollector || noAssignmentSpecified) {
+                            if ("COMPLETED".equals(status)) {
+                                completedCount++;
+                            } else if ("ASSIGNED".equals(status)) {
+                                assignedCount++;
+                            } else if ("IN_PROGRESS".equals(status)) {
+                                inProgressCount++;
+                                assignedCount++; // Count in-progress as part of assigned work
+                            }
+                        }
+                    }
+                    
+                    Log.d(TAG, "Found " + completedCount + " completed reports and " + assignedCount + " assigned/in-progress reports");
+                    
+                    binding.tvCompletedCount.setText(String.valueOf(completedCount));
+                    binding.tvAssignedCount.setText(String.valueOf(assignedCount));
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading reports for performance metrics", e);
+                    binding.tvCompletedCount.setText("0");
+                    binding.tvAssignedCount.setText("0");
                 });
     }
 
@@ -171,15 +216,11 @@ public class ManageCollectorActivity extends BaseAdminActivity {
         TextInputEditText etName = dialogView.findViewById(R.id.etCollectorName);
         TextInputEditText etPhone = dialogView.findViewById(R.id.etCollectorPhone);
         TextInputEditText etEmail = dialogView.findViewById(R.id.etCollectorEmail);
-        TextInputEditText etEmployeeId = dialogView.findViewById(R.id.etCollectorEmployeeId);
-        TextInputEditText etAssignedArea = dialogView.findViewById(R.id.etCollectorAssignedArea);
         
         // Pre-fill the fields with current collector info
         etName.setText(currentCollector.getName());
         etPhone.setText(currentCollector.getPhoneNumber());
         etEmail.setText(currentCollector.getEmail());
-        etEmployeeId.setText(currentCollector.getEmployeeId());
-        etAssignedArea.setText(currentCollector.getAssignedArea());
 
         // Create and show the dialog
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -193,8 +234,6 @@ public class ManageCollectorActivity extends BaseAdminActivity {
             currentCollector.setName(etName.getText().toString().trim());
             currentCollector.setPhoneNumber(etPhone.getText().toString().trim());
             currentCollector.setEmail(etEmail.getText().toString().trim());
-            currentCollector.setEmployeeId(etEmployeeId.getText().toString().trim());
-            currentCollector.setAssignedArea(etAssignedArea.getText().toString().trim());
 
             // Save to Firestore
             saveCollectorChanges();

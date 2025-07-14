@@ -31,6 +31,7 @@ public class CollectionTasksActivity extends BaseCollectorActivity {
     private FirebaseFirestore db;
     private TasksAdapter adapter;
     private List<WasteReport> tasksList;
+    private String actualCollectorId = "default_collector"; // fallback
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +57,29 @@ public class CollectionTasksActivity extends BaseCollectorActivity {
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerView.setAdapter(adapter);
 
+        // Load actual collector ID
+        loadActualCollectorId();
+
         // Load assigned tasks
         loadAssignedTasks();
+    }
+
+    private void loadActualCollectorId() {
+        // Get the actual collector ID from the database
+        db.collection("collectors")
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        actualCollectorId = queryDocumentSnapshots.iterator().next().getId();
+                        Log.d(TAG, "Loaded actual collector ID: " + actualCollectorId);
+                    } else {
+                        Log.w(TAG, "No collector found, using default collector ID");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading collector ID", e);
+                });
     }
 
     private void loadAssignedTasks() {
@@ -193,7 +215,7 @@ public class CollectionTasksActivity extends BaseCollectorActivity {
         testReport.put("status", "ASSIGNED");
         testReport.put("timestamp", System.currentTimeMillis());
         testReport.put("assignedTimestamp", System.currentTimeMillis());
-        testReport.put("assignedCollectorId", "default_collector");
+        testReport.put("assignedCollectorId", actualCollectorId); // Use actual collector ID
         testReport.put("assignedCollectorName", "Default Collector");
         testReport.put("userId", "test_user");
         

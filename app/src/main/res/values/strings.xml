@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SmartWaste AI</string>
+    <string name="app_name">SmartWaste</string>
     <string name="app_tagline">Smart Collection for a Cleaner Tomorrow</string>
     <string name="app_logo">App Logo</string>
     <string name="welcome_message">Welcome to SmartWaste AI. Please select your role to continue:</string>

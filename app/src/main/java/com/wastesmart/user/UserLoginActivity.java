@@ -30,9 +30,20 @@ public class UserLoginActivity extends AppCompatActivity {
         // Login button click listener
         binding.btnLogin.setOnClickListener(v -> attemptLogin());
 
+        // Back button click listener
+        binding.btnBack.setOnClickListener(v -> {
+            finish(); // This will close the current activity and return to MainActivity
+        });
+
         // Forgot password click listener
         binding.tvForgotPassword.setOnClickListener(v -> {
             Intent intent = new Intent(UserLoginActivity.this, UserForgotPasswordActivity.class);
+            startActivity(intent);
+        });
+
+        // Register click listener
+        binding.tvRegister.setOnClickListener(v -> {
+            Intent intent = new Intent(UserLoginActivity.this, UserRegisterActivity.class);
             startActivity(intent);
         });
     }

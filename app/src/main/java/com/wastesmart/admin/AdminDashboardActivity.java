@@ -28,6 +28,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
     
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private String actualCollectorId = "default_collector"; // fallback to default
     private TextView tvWelcomeAdmin;
     private TextView tvPendingCount;
     private TextView tvTodayCount;
@@ -73,6 +74,9 @@ public class AdminDashboardActivity extends BaseAdminActivity {
 
         // Load dashboard data
         loadDashboardData();
+        
+        // Load the actual collector ID from database
+        loadActualCollectorId();
         
         if (adminEmail != null && !adminEmail.isEmpty()) {
             Toast.makeText(this, "Logged in as: " + adminEmail, Toast.LENGTH_SHORT).show();
@@ -204,6 +208,24 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         }
     }
 
+    private void loadActualCollectorId() {
+        // Get the actual collector ID from the database
+        db.collection("collectors")
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        actualCollectorId = queryDocumentSnapshots.iterator().next().getId();
+                        Log.d(TAG, "Loaded actual collector ID: " + actualCollectorId);
+                    } else {
+                        Log.w(TAG, "No collector found, using default collector ID");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading collector ID", e);
+                });
+    }
+
     // Sample report creation methods removed as they're not needed in production
 
     private void logout() {
@@ -226,7 +248,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
     public void assignReportToCollector(String reportId) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", "ASSIGNED");
-        updates.put("assignedCollectorId", "default_collector");
+        updates.put("assignedCollectorId", actualCollectorId); // Use actual collector ID
         updates.put("assignedCollectorName", "Waste Collector");
         updates.put("assignedTimestamp", System.currentTimeMillis());
         

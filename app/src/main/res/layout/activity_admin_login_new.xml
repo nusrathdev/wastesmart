@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/collector_gradient"
+    android:background="@drawable/admin_gradient_background"
     android:fillViewport="true"
     tools:context=".admin.AdminLoginActivity">
 
@@ -27,8 +27,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_assignment"
+                android:tint="@color/white" />
+
             <TextView
-                android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -46,7 +52,7 @@
                 android:layout_marginTop="4dp"
                 android:alpha="0.9"
                 android:fontFamily="sans-serif-light"
-                android:text="Municipal Administration"
+                android:text="Municipal Administration Access"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
@@ -75,7 +81,7 @@
 
                 <!-- Email Input -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilEmail"
+                    android:id="@+id/tilAdminEmail"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -85,11 +91,13 @@
                     app:boxCornerRadiusBottomStart="12dp"
                     app:boxCornerRadiusTopEnd="12dp"
                     app:boxCornerRadiusTopStart="12dp"
-                    app:boxStrokeColor="@color/primary"
-                    app:hintTextColor="@color/primary">
+                    app:boxStrokeColor="@color/secondary_dark"
+                    app:hintTextColor="@color/secondary_dark"
+                    app:startIconDrawable="@drawable/ic_email"
+                    app:startIconTint="@color/secondary_dark">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etEmail"
+                        android:id="@+id/etAdminEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif"
@@ -102,23 +110,25 @@
 
                 <!-- Password Input -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilPassword"
+                    android:id="@+id/tilAdminPassword"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="24dp"
-                    android:hint="Password"
+                    android:layout_marginBottom="32dp"
+                    android:hint="Admin Password"
                     app:boxCornerRadiusBottomEnd="12dp"
                     app:boxCornerRadiusBottomStart="12dp"
                     app:boxCornerRadiusTopEnd="12dp"
                     app:boxCornerRadiusTopStart="12dp"
-                    app:boxStrokeColor="@color/primary"
+                    app:boxStrokeColor="@color/secondary_dark"
                     app:endIconMode="password_toggle"
-                    app:endIconTint="@color/primary"
-                    app:hintTextColor="@color/primary">
+                    app:endIconTint="@color/secondary_dark"
+                    app:hintTextColor="@color/secondary_dark"
+                    app:startIconDrawable="@drawable/ic_lock"
+                    app:startIconTint="@color/secondary_dark">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etPassword"
+                        android:id="@+id/etAdminPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif"
@@ -131,24 +141,15 @@
 
                 <!-- Login Button -->
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnLogin"
+                    android:id="@+id/btnAdminLogin"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:fontFamily="sans-serif-medium"
                     android:text="Sign In as Admin"
                     android:textAllCaps="false"
                     android:textSize="16sp"
-                    app:backgroundTint="@color/primary"
+                    app:backgroundTint="@color/secondary_dark"
                     app:cornerRadius="28dp" />
-
-                <!-- Progress Bar -->
-                <ProgressBar
-                    android:id="@+id/progressBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="16dp"
-                    android:visibility="gone" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

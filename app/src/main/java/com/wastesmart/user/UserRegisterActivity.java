@@ -36,6 +36,11 @@ public class UserRegisterActivity extends AppCompatActivity {
 
         // Register button click listener
         binding.btnRegister.setOnClickListener(v -> attemptRegistration());
+
+        // Back button click listener
+        binding.btnBack.setOnClickListener(v -> {
+            finish(); // This will close the current activity and return to UserLoginActivity
+        });
     }
 
     private void attemptRegistration() {

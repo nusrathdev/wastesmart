@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/collector_gradient"
+    android:background="@drawable/collector_gradient_background"
     android:fillViewport="true"
-    tools:context=".admin.AdminLoginActivity">
+    tools:context=".collector.CollectorLoginActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -27,14 +27,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_recycling"
+                android:tint="@color/white" />
+
             <TextView
-                android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"
                 android:fontFamily="sans-serif-medium"
-                android:text="Admin Portal"
+                android:text="Collector Portal"
                 android:textColor="@color/white"
                 android:textSize="28sp"
                 android:textStyle="bold" />
@@ -46,7 +52,7 @@
                 android:layout_marginTop="4dp"
                 android:alpha="0.9"
                 android:fontFamily="sans-serif-light"
-                android:text="Municipal Administration"
+                android:text="Waste Collection Team Access"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
@@ -75,21 +81,23 @@
 
                 <!-- Email Input -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilEmail"
+                    android:id="@+id/tilCollectorEmail"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:hint="Admin Email"
+                    android:hint="Collector Email"
                     app:boxCornerRadiusBottomEnd="12dp"
                     app:boxCornerRadiusBottomStart="12dp"
                     app:boxCornerRadiusTopEnd="12dp"
                     app:boxCornerRadiusTopStart="12dp"
-                    app:boxStrokeColor="@color/primary"
-                    app:hintTextColor="@color/primary">
+                    app:boxStrokeColor="@color/secondary"
+                    app:hintTextColor="@color/secondary"
+                    app:startIconDrawable="@drawable/ic_email"
+                    app:startIconTint="@color/secondary">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etEmail"
+                        android:id="@+id/etCollectorEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif"
@@ -102,23 +110,25 @@
 
                 <!-- Password Input -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilPassword"
+                    android:id="@+id/tilCollectorPassword"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="24dp"
-                    android:hint="Password"
+                    android:layout_marginBottom="32dp"
+                    android:hint="Collector Password"
                     app:boxCornerRadiusBottomEnd="12dp"
                     app:boxCornerRadiusBottomStart="12dp"
                     app:boxCornerRadiusTopEnd="12dp"
                     app:boxCornerRadiusTopStart="12dp"
-                    app:boxStrokeColor="@color/primary"
+                    app:boxStrokeColor="@color/secondary"
                     app:endIconMode="password_toggle"
-                    app:endIconTint="@color/primary"
-                    app:hintTextColor="@color/primary">
+                    app:endIconTint="@color/secondary"
+                    app:hintTextColor="@color/secondary"
+                    app:startIconDrawable="@drawable/ic_lock"
+                    app:startIconTint="@color/secondary">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etPassword"
+                        android:id="@+id/etCollectorPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif"
@@ -131,24 +141,15 @@
 
                 <!-- Login Button -->
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnLogin"
+                    android:id="@+id/btnCollectorLogin"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:fontFamily="sans-serif-medium"
-                    android:text="Sign In as Admin"
+                    android:text="Sign In as Collector"
                     android:textAllCaps="false"
                     android:textSize="16sp"
-                    app:backgroundTint="@color/primary"
+                    app:backgroundTint="@color/secondary"
                     app:cornerRadius="28dp" />
-
-                <!-- Progress Bar -->
-                <ProgressBar
-                    android:id="@+id/progressBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="16dp"
-                    android:visibility="gone" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
