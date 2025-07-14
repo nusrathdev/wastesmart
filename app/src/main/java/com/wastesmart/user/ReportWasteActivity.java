@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -18,6 +20,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.wastesmart.MainActivity;
 import com.wastesmart.R;
 import com.wastesmart.databinding.ActivityReportWasteBinding;
 import com.wastesmart.models.WasteReport;
@@ -118,6 +121,9 @@ public class ReportWasteActivity extends BaseUserActivity {
             // getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle(R.string.report_waste);
         }
+
+        // Set up logout button click listener
+        findViewById(R.id.btnLogout).setOnClickListener(v -> showLogoutConfirmation());
 
         // Setup bottom navigation
         setupBottomNavigation();
@@ -664,6 +670,23 @@ public class ReportWasteActivity extends BaseUserActivity {
             Log.d(TAG, "Passing location to map: " + latitude + ", " + longitude);
         }
         startActivityForResult(intent, REQUEST_MAP_LOCATION);
+    }
+
+    private void showLogoutConfirmation() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Yes", (dialog, which) -> logout())
+                .setNegativeButton("No", null)
+                .show();
+    }
+    
+    private void logout() {
+        mAuth.signOut();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
     @Override

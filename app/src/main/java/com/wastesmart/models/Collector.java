@@ -10,6 +10,7 @@ public class Collector {
     private String phoneNumber;
     private String employeeId;
     private String assignedArea;
+    private String userId; // Firebase Auth user ID associated with this collector
 
     // Default constructor required for Firestore
     public Collector() {
@@ -70,5 +71,13 @@ public class Collector {
 
     public void setAssignedArea(String assignedArea) {
         this.assignedArea = assignedArea;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
