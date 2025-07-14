@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 
 import com.wastesmart.MainActivity;
 import com.wastesmart.R;
@@ -34,7 +35,7 @@ public class UserDashboardActivity extends BaseUserActivity {
         setSupportActionBar(binding.toolbar);
 
         // Set up logout button click listener
-        binding.btnLogout.setOnClickListener(v -> logout());
+        binding.btnLogout.setOnClickListener(v -> showLogoutConfirmation());
 
         // Setup bottom navigation
         setupBottomNavigation();
@@ -95,11 +96,36 @@ public class UserDashboardActivity extends BaseUserActivity {
             int randomIndex = (int) (Math.random() * welcomeMessages.length);
             binding.tvWelcomeMessage.setText(welcomeMessages[randomIndex]);
             
-            // TODO: Load actual user stats from database
-            // For now, using placeholder values
-            binding.tvReportsCount.setText("12");
+            // Load actual user report count from database
+            loadUserReportCount();
             // binding.tvPointsEarned.setText("240"); // Removed: view no longer exists in layout
         }
+    }
+
+    private void loadUserReportCount() {
+        if (mAuth.getCurrentUser() == null) return;
+        
+        String userId = mAuth.getCurrentUser().getUid();
+        db.collection("waste_reports")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    int reportCount = querySnapshot.size();
+                    binding.tvReportsCount.setText(String.valueOf(reportCount));
+                })
+                .addOnFailureListener(e -> {
+                    // If failed to load, show 0
+                    binding.tvReportsCount.setText("0");
+                });
+    }
+
+    private void showLogoutConfirmation() {
+        new AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Logout", (dialog, which) -> logout())
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void logout() {

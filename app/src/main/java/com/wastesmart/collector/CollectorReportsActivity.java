@@ -101,96 +101,127 @@ public class CollectorReportsActivity extends BaseCollectorActivity {
     }
     
     /**
-     * Simplified method to load all reports relevant to the current collector without filtering
+     * Load reports assigned to the current collector
      */
     private void loadAllCollectorReports() {
         // Clear the list to prevent duplicates
         reportsList.clear();
         
-        // Get current collector ID
-        String collectorId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : "default_collector";
+        // First get the collector document ID using the Firebase Auth user ID
+        if (mAuth.getCurrentUser() == null) {
+            Log.d(TAG, "No authenticated user");
+            binding.progressBar.setVisibility(View.GONE);
+            showNoReportsMessage(true);
+            binding.tvNoReports.setText("Please log in to view reports");
+            return;
+        }
         
-        Log.d(TAG, "Loading ALL reports for collector ID: " + collectorId);
+        String authUserId = mAuth.getCurrentUser().getUid();
+        Log.d(TAG, "Loading reports for auth user ID: " + authUserId);
         
-        // Query to get all reports and filter locally for better reliability
-        db.collection("waste_reports")
-            .get()
-            .addOnSuccessListener(queryDocumentSnapshots -> {
-                Log.d(TAG, "Retrieved " + queryDocumentSnapshots.size() + " waste reports from database");
-                
-                // Use a map to track unique IDs and prevent duplicates
-                Map<String, WasteReport> uniqueReports = new HashMap<>();
-                
-                // Simply log the number of reports retrieved
-                Log.d(TAG, "Processing reports for collector ID: " + collectorId);
-                
-                // Process each waste report
-                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                    try {
-                        String reportId = document.getId();
-                        // Only add if we haven't already processed this report ID
-                        if (!uniqueReports.containsKey(reportId)) {
-                            WasteReport report = document.toObject(WasteReport.class);
-                            report.setId(reportId);
-                            
-                            // Ensure both photoUrl and imageUrl are set (critical fix)
-                            if (report.getPhotoUrl() == null && report.getImageUrl() != null) {
-                                report.setPhotoUrl(report.getImageUrl());
-                            } else if (report.getImageUrl() == null && report.getPhotoUrl() != null) {
-                                report.setImageUrl(report.getPhotoUrl());
-                            }
-                            
-                            String status = report.getStatus();
-                            String assignedCollectorId = report.getAssignedCollectorId();
-                            
-                            Log.d(TAG, "Processing report: ID=" + reportId + 
-                                  ", status=" + status + ", assignedTo=" + assignedCollectorId +
-                                  ", photoUrl=" + report.getPhotoUrl());
-                            
-                            // Include all reports except PENDING without any collector filtering
-                            if (status != null && !status.equalsIgnoreCase("PENDING")) {
-                                uniqueReports.put(reportId, report);
-                                Log.d(TAG, "Including report with ID: " + reportId);
-                            }
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error parsing waste report: " + document.getId(), e);
+        // First find the collector document using the auth user ID
+        db.collection("collectors")
+                .whereEqualTo("userId", authUserId)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(collectorQuery -> {
+                    if (!collectorQuery.isEmpty()) {
+                        String collectorId = collectorQuery.getDocuments().get(0).getId();
+                        Log.d(TAG, "Found collector document ID: " + collectorId);
+                        
+                        // Now query for reports assigned to this collector
+                        db.collection("waste_reports")
+                                .whereEqualTo("assignedCollectorId", collectorId)
+                                .get()
+                                .addOnSuccessListener(queryDocumentSnapshots -> {
+                                    Log.d(TAG, "Retrieved " + queryDocumentSnapshots.size() + " waste reports for collector ID: " + collectorId);
+                                    
+                                    // Use a map to track unique IDs and prevent duplicates
+                                    Map<String, WasteReport> uniqueReports = new HashMap<>();
+                                    
+                                    // Process each waste report
+                                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                        try {
+                                            String reportId = document.getId();
+                                            // Only add if we haven't already processed this report ID
+                                            if (!uniqueReports.containsKey(reportId)) {
+                                                WasteReport report = document.toObject(WasteReport.class);
+                                                report.setId(reportId);
+                                                
+                                                // Ensure both photoUrl and imageUrl are set (critical fix)
+                                                if (report.getPhotoUrl() == null && report.getImageUrl() != null) {
+                                                    report.setPhotoUrl(report.getImageUrl());
+                                                } else if (report.getImageUrl() == null && report.getPhotoUrl() != null) {
+                                                    report.setImageUrl(report.getPhotoUrl());
+                                                }
+                                                
+                                                String status = report.getStatus();
+                                                
+                                                Log.d(TAG, "Processing report: ID=" + reportId + 
+                                                      ", status=" + status + ", assignedTo=" + collectorId +
+                                                      ", photoUrl=" + report.getPhotoUrl());
+                                                
+                                                // Include all reports assigned to this collector except PENDING
+                                                if (status != null && !status.equalsIgnoreCase("PENDING")) {
+                                                    uniqueReports.put(reportId, report);
+                                                    Log.d(TAG, "Including report with ID: " + reportId);
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            Log.e(TAG, "Error parsing waste report: " + document.getId(), e);
+                                        }
+                                    }
+                                    
+                                    // Clear the list before adding new data to prevent duplicates
+                                    reportsList.clear();
+                                    
+                                    // Convert map to list and add to reportsList
+                                    reportsList.addAll(uniqueReports.values());
+                                    
+                                    // Sort by timestamp (newest first)
+                                    reportsList.sort((r1, r2) -> {
+                                        Long t1 = r1.getTimestamp();
+                                        Long t2 = r2.getTimestamp();
+                                        if (t1 == null && t2 == null) return 0;
+                                        if (t1 == null) return 1;
+                                        if (t2 == null) return -1;
+                                        return t2.compareTo(t1);
+                                    });
+                                    
+                                    // Update UI
+                                    reportAdapter.notifyDataSetChanged();
+                                    
+                                    if (reportsList.isEmpty()) {
+                                        showNoReportsMessage(true);
+                                        Log.d(TAG, "No reports to display after processing.");
+                                    } else {
+                                        showNoReportsMessage(false);
+                                        Log.d(TAG, "Displaying " + reportsList.size() + " waste reports");
+                                    }
+                                    
+                                    binding.progressBar.setVisibility(View.GONE);
+                                })
+                                .addOnFailureListener(e -> {
+                                    binding.progressBar.setVisibility(View.GONE);
+                                    Log.e(TAG, "Error loading waste reports: " + e.getMessage(), e);
+                                    Toast.makeText(CollectorReportsActivity.this, 
+                                        "Error loading reports: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    showNoReportsMessage(true);
+                                });
+                    } else {
+                        Log.w(TAG, "No collector found for auth user ID: " + authUserId);
+                        binding.progressBar.setVisibility(View.GONE);
+                        showNoReportsMessage(true);
+                        binding.tvNoReports.setText("Collector account not found");
                     }
-                }
-                
-                // Convert map to list and add to reportsList
-                reportsList.addAll(uniqueReports.values());
-                
-                // Sort by timestamp (newest first)
-                reportsList.sort((r1, r2) -> {
-                    Long t1 = r1.getTimestamp();
-                    Long t2 = r2.getTimestamp();
-                    if (t1 == null && t2 == null) return 0;
-                    if (t1 == null) return 1;
-                    if (t2 == null) return -1;
-                    return t2.compareTo(t1);
-                });
-                
-                // Update UI
-                reportAdapter.notifyDataSetChanged();
-                
-                if (reportsList.isEmpty()) {
+                })
+                .addOnFailureListener(e -> {
+                    binding.progressBar.setVisibility(View.GONE);
+                    Log.e(TAG, "Error finding collector: " + e.getMessage());
+                    Toast.makeText(CollectorReportsActivity.this, 
+                        "Error finding collector: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     showNoReportsMessage(true);
-                    Log.d(TAG, "No reports to display after processing.");
-                } else {
-                    showNoReportsMessage(false);
-                    Log.d(TAG, "Displaying " + reportsList.size() + " waste reports");
-                }
-                
-                binding.progressBar.setVisibility(View.GONE);
-            })
-            .addOnFailureListener(e -> {
-                binding.progressBar.setVisibility(View.GONE);
-                Log.e(TAG, "Error loading waste reports: " + e.getMessage(), e);
-                Toast.makeText(CollectorReportsActivity.this, 
-                    "Error loading reports: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                showNoReportsMessage(true);
-            });
+                });
     }
     
     private void showNoReportsMessage(boolean show) {
@@ -218,11 +249,19 @@ public class CollectorReportsActivity extends BaseCollectorActivity {
             loadReports();
             return true;
         } else if (id == R.id.action_logout) {
-            mAuth.signOut();
-            Intent intent = new Intent(CollectorReportsActivity.this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
+            // Show confirmation dialog before logging out
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    mAuth.signOut();
+                    Intent intent = new Intent(CollectorReportsActivity.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .setNegativeButton("No", null)
+                .show();
             return true;
         }
         
@@ -300,10 +339,9 @@ public class CollectorReportsActivity extends BaseCollectorActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Always refresh reports when returning to this screen
-        // This ensures we always show the latest data
-        Log.d(TAG, "onResume - refreshing reports");
-        loadReports();
+        // Don't reload reports here to avoid duplicate loading
+        // Reports are already loaded in onCreate()
+        Log.d(TAG, "onResume - skipping reports reload to prevent duplicates");
     }
     
     // All test report generation and filtering logic has been removed

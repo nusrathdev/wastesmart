@@ -310,18 +310,78 @@ public class ManageReportsActivity extends BaseAdminActivity {
     }
     
     /**
-     * Assigns a report to the default collector
+     * Shows dialog to assign a report to a selected collector
      */
     public void assignReportToCollector(WasteReport report, int position) {
         if (report == null || report.getId() == null) return;
         
+        // First, fetch all available collectors
+        db.collection("collectors")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<String> collectorNames = new ArrayList<>();
+                    List<String> collectorIds = new ArrayList<>();
+                    
+                    Log.d(TAG, "Found " + querySnapshot.size() + " collectors in database");
+                    
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        String name = doc.getString("name");
+                        String employeeId = doc.getString("employeeId");
+                        Log.d(TAG, "Collector: " + name + " (" + employeeId + ")");
+                        
+                        if (name != null && employeeId != null) {
+                            collectorNames.add(name); // Only show name, not ID
+                            collectorIds.add(doc.getId());
+                        }
+                    }
+                    
+                    if (collectorNames.isEmpty()) {
+                        Toast.makeText(this, "No collectors available. Please create collectors first.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    
+                    // Show selection dialog
+                    showCollectorSelectionDialog(report, position, collectorNames, collectorIds);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error fetching collectors", e);
+                    Toast.makeText(this, "Error fetching collectors: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+    
+    private void showCollectorSelectionDialog(WasteReport report, int position, List<String> collectorNames, List<String> collectorIds) {
+        if (collectorNames.isEmpty()) {
+            Toast.makeText(this, "No collectors available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Assign to Collector");
+        
+        String[] names = collectorNames.toArray(new String[0]);
+        
+        builder.setSingleChoiceItems(names, -1, (dialog, which) -> {
+            String selectedCollectorId = collectorIds.get(which);
+            String selectedCollectorName = collectorNames.get(which);
+            
+            // Use the full name directly since we're not showing IDs
+            String displayName = selectedCollectorName;
+            
+            assignReportToSelectedCollector(report, position, selectedCollectorId, displayName);
+            dialog.dismiss();
+        });
+        
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+    
+    private void assignReportToSelectedCollector(WasteReport report, int position, String collectorId, String collectorName) {
         binding.progressBar.setVisibility(View.VISIBLE);
         
-        // Use a single hardcoded collector for simplicity
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", "ASSIGNED");
-        updates.put("assignedCollectorId", "default_collector");
-        updates.put("assignedCollectorName", "Waste Collector");
+        updates.put("assignedCollectorId", collectorId);
+        updates.put("assignedCollectorName", collectorName);
         updates.put("assignedTimestamp", System.currentTimeMillis());
         
         db.collection("waste_reports")
@@ -329,19 +389,46 @@ public class ManageReportsActivity extends BaseAdminActivity {
             .update(updates)
             .addOnSuccessListener(aVoid -> {
                 binding.progressBar.setVisibility(View.GONE);
-                Toast.makeText(this, "Report assigned to collector", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Report assigned to " + collectorName, Toast.LENGTH_SHORT).show();
                 
                 // Update local list and UI
                 report.setStatus("ASSIGNED");
-                report.setAssignedCollectorId("default_collector");
-                report.setAssignedCollectorName("Waste Collector");
+                report.setAssignedCollectorId(collectorId);
+                report.setAssignedCollectorName(collectorName);
                 report.setAssignedTimestamp(System.currentTimeMillis());
                 reportAdapter.notifyItemChanged(position);
+                
+                // Create notification for the collector
+                createCollectorNotification(collectorId, collectorName, report);
             })
             .addOnFailureListener(e -> {
                 binding.progressBar.setVisibility(View.GONE);
                 Toast.makeText(this, "Failed to assign report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
+    }
+    
+    private void createCollectorNotification(String collectorId, String collectorName, WasteReport report) {
+        // Create a notification document for the collector
+        Map<String, Object> notification = new HashMap<>();
+        notification.put("collectorId", collectorId);
+        notification.put("collectorName", collectorName);
+        notification.put("reportId", report.getId());
+        notification.put("message", "New waste collection task assigned to you");
+        notification.put("type", "TASK_ASSIGNED");
+        notification.put("timestamp", System.currentTimeMillis());
+        notification.put("isRead", false);
+        notification.put("wasteType", report.getWasteType());
+        notification.put("latitude", report.getLatitude());
+        notification.put("longitude", report.getLongitude());
+        
+        db.collection("notifications")
+                .add(notification)
+                .addOnSuccessListener(documentReference -> {
+                    Log.d(TAG, "Notification created for collector: " + collectorName);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to create notification for collector", e);
+                });
     }
     
     /**

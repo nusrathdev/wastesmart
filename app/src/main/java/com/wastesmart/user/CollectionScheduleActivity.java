@@ -2,23 +2,30 @@ package com.wastesmart.user;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.wastesmart.MainActivity;
 import com.wastesmart.R;
 import com.wastesmart.databinding.ActivityUserAboutBinding;
 
 public class CollectionScheduleActivity extends BaseUserActivity {
 
     private ActivityUserAboutBinding binding;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityUserAboutBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
 
         // Setup toolbar
         setSupportActionBar(binding.toolbar);
@@ -27,6 +34,9 @@ public class CollectionScheduleActivity extends BaseUserActivity {
             // getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("About");
         }
+
+        // Set up logout button click listener
+        binding.btnLogout.setOnClickListener(v -> showLogoutConfirmation());
 
         // Setup bottom navigation
         setupBottomNavigation();
@@ -55,6 +65,23 @@ public class CollectionScheduleActivity extends BaseUserActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    private void showLogoutConfirmation() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Yes", (dialog, which) -> logout())
+                .setNegativeButton("No", null)
+                .show();
+    }
+    
+    private void logout() {
+        mAuth.signOut();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
     @Override

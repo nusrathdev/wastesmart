@@ -197,6 +197,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif"
                         android:inputType="phone"
+                        android:maxLength="10"
                         android:paddingTop="16dp"
                         android:paddingBottom="16dp"
                         android:textSize="16sp" />

@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 
 import androidx.annotation.NonNull;
 
@@ -109,7 +110,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         // Logout button in toolbar
         ImageView btnLogout = findViewById(R.id.btnLogout);
         if (btnLogout != null) {
-            btnLogout.setOnClickListener(v -> logout());
+            btnLogout.setOnClickListener(v -> showLogoutConfirmation());
         }
     }
 
@@ -228,6 +229,15 @@ public class AdminDashboardActivity extends BaseAdminActivity {
     }
 
     // Sample report creation methods removed as they're not needed in production
+
+    private void showLogoutConfirmation() {
+        new AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Logout", (dialog, which) -> logout())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
 
     private void logout() {
         mAuth.signOut();

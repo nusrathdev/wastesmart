@@ -3,6 +3,7 @@ package com.wastesmart.user;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -18,6 +19,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.wastesmart.MainActivity;
 import com.wastesmart.R;
 import com.wastesmart.models.WasteReport;
 
@@ -47,6 +49,9 @@ public class MyReportsActivity extends BaseUserActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("My Reports");
         }
+
+        // Set up logout button click listener
+        findViewById(R.id.btnLogout).setOnClickListener(v -> showLogoutConfirmation());
 
         // Setup bottom navigation
         setupBottomNavigation();
@@ -162,6 +167,23 @@ public class MyReportsActivity extends BaseUserActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    private void showLogoutConfirmation() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Yes", (dialog, which) -> logout())
+                .setNegativeButton("No", null)
+                .show();
+    }
+    
+    private void logout() {
+        mAuth.signOut();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
     @Override

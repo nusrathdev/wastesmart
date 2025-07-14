@@ -29,6 +29,7 @@ public class CollectionTasksActivity extends BaseCollectorActivity {
     private static final String TAG = "CollectionTasks";
     private ActivityCollectionTasksBinding binding;
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
     private TasksAdapter adapter;
     private List<WasteReport> tasksList;
     private String actualCollectorId = "default_collector"; // fallback
@@ -41,6 +42,7 @@ public class CollectionTasksActivity extends BaseCollectorActivity {
 
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         // Setup toolbar
         setSupportActionBar(binding.toolbar);
@@ -84,71 +86,96 @@ public class CollectionTasksActivity extends BaseCollectorActivity {
 
     private void loadAssignedTasks() {
         binding.progressBar.setVisibility(View.VISIBLE);
-
-        // Simple approach: Load all reports and filter client-side
-        // This avoids any Firestore index requirements
-        Log.d(TAG, "Starting to load waste_reports collection");
-        db.collection("waste_reports")
+        
+        // First get the collector document ID using the Firebase Auth user ID
+        if (mAuth.getCurrentUser() == null) {
+            Log.d(TAG, "No authenticated user");
+            binding.progressBar.setVisibility(View.GONE);
+            binding.tvNoTasks.setVisibility(View.VISIBLE);
+            binding.tvNoTasks.setText("Please log in to view tasks");
+            return;
+        }
+        
+        String authUserId = mAuth.getCurrentUser().getUid();
+        Log.d(TAG, "Loading tasks for auth user ID: " + authUserId);
+        
+        // First find the collector document using the auth user ID
+        db.collection("collectors")
+                .whereEqualTo("userId", authUserId)
+                .limit(1)
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    binding.progressBar.setVisibility(View.GONE);
-                    tasksList.clear();
-                    
-                    Log.d(TAG, "Retrieved " + queryDocumentSnapshots.size() + " total reports from Firestore");
-
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        try {
-                            WasteReport task = document.toObject(WasteReport.class);
-                            task.setId(document.getId());
-                            
-                            // Filter for assigned and in_progress tasks only
-                            String status = task.getStatus();
-                            if (status != null) {
-                                status = status.toUpperCase(); // Normalize to uppercase for comparison
-                                if ("ASSIGNED".equals(status) || "IN_PROGRESS".equals(status)) {
-                                    tasksList.add(task);
-                                    Log.d(TAG, "Added task with ID: " + task.getId() + ", status: " + status);
-                                }
-                            }
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error parsing task: " + document.getId(), e);
-                        }
-                    }
-
-                    // Sort by assigned timestamp (newest first)
-                    tasksList.sort((t1, t2) -> {
-                        Long ts1 = t1.getAssignedTimestamp();
-                        Long ts2 = t2.getAssignedTimestamp();
-                        if (ts1 == null && ts2 == null) return 0;
-                        if (ts1 == null) return 1;
-                        if (ts2 == null) return -1;
-                        return ts2.compareTo(ts1); // Descending order (newest first)
-                    });
-
-                    adapter.notifyDataSetChanged();
-
-                    if (tasksList.isEmpty()) {
-                        // Check if we need to create a test report for debugging
-                        if (queryDocumentSnapshots.isEmpty()) {
-                            Log.d(TAG, "No reports found in database, creating test report");
-                            createTestReport();
-                        } else {
-                            Log.d(TAG, "Reports found but none match collector criteria");
-                        }
+                .addOnSuccessListener(collectorQuery -> {
+                    if (!collectorQuery.isEmpty()) {
+                        String collectorId = collectorQuery.getDocuments().get(0).getId();
+                        Log.d(TAG, "Found collector document ID: " + collectorId);
                         
-                        binding.tvNoTasks.setVisibility(View.VISIBLE);
-                        binding.recyclerView.setVisibility(View.GONE);
-                        binding.tvNoTasks.setText("No collection tasks assigned yet");
+                        // Now query for tasks assigned to this collector
+                        db.collection("waste_reports")
+                                .whereEqualTo("assignedCollectorId", collectorId)
+                                .get()
+                                .addOnSuccessListener(queryDocumentSnapshots -> {
+                                    binding.progressBar.setVisibility(View.GONE);
+                                    tasksList.clear();
+                                    
+                                    Log.d(TAG, "Retrieved " + queryDocumentSnapshots.size() + " reports for collector ID: " + collectorId);
+
+                                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                        try {
+                                            WasteReport task = document.toObject(WasteReport.class);
+                                            task.setId(document.getId());
+                                            
+                                            // Filter for assigned and in_progress tasks only
+                                            String status = task.getStatus();
+                                            if (status != null) {
+                                                status = status.toUpperCase(); // Normalize to uppercase for comparison
+                                                if ("ASSIGNED".equals(status) || "IN_PROGRESS".equals(status)) {
+                                                    tasksList.add(task);
+                                                    Log.d(TAG, "Added task with ID: " + task.getId() + ", status: " + status);
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            Log.e(TAG, "Error parsing task: " + document.getId(), e);
+                                        }
+                                    }
+
+                                    // Sort by assigned timestamp (newest first)
+                                    tasksList.sort((t1, t2) -> {
+                                        Long ts1 = t1.getAssignedTimestamp();
+                                        Long ts2 = t2.getAssignedTimestamp();
+                                        if (ts1 == null && ts2 == null) return 0;
+                                        if (ts1 == null) return 1;
+                                        if (ts2 == null) return -1;
+                                        return ts2.compareTo(ts1); // Descending order (newest first)
+                                    });
+
+                                    adapter.notifyDataSetChanged();
+
+                                    if (tasksList.isEmpty()) {
+                                        binding.tvNoTasks.setVisibility(View.VISIBLE);
+                                        binding.recyclerView.setVisibility(View.GONE);
+                                        binding.tvNoTasks.setText("No collection tasks assigned yet");
+                                    } else {
+                                        binding.tvNoTasks.setVisibility(View.GONE);
+                                        binding.recyclerView.setVisibility(View.VISIBLE);
+                                        Log.d(TAG, "Showing " + tasksList.size() + " tasks to collector");
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    binding.progressBar.setVisibility(View.GONE);
+                                    Log.e(TAG, "Error loading tasks", e);
+                                    Toast.makeText(this, "Error loading tasks: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                });
                     } else {
-                        binding.tvNoTasks.setVisibility(View.GONE);
-                        binding.recyclerView.setVisibility(View.VISIBLE);
-                        Log.d(TAG, "Showing " + tasksList.size() + " tasks to collector");
+                        Log.w(TAG, "No collector found for auth user ID: " + authUserId);
+                        binding.progressBar.setVisibility(View.GONE);
+                        binding.tvNoTasks.setVisibility(View.VISIBLE);
+                        binding.tvNoTasks.setText("Collector account not found");
                     }
                 })
                 .addOnFailureListener(e -> {
                     binding.progressBar.setVisibility(View.GONE);
-                    Log.e(TAG, "Error loading tasks", e);
-                    Toast.makeText(this, "Error loading tasks: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Error finding collector: " + e.getMessage());
+                    Toast.makeText(this, "Error finding collector: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
@@ -182,12 +209,19 @@ public class CollectionTasksActivity extends BaseCollectorActivity {
             finish();
             return true;
         } else if (id == R.id.action_logout) {
-            // Sign out and go to main activity
-            FirebaseAuth.getInstance().signOut();
-            Intent intent = new Intent(CollectionTasksActivity.this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
+            // Show confirmation dialog before logging out
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    FirebaseAuth.getInstance().signOut();
+                    Intent intent = new Intent(CollectionTasksActivity.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .setNegativeButton("No", null)
+                .show();
             return true;
         }
         return super.onOptionsItemSelected(item);

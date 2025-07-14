@@ -270,47 +270,66 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
      * Load the count of assigned waste reports for this collector
      */
     private void loadAssignedTaskCount() {
-        // Get collector ID - use currentCollector if available, otherwise use Firebase Auth
-        String collectorId;
-        
-        if (currentCollector != null && currentCollector.getId() != null) {
-            collectorId = currentCollector.getId();
-        } else if (mAuth.getCurrentUser() != null) {
-            collectorId = mAuth.getCurrentUser().getUid();
-        } else {
-            collectorId = "default_collector";
-            Log.d(TAG, "Using default collector ID for assigned count");
+        // First get the collector document ID using the Firebase Auth user ID
+        if (mAuth.getCurrentUser() == null) {
+            Log.d(TAG, "No authenticated user, using default values");
+            if (binding.tvTasksCount != null) {
+                binding.tvTasksCount.setText("0");
+            }
+            return;
         }
         
-        Log.d(TAG, "Loading assigned task count for collector ID: " + collectorId);
+        String authUserId = mAuth.getCurrentUser().getUid();
+        Log.d(TAG, "Loading assigned task count for auth user ID: " + authUserId);
         
-        // Query Firestore for assigned waste reports (use uppercase for consistent comparison)
-        db.collection("waste_reports")
-            .whereEqualTo("assignedCollectorId", collectorId)
-            .whereEqualTo("status", "ASSIGNED")
-            .get()
-            .addOnSuccessListener(queryDocumentSnapshots -> {
-                // Set the count to the TextView
-                int assignedCount = queryDocumentSnapshots.size();
-                Log.d(TAG, "Found " + assignedCount + " assigned tasks for collector ID: " + collectorId);
-                
-                if (binding.tvTasksCount != null) {
-                    String countStr = String.valueOf(assignedCount);
-                    binding.tvTasksCount.setText(countStr);
-                    
-                    // Save the count to SharedPreferences
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString(TASKS_COUNT_KEY, countStr);
-                    editor.apply();
-                }
-            })
-            .addOnFailureListener(e -> {
-                // On failure, log error but don't show to user
-                Log.e(TAG, "Error getting assigned task count: " + e.getMessage());
-                if (binding.tvTasksCount != null) {
-                    binding.tvTasksCount.setText("?");
-                }
-            });
+        // First find the collector document using the auth user ID
+        db.collection("collectors")
+                .whereEqualTo("userId", authUserId)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(collectorQuery -> {
+                    if (!collectorQuery.isEmpty()) {
+                        String collectorId = collectorQuery.getDocuments().get(0).getId();
+                        Log.d(TAG, "Found collector document ID: " + collectorId);
+                        
+                        // Now query for assigned tasks using the collector document ID
+                        db.collection("waste_reports")
+                                .whereEqualTo("assignedCollectorId", collectorId)
+                                .whereEqualTo("status", "ASSIGNED")
+                                .get()
+                                .addOnSuccessListener(reportsQuery -> {
+                                    int assignedCount = reportsQuery.size();
+                                    Log.d(TAG, "Found " + assignedCount + " assigned tasks for collector ID: " + collectorId);
+                                    
+                                    if (binding.tvTasksCount != null) {
+                                        String countStr = String.valueOf(assignedCount);
+                                        binding.tvTasksCount.setText(countStr);
+                                        
+                                        // Save the count to SharedPreferences
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        editor.putString(TASKS_COUNT_KEY, countStr);
+                                        editor.apply();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Error getting assigned task count: " + e.getMessage());
+                                    if (binding.tvTasksCount != null) {
+                                        binding.tvTasksCount.setText("0");
+                                    }
+                                });
+                    } else {
+                        Log.w(TAG, "No collector found for auth user ID: " + authUserId);
+                        if (binding.tvTasksCount != null) {
+                            binding.tvTasksCount.setText("0");
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error finding collector: " + e.getMessage());
+                    if (binding.tvTasksCount != null) {
+                        binding.tvTasksCount.setText("0");
+                    }
+                });
     }
 
     /**
@@ -368,17 +387,25 @@ public class CollectorDashboardActivity extends BaseCollectorActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_logout) {
-            // Clear SharedPreferences when logging out
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.clear();
-            editor.apply();
-            
-            mAuth.signOut();
-            Intent intent = new Intent(CollectorDashboardActivity.this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-            finish();
+            // Show confirmation dialog before logging out
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    // Clear SharedPreferences when logging out
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.clear();
+                    editor.apply();
+                    
+                    mAuth.signOut();
+                    Intent intent = new Intent(CollectorDashboardActivity.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                    finish();
+                })
+                .setNegativeButton("No", null)
+                .show();
             return true;
         }
 
