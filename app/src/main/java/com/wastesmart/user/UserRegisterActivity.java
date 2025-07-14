@@ -40,6 +40,7 @@ public class UserRegisterActivity extends AppCompatActivity {
         // Back button click listener
         binding.btnBack.setOnClickListener(v -> {
             finish(); // This will close the current activity and return to UserLoginActivity
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         });
     }
 
@@ -138,6 +139,7 @@ public class UserRegisterActivity extends AppCompatActivity {
                                         Intent intent = new Intent(UserRegisterActivity.this, UserDashboardActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         startActivity(intent);
+                                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                                         finish();
                                     })
                                     .addOnFailureListener(e -> {
@@ -161,5 +163,11 @@ public class UserRegisterActivity extends AppCompatActivity {
 
     private boolean isPasswordValid(String password) {
         return password.length() >= 6;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 }

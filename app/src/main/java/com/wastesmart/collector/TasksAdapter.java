@@ -38,7 +38,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
     @Override
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_collection_task_new, parent, false);
+                .inflate(R.layout.item_collection_task, parent, false);
         return new TaskViewHolder(view);
     }
 
@@ -161,6 +161,9 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
                 Intent fullscreenIntent = new Intent(context, com.wastesmart.ui.FullscreenImageActivity.class);
                 fullscreenIntent.putExtra("imageUrl", finalImageUrl);
                 context.startActivity(fullscreenIntent);
+                if (context instanceof android.app.Activity) {
+                    ((android.app.Activity) context).overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                }
             } else {
                 Toast.makeText(context, "No image available", Toast.LENGTH_SHORT).show();
             }

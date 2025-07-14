@@ -414,4 +414,10 @@ public class ManageReportsActivity extends BaseAdminActivity {
         // We don't need to refresh reports here as it's already called in onCreate
         // This prevents duplicate loading
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }
 }

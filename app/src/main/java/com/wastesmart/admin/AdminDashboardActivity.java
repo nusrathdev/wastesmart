@@ -103,6 +103,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         tvViewAll.setOnClickListener(v -> {
             Intent intent = new Intent(AdminDashboardActivity.this, ManageReportsActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
         
         // Logout button in toolbar
@@ -233,6 +234,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
         Intent intent = new Intent(AdminDashboardActivity.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         finish();
     }
 

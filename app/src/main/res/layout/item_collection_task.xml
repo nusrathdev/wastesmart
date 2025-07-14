@@ -54,13 +54,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingEnd="16dp">
 
                 <TextView
                     android:id="@+id/tvSize"
@@ -69,7 +70,7 @@
                     android:text="Small (Fits in a bag)"
                     android:textColor="@color/dark_gray"
                     android:textSize="15sp"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:id="@+id/tvLocation"
@@ -78,7 +79,7 @@
                     android:text="📍 6.980969, 81.078339"
                     android:textColor="@color/dark_gray"
                     android:textSize="13sp"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:id="@+id/tvTimestamp"
@@ -87,7 +88,7 @@
                     android:text="🕒 Jun 25, 2025 23:16"
                     android:textColor="@color/dark_gray"
                     android:textSize="13sp"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:id="@+id/tvAssignedInfo"
@@ -97,7 +98,7 @@
                     android:textColor="@color/primary"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="2dp"
+                    android:layout_marginBottom="4dp"
                     android:visibility="visible" />
 
                 <TextView
@@ -113,9 +114,9 @@
 
             <ImageView
                 android:id="@+id/ivPhoto"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginStart="12dp"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center_vertical"
                 android:scaleType="centerCrop"
                 android:background="@drawable/image_rounded_bg"
                 android:src="@drawable/ic_photo_placeholder"

@@ -134,7 +134,7 @@ public abstract class BaseUserActivity extends AppCompatActivity {
             Intent intent = new Intent(this, ReportWasteActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-            overridePendingTransition(0, 0);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
     }
 
@@ -143,7 +143,7 @@ public abstract class BaseUserActivity extends AppCompatActivity {
             Intent intent = new Intent(this, MyReportsActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-            overridePendingTransition(0, 0);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
     }
 
@@ -152,7 +152,7 @@ public abstract class BaseUserActivity extends AppCompatActivity {
             Intent intent = new Intent(this, UserDashboardActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-            overridePendingTransition(0, 0);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
     }
 
@@ -161,7 +161,7 @@ public abstract class BaseUserActivity extends AppCompatActivity {
             Intent intent = new Intent(this, CollectionScheduleActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-            overridePendingTransition(0, 0);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
     }
 
@@ -170,7 +170,7 @@ public abstract class BaseUserActivity extends AppCompatActivity {
             Intent intent = new Intent(this, UserProfileActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-            overridePendingTransition(0, 0);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
     }
 }

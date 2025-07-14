@@ -45,6 +45,7 @@ public class AdminLoginActivity extends AppCompatActivity {
         // Back button click listener
         binding.btnBack.setOnClickListener(v -> {
             finish(); // This will close the current activity and return to MainActivity
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         });
 
         // Add a hint for default credentials
@@ -122,6 +123,7 @@ public class AdminLoginActivity extends AppCompatActivity {
             intent.putExtra("admin_email", email);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             finish();
         }, 1000);
     }
@@ -139,6 +141,7 @@ public class AdminLoginActivity extends AppCompatActivity {
                         intent.putExtra("admin_email", email);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                         finish();
                     } else {
                         // Login failed
@@ -153,5 +156,11 @@ public class AdminLoginActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 }

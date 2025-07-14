@@ -670,4 +670,10 @@ public class ReportWasteActivity extends BaseUserActivity {
     protected String getActiveNavItem() {
         return "submit";
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }
 }

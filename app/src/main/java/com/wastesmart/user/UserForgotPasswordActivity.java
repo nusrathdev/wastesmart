@@ -73,6 +73,7 @@ public class UserForgotPasswordActivity extends AppCompatActivity {
                                     "Password reset email sent. Please check your inbox.",
                                     Toast.LENGTH_LONG).show();
                             finish();
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                         } else {
                             Toast.makeText(UserForgotPasswordActivity.this,
                                     "Failed to send reset email: " + task.getException().getMessage(),
@@ -90,5 +91,11 @@ public class UserForgotPasswordActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }

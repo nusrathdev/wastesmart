@@ -2,12 +2,8 @@ package com.wastesmart.user;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 
 import com.wastesmart.MainActivity;
 import com.wastesmart.R;
@@ -37,6 +33,9 @@ public class UserDashboardActivity extends BaseUserActivity {
         // Set up toolbar
         setSupportActionBar(binding.toolbar);
 
+        // Set up logout button click listener
+        binding.btnLogout.setOnClickListener(v -> logout());
+
         // Setup bottom navigation
         setupBottomNavigation();
 
@@ -46,7 +45,7 @@ public class UserDashboardActivity extends BaseUserActivity {
                 Intent intent = new Intent(UserDashboardActivity.this, ReportWasteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(intent);
-                overridePendingTransition(0, 0);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
 
@@ -103,25 +102,12 @@ public class UserDashboardActivity extends BaseUserActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_user, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_logout) {
-            mAuth.signOut();
-            // Go back to main screen
-            Intent intent = new Intent(UserDashboardActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    private void logout() {
+        mAuth.signOut();
+        // Go back to main screen
+        Intent intent = new Intent(UserDashboardActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 }
