@@ -25,8 +25,8 @@
 
             <ImageView
                 android:id="@+id/btnLogout"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_gravity="end"
                 android:layout_marginEnd="16dp"
                 android:src="@drawable/ic_logout"
