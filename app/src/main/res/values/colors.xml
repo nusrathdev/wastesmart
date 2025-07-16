@@ -8,7 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- SmartWaste AI Theme Colors -->
+    <!-- SmartWaste Theme Colors -->
     <color name="primary">#2E7D32</color> <!-- Dark Green -->
     <color name="primary_light">#4CAF50</color> <!-- Medium Green -->
     <color name="primary_dark">#1B5E20</color> <!-- Very Dark Green -->
@@ -32,11 +32,6 @@
     <color name="status_in_progress">#FF9800</color> <!-- Orange -->
     <color name="status_completed">#4CAF50</color> <!-- Green -->
     <color name="status_pending">#9E9E9E</color> <!-- Gray -->
-    
-    <!-- Leaderboard Medal Colors -->
-    <color name="gold">#FFD700</color> <!-- Gold medal -->
-    <color name="silver">#C0C0C0</color> <!-- Silver medal -->
-    <color name="bronze">#CD7F32</color> <!-- Bronze medal -->
     
     <!-- Additional UI Colors -->
     <color name="transparent">#00000000</color> <!-- Transparent -->
