@@ -32,8 +32,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+import com.wastesmart.utils.ImageUploadUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,8 +53,6 @@ public class ReportWasteActivity extends BaseUserActivity {
     private ActivityReportWasteBinding binding;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    private FirebaseStorage storage;
-    private StorageReference storageRef;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
 
@@ -75,11 +72,9 @@ public class ReportWasteActivity extends BaseUserActivity {
         // Initialize Firebase components
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
 
         // Validate Firebase initialization
-        if (mAuth == null || db == null || storage == null || storageRef == null) {
+        if (mAuth == null || db == null) {
             Log.e(TAG, "Firebase components not properly initialized");
             Toast.makeText(this, "Firebase initialization error", Toast.LENGTH_LONG).show();
             finish();
@@ -379,71 +374,68 @@ public class ReportWasteActivity extends BaseUserActivity {
         binding.progressBar.setVisibility(View.VISIBLE);
         binding.btnSubmitReport.setEnabled(false); // Prevent multiple submissions
 
-        // First upload the image to Firebase Storage
+        // Upload the image using ImgBB
         String userId = mAuth.getCurrentUser().getUid();
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-        String imagePath = "waste_reports/" + userId + "/" + timestamp + ".jpg";
-
-        Log.d(TAG, "Starting image upload to: " + imagePath);
+        
+        Log.d(TAG, "Starting image upload to ImgBB");
         Log.d(TAG, "Photo URI: " + photoUri.toString());
 
-        // Compress image before upload
-        Uri uploadUri = compressImage(photoUri);
-        Log.d(TAG, "Using compressed image URI: " + uploadUri.toString());
+        // Upload image to ImgBB
+        ImageUploadUtil.uploadImage(this, photoUri, new ImageUploadUtil.UploadCallback() {
+            @Override
+            public void onSuccess(String imageUrl) {
+                runOnUiThread(() -> {
+                    Log.d(TAG, "Image uploaded successfully to ImgBB: " + imageUrl);
+                    
+                    // Create the waste report object with the image URL
+                    WasteReport report = new WasteReport(
+                            null, // ID will be set by Firestore
+                            userId,
+                            wasteType,
+                            wasteSize,
+                            description,
+                            latitude,
+                            longitude,
+                            imageUrl,
+                            "PENDING",
+                            new Date());
 
-        StorageReference imageRef = storageRef.child(imagePath);
-        imageRef.putFile(uploadUri)
-                .addOnSuccessListener(taskSnapshot -> {
-                    Log.d(TAG, "Image uploaded successfully");
-                    // Get the download URL
-                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        Log.d(TAG, "Download URL obtained: " + uri.toString());
-                        // Create the waste report object with the image URL
-                        WasteReport report = new WasteReport(
-                                null, // ID will be set by Firestore
-                                userId,
-                                wasteType,
-                                wasteSize,
-                                description,
-                                latitude,
-                                longitude,
-                                uri.toString(),
-                                "PENDING",
-                                new Date());
+                    // Set additional fields for better database compatibility
+                    report.setTimestamp(System.currentTimeMillis());
+                    report.setSubmittedBy(userId);
 
-                        Log.d(TAG, "Saving report to Firestore");
-                        // Save to Firestore
-                        db.collection("waste_reports").add(report)
-                                .addOnSuccessListener(documentReference -> {
-                                    Log.d(TAG, "Report saved successfully with ID: " + documentReference.getId());
-                                    binding.progressBar.setVisibility(View.GONE);
-                                    binding.btnSubmitReport.setEnabled(true);
-                                    Toast.makeText(ReportWasteActivity.this,
-                                            "Report submitted successfully", Toast.LENGTH_SHORT).show();
-                                    finish();
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e(TAG, "Error saving report to Firestore", e);
-                                    binding.progressBar.setVisibility(View.GONE);
-                                    binding.btnSubmitReport.setEnabled(true);
-                                    Toast.makeText(ReportWasteActivity.this,
-                                            "Error submitting report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                });
-                    }).addOnFailureListener(e -> {
-                        Log.e(TAG, "Error getting download URL", e);
-                        binding.progressBar.setVisibility(View.GONE);
-                        binding.btnSubmitReport.setEnabled(true);
-                        Toast.makeText(ReportWasteActivity.this,
-                                "Error getting image URL: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error uploading image to Storage", e);
+                    Log.d(TAG, "Saving report to Firestore");
+                    // Save to Firestore
+                    db.collection("waste_reports").add(report)
+                            .addOnSuccessListener(documentReference -> {
+                                Log.d(TAG, "Report saved successfully with ID: " + documentReference.getId());
+                                binding.progressBar.setVisibility(View.GONE);
+                                binding.btnSubmitReport.setEnabled(true);
+                                Toast.makeText(ReportWasteActivity.this,
+                                        "Report submitted successfully", Toast.LENGTH_SHORT).show();
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Error saving report to Firestore", e);
+                                binding.progressBar.setVisibility(View.GONE);
+                                binding.btnSubmitReport.setEnabled(true);
+                                Toast.makeText(ReportWasteActivity.this,
+                                        "Error submitting report: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            });
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    Log.e(TAG, "Error uploading image to ImgBB: " + error);
                     binding.progressBar.setVisibility(View.GONE);
                     binding.btnSubmitReport.setEnabled(true);
                     Toast.makeText(ReportWasteActivity.this,
-                            "Error uploading image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            "Error uploading image: " + error, Toast.LENGTH_SHORT).show();
                 });
+            }
+        });
     }
 
     @Override

@@ -145,10 +145,7 @@ public class AdminDashboardActivity extends BaseAdminActivity {
                         if (tvPendingCount != null) {
                             tvPendingCount.setText(String.valueOf(pendingCount));
                         }
-                        Log.d(TAG, "Pending reports: " + pendingCount);
-                        
-                // No need to create sample reports in production code
-                            Log.d(TAG, "Found " + pendingCount + " pending reports");
+                        Log.d(TAG, "Pending reports loaded: " + pendingCount);
                     } catch (Exception e) {
                         Log.e(TAG, "Error updating pending count", e);
                     }

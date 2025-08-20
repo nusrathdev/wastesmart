@@ -221,6 +221,12 @@ public class ManageCollectorActivity extends BaseAdminActivity implements Collec
     }
 
     private void createNewCollector(String name, String email, String phone, String password, String area, AlertDialog dialog) {
+        // Validate phone number length
+        if (phone.length() != 10) {
+            Toast.makeText(this, "Phone number must be exactly 10 digits", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
         // First, get the count of existing collectors to generate the next ID
         db.collection("collectors")
                 .get()
@@ -246,10 +252,13 @@ public class ManageCollectorActivity extends BaseAdminActivity implements Collec
                                 
                                 // Create user object
                                 User user = new User();
+                                user.setUserId(userId);
                                 user.setName(name);
                                 user.setEmail(email);
                                 user.setPhone(phone);
                                 user.setUserType("collector");
+                                
+                                Log.d(TAG, "Creating collector document in Firestore...");
                                 
                                 // Save to collectors collection
                                 db.collection("collectors")
@@ -270,22 +279,28 @@ public class ManageCollectorActivity extends BaseAdminActivity implements Collec
                                                     })
                                                     .addOnFailureListener(e -> {
                                                         Log.e(TAG, "Error creating user document", e);
-                                                        Toast.makeText(this, "Error creating collector profile", Toast.LENGTH_SHORT).show();
+                                                        Toast.makeText(this, "Error creating collector profile: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                                     });
                                         })
                                         .addOnFailureListener(e -> {
                                             Log.e(TAG, "Error creating collector document", e);
-                                            Toast.makeText(this, "Error creating collector", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(this, "Error creating collector: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                         });
                             })
                             .addOnFailureListener(e -> {
                                 Log.e(TAG, "Error creating collector account", e);
-                                Toast.makeText(this, "Error creating collector account: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                String errorMessage = e.getMessage();
+                                if (errorMessage.contains("email address is already in use")) {
+                                    errorMessage = "Email address is already registered";
+                                } else if (errorMessage.contains("weak password")) {
+                                    errorMessage = "Password must be at least 6 characters";
+                                }
+                                Toast.makeText(this, "Error creating collector account: " + errorMessage, Toast.LENGTH_LONG).show();
                             });
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error counting collectors", e);
-                    Toast.makeText(this, "Error generating collector ID", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error generating collector ID: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

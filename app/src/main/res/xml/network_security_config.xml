@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
+    <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">firebase.googleapis.com</domain>
         <domain includeSubdomains="true">firebasestorage.googleapis.com</domain>
         <domain includeSubdomains="true">storage.googleapis.com</domain>
+        <domain includeSubdomains="true">api.imgbb.com</domain>
+        <domain includeSubdomains="true">imgbb.com</domain>
+        <domain includeSubdomains="true">ibb.co</domain>
     </domain-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
 </network-security-config>
